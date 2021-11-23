@@ -13,8 +13,6 @@ import io.ktor.http.content.*
 import io.ktor.util.*
 import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.*
-import net.mamoe.mirai.console.util.ConsoleExperimentalApi
-import net.mamoe.mirai.console.util.CoroutineScopeUtils.overrideWithSupervisorJob
 import org.openqa.selenium.remote.http.*
 import org.openqa.selenium.remote.http.HttpClient.Factory
 import java.net.URI
@@ -61,10 +59,7 @@ private fun HttpResponse.toSeleniumHttpResponse() = SeleniumHttpResponse().also 
     }
 }
 
-@OptIn(ConsoleExperimentalApi::class)
-private val KtorContext by lazy {
-    Dispatchers.IO.overrideWithSupervisorJob("Selenium-HttpClient")
-}
+internal var KtorContext = Dispatchers.IO
 
 private class KtorHttpClient(private val config: ClientConfig) : SeleniumHttpClient {
     @OptIn(KtorExperimentalAPI::class)
