@@ -21,3 +21,14 @@ dependencies {
 ## 使用本前置插件的项目
 
 * [BiliBili Helper](https://github.com/cssxsh/bilibili-helper)
+
+## 安装
+
+### MCL 指令安装
+
+`./mcl --update-package xyz.cssxsh.mirai:mirai-selenium-plugin --channel stable --type plugin`
+
+### 手动安装
+
+1. 运行 [Mirai Console](https://github.com/mamoe/mirai-console) 生成`plugins`文件夹
+1. 从 [Releases](https://github.com/cssxsh/mirai-selenium-plugin/releases) 下载`jar`并将其放入`plugins`文件夹中
