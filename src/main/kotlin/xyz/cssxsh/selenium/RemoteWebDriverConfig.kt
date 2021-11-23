@@ -14,4 +14,5 @@ interface RemoteWebDriverConfig {
     val pixelRatio: Int
     val headless: Boolean
     val browser: String
+    val factory: String
 }

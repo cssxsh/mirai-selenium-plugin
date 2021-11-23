@@ -27,4 +27,8 @@ object SeleniumToolConfig : ReadOnlyPluginConfig("SeleniumConfig"), RemoteWebDri
     @ValueName("browser")
     @ValueDescription("指定使用的浏览器，Chrome/Firefox")
     override val browser: String by value("")
+
+    @ValueName("factory")
+    @ValueDescription("指定使用的Factory")
+    override val factory: String by value("ktor")
 }

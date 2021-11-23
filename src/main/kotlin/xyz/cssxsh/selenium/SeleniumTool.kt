@@ -26,7 +26,7 @@ private fun Class<*>.getLogger(): Logger {
  */
 internal fun setupSelenium(folder: File, browser: String = "", factory: String = "ktor") {
     if (browser.isNotBlank()) System.setProperty("mxlib.selenium.browser", browser)
-    System.setProperty("webdriver.http.factory", factory)
+    if (factory.isNotBlank()) System.setProperty("webdriver.http.factory", factory)
     System.setProperty("io.ktor.random.secure.random.provider", "DRBG")
     MxLib.setLoggerFactory { name -> NopLogger(name) }
     MxLib.setDataStorage(folder)
@@ -112,11 +112,11 @@ internal const val TIMEOUT = "xyz.cssxsh.selenium.screenshot.timeout"
 
 internal const val INTERVAL = "xyz.cssxsh.selenium.screenshot.interval"
 
-private val Init by lazy { Duration.ofMillis(System.getProperty(INIT).toLongOrNull() ?: 10_000) }
+private val Init by lazy { Duration.ofMillis(System.getProperty(INIT)?.toLongOrNull() ?: 10_000) }
 
-private val Timeout by lazy { Duration.ofMillis(System.getProperty(TIMEOUT).toLongOrNull() ?: 180_000) }
+private val Timeout by lazy { Duration.ofMillis(System.getProperty(TIMEOUT)?.toLongOrNull() ?: 180_000) }
 
-private val Interval by lazy { Duration.ofMillis(System.getProperty(INTERVAL).toLongOrNull() ?: 10_000) }
+private val Interval by lazy { Duration.ofMillis(System.getProperty(INTERVAL)?.toLongOrNull() ?: 10_000) }
 
 /**
  * 创建一个 RemoteWebDriver
