@@ -22,10 +22,11 @@ private fun Class<*>.getLogger(): Logger {
  * 初始化 Selenium/Mxlib 配置
  * @param folder 数据缓存文件夹
  * @param browser 浏览器类型 Chrome, Firefox ...
+ * @param factory [org.openqa.selenium.remote.http.HttpClient.Factory] , ktor, netty
  */
-internal fun setupSelenium(folder: File, browser: String = "") {
+internal fun setupSelenium(folder: File, browser: String = "", factory: String = "ktor") {
     if (browser.isNotBlank()) System.setProperty("mxlib.selenium.browser", browser)
-    System.setProperty("webdriver.http.factory", "ktor")
+    System.setProperty("webdriver.http.factory", factory)
     System.setProperty("io.ktor.random.secure.random.provider", "DRBG")
     MxLib.setLoggerFactory { name -> NopLogger(name) }
     MxLib.setDataStorage(folder)
@@ -37,7 +38,7 @@ internal fun setupSelenium(folder: File, browser: String = "") {
     val thread = Thread.currentThread()
     val oc = thread.contextClassLoader
     try {
-        thread.contextClassLoader = KtorHttpClientFactory::class.java.classLoader
+        thread.contextClassLoader = KtorHttpClient.Factory::class.java.classLoader
         MxSelenium.initialize()
     } finally {
         thread.contextClassLoader = oc
@@ -53,7 +54,7 @@ internal fun setupSelenium(folder: File, browser: String = "") {
  */
 @Suppress("FunctionName")
 private fun JavaScript(name: String): String {
-    return requireNotNull(KtorHttpClientFactory::class.java.getResourceAsStream("$name.js")) { "脚本${name}不存在" }
+    return requireNotNull(KtorHttpClient.Factory::class.java.getResourceAsStream("$name.js")) { "脚本${name}不存在" }
         .use { it.reader().readText() + "\nreturn $name();" }
 }
 
@@ -130,7 +131,7 @@ fun RemoteWebDriver(config: RemoteWebDriverConfig): RemoteWebDriver {
     val oc = thread.contextClassLoader
 
     return try {
-        thread.contextClassLoader = KtorHttpClientFactory::class.java.classLoader
+        thread.contextClassLoader = KtorHttpClient.Factory::class.java.classLoader
 
         MxSelenium.newDriver(null, config.toConsumer()).apply {
             // 诡异的等级
