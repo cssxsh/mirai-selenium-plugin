@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    implementation("xyz.cssxsh.mirai:mirai-selenium-plugin:${version}")
+    compileOnly("xyz.cssxsh.mirai:mirai-selenium-plugin:${version}")
 }
 ```
 
