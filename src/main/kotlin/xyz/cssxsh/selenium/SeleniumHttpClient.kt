@@ -1,24 +1,26 @@
 package xyz.cssxsh.selenium
 
 import kotlinx.coroutines.*
+import kotlin.coroutines.*
+import org.openqa.selenium.remote.http.*
 
-typealias SeleniumHttpClient = org.openqa.selenium.remote.http.HttpClient
+typealias SeleniumHttpClient = HttpClient
 
-typealias SeleniumHttpClientConfig = org.openqa.selenium.remote.http.ClientConfig
+typealias SeleniumHttpClientConfig = ClientConfig
 
-typealias SeleniumHttpClientFactory = org.openqa.selenium.remote.http.HttpClient.Factory
+typealias SeleniumHttpClientFactory = HttpClient.Factory
 
-typealias SeleniumHttpClientName = org.openqa.selenium.remote.http.HttpClientName
+typealias SeleniumHttpClientName = HttpClientName
 
-typealias SeleniumHttpRequest = org.openqa.selenium.remote.http.HttpRequest
+typealias SeleniumHttpRequest = HttpRequest
 
-typealias SeleniumHttpResponse = org.openqa.selenium.remote.http.HttpResponse
+typealias SeleniumHttpResponse = HttpResponse
 
-typealias SeleniumWebListener = org.openqa.selenium.remote.http.WebSocket.Listener
+typealias SeleniumWebListener = WebSocket.Listener
 
-typealias SeleniumUserAgent = org.openqa.selenium.remote.http.AddSeleniumUserAgent
+typealias SeleniumUserAgent = AddSeleniumUserAgent
 
-typealias SeleniumHttpContents = org.openqa.selenium.remote.http.Contents
+typealias SeleniumHttpContents = Contents
 
 
-internal var KtorContext = Dispatchers.IO
+internal var KtorContext: CoroutineContext = Dispatchers.IO

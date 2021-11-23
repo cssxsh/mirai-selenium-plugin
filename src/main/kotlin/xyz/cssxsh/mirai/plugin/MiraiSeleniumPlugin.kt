@@ -1,6 +1,9 @@
 package xyz.cssxsh.mirai.plugin
 
+import net.mamoe.mirai.console.extension.*
 import net.mamoe.mirai.console.plugin.jvm.*
+import net.mamoe.mirai.console.util.*
+import net.mamoe.mirai.console.util.CoroutineScopeUtils.childScopeContext
 import net.mamoe.mirai.utils.*
 import xyz.cssxsh.mirai.plugin.data.*
 import xyz.cssxsh.selenium.*
@@ -45,6 +48,11 @@ object MiraiSeleniumPlugin : KotlinPlugin(
      * @see RemoteWebDriver
      */
     fun driver(config: RemoteWebDriverConfig = SeleniumToolConfig) = RemoteWebDriver(config)
+
+    @OptIn(ConsoleExperimentalApi::class)
+    override fun PluginComponentStorage.onLoad() {
+        KtorContext = this@MiraiSeleniumPlugin.childScopeContext("SeleniumHttpClient")
+    }
 
     override fun onEnable() {
         SeleniumToolConfig.reload()
