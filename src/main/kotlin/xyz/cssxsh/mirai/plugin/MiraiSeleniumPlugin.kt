@@ -27,11 +27,11 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     fun setup(flush: Boolean = false): Boolean = synchronized(this) {
         if (!flush && installed) return true
 
-        SeleniumToolConfig.reload()
+        MiraiSeleniumConfig.reload()
         installed = false
 
         try {
-            setupSelenium(dataFolder, SeleniumToolConfig.browser)
+            setupSelenium(dataFolder, MiraiSeleniumConfig.browser)
             installed = true
         } catch (exception: UnsupportedOperationException) {
             logger.warning { "请安装 Chrome 或者 Firefox 浏览器 $exception" }
@@ -47,7 +47,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
      * @param config 配置
      * @see RemoteWebDriver
      */
-    fun driver(config: RemoteWebDriverConfig = SeleniumToolConfig) = RemoteWebDriver(config)
+    fun driver(config: RemoteWebDriverConfig = MiraiSeleniumConfig) = RemoteWebDriver(config)
 
     @OptIn(ConsoleExperimentalApi::class)
     override fun PluginComponentStorage.onLoad() {
@@ -55,6 +55,6 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     }
 
     override fun onEnable() {
-        SeleniumToolConfig.reload()
+        MiraiSeleniumConfig.reload()
     }
 }
