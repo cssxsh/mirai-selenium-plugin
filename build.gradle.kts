@@ -29,17 +29,8 @@ dependencies {
         exclude("org.seleniumhq.selenium")
         exclude("junit")
         exclude("classworlds")
-        exclude("io.netty")
-        exclude("com.typesafe.netty")
     }
-    implementation("org.seleniumhq.selenium:selenium-java:4.0.0") {
-        exclude("io.netty")
-        exclude("com.typesafe.netty")
-        exclude("com.google.auto.service")
-        exclude("com.google.guava")
-        exclude("org.asynchttpclient")
-        exclude("io.opentelemetry")
-    }
+    api("org.seleniumhq.selenium:selenium-java:4.0.0")
 
     testImplementation(kotlin("test", "1.5.31"))
 }
