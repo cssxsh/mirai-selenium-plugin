@@ -22,7 +22,12 @@ object MiraiSeleniumPlugin : KotlinPlugin(
 
     /**
      * 初始化 Selenium
+     *
+     * 如果 是 [io.github.karlatemp.mxlib.selenium.MxSelenium] 不支持的环境，
+     * 请自行实现 初始化方法(判断浏览器类型，下载驱动，配置路径)
+     *
      * @see [setupSelenium]
+     * @see [setupEdgeDriver]
      */
     fun setup(flush: Boolean = false): Boolean = synchronized(this) {
         if (!flush && installed) return true
@@ -34,7 +39,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
             setupSelenium(dataFolder, MiraiSeleniumConfig.browser)
             installed = true
         } catch (exception: UnsupportedOperationException) {
-            logger.warning { "请安装 Chrome 或者 Firefox 浏览器 $exception" }
+            logger.warning { "浏览器不受支持 $exception" }
         } catch (cause: Throwable) {
             logger.warning({ "初始化浏览器驱动失败 $cause" }, cause)
         }
