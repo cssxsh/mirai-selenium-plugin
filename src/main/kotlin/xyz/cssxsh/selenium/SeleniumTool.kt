@@ -1,6 +1,7 @@
 package xyz.cssxsh.selenium
 
 import io.github.karlatemp.mxlib.*
+import io.github.karlatemp.mxlib.exception.*
 import io.github.karlatemp.mxlib.logger.*
 import io.github.karlatemp.mxlib.selenium.*
 import io.ktor.client.*
@@ -18,11 +19,20 @@ import java.time.*
 import java.util.function.*
 import java.util.logging.*
 import java.util.zip.*
+import kotlin.properties.*
+import kotlin.reflect.*
 
 // region Setup Selenium
 
-private fun Class<*>.getLogger(): Logger {
-    return declaredFields.first { it.type == Logger::class.java }.apply { isAccessible = true }.get(null) as Logger
+private inline fun <reified T : Any, reified R> reflect() = object : ReadWriteProperty<T, R> {
+
+    override fun getValue(thisRef: T, property: KProperty<*>): R {
+        return T::class.java.getDeclaredField(property.name).apply { isAccessible = true }.get(thisRef) as R
+    }
+
+    override fun setValue(thisRef: T, property: KProperty<*>, value: R) {
+        T::class.java.getDeclaredField(property.name).apply { isAccessible = true }.set(thisRef, value)
+    }
 }
 
 internal const val USER_CHOICE_KEY =
@@ -44,6 +54,14 @@ internal val VERSION = """\d+(.\d+)*""".toRegex()
 internal val ZIP_URL = "(?<=<Url>).{16,256}zip".toRegex()
 
 typealias DriverSupplier = BiFunction<String?, Consumer<Capabilities>?, RemoteWebDriver>
+
+private val MxSeleniumInstance by lazy { MxSelenium() }
+
+private var MxSelenium.initialized: Boolean by reflect()
+
+private var MxSelenium.driverClass: Class<out RemoteWebDriver> by reflect()
+
+private var MxSelenium.driverSupplier: DriverSupplier by reflect()
 
 /**
  * Only Windows
@@ -112,9 +130,15 @@ internal fun setMxSelenium(driverClass: Class<out RemoteWebDriver>, driverSuppli
  */
 internal fun setupSelenium(folder: File, browser: String = "", factory: String = "ktor") {
     System.setProperty("io.ktor.random.secure.random.provider", "DRBG")
-    MxLib.setLoggerFactory { name -> NopLogger(name) }
-    MxLib.setDataStorage(folder)
-    ProtocolHandshake::class.java.getLogger().parent.level = Level.OFF
+    try {
+        MxLib.setLoggerFactory { name -> NopLogger(name) }
+        MxLib.setDataStorage(folder)
+    } catch (_: ValueInitializedException) {
+        //
+    }
+    if (MxSeleniumInstance.initialized) {
+        MxSeleniumInstance.initialized = false
+    }
 
     if (browser.isNotBlank()) System.setProperty("mxlib.selenium.browser", browser)
     if (factory.isNotBlank()) System.setProperty("webdriver.http.factory", factory)
@@ -131,6 +155,9 @@ internal fun setupSelenium(folder: File, browser: String = "", factory: String =
     val oc = thread.contextClassLoader
     try {
         thread.contextClassLoader = KtorHttpClient.Factory::class.java.classLoader
+
+        Logger.getLogger("org.openqa.selenium").level = Level.OFF
+
         MxSelenium.initialize()
     } finally {
         thread.contextClassLoader = oc
