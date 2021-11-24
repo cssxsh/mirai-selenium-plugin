@@ -236,14 +236,14 @@ fun RemoteWebDriver.isReady(): Boolean {
     return executeScript(
         """
         function imagesComplete() {
-            const images = $('img');
+            const images = document.getElementsByTagName('img');
             let complete = images.length !== 0;
             let count = 0;
             try {
-                images.each((index, element) => {
-                    complete = complete && element.complete;
-                    element.complete && count++;
-                });
+                for (const image of images) {
+                    complete = complete && image.complete;
+                    image.complete && count++;
+                }
             } finally {
                 console.log(`ImagesComplete: ${'$'}{count}/${'$'}{images.length}`);
             }
