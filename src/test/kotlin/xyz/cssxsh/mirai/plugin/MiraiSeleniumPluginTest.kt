@@ -2,7 +2,6 @@ package xyz.cssxsh.mirai.plugin
 
 import kotlinx.coroutines.runBlocking
 import net.mamoe.mirai.console.plugin.jvm.*
-import net.mamoe.mirai.utils.*
 import org.openqa.selenium.remote.*
 import xyz.cssxsh.mirai.plugin.data.*
 import xyz.cssxsh.selenium.*
@@ -13,20 +12,7 @@ internal class MiraiSeleniumPluginTest :
     /**
      * 如果加载成功则为真
      */
-    val selenium: Boolean by lazy {
-        try {
-            MiraiSeleniumPlugin.setup()
-        } catch (exception: NoClassDefFoundError) {
-            logger.warning { "相关类加载失败，请安装 MiraiSeleniumPlugin $exception" }
-            false
-        } catch (exception: UnsupportedOperationException) {
-            logger.warning { "截图模式，请安装 Chrome 或者 Firefox 浏览器 $exception" }
-            false
-        } catch (it: Throwable) {
-            logger.warning { "截图模式，初始化浏览器驱动失败 $it" }
-            false
-        }
-    }
+    val selenium: Boolean by lazy { MiraiSeleniumPlugin.setup() }
 
     override fun onEnable() {
         if (selenium) {
