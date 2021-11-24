@@ -7,7 +7,9 @@ import xyz.cssxsh.mirai.plugin.data.*
 import xyz.cssxsh.selenium.*
 
 internal class MiraiSeleniumPluginTest :
-    KotlinPlugin(JvmPluginDescription(id = "", name = "mirai-selenium-plugin", version = "0.0.0")) {
+    KotlinPlugin(JvmPluginDescription(id = "mirai-selenium-test", name = "mirai-selenium-test", version = "0.0.0") {
+        dependsOn("xyz.cssxsh.mirai.plugin.mirai-selenium-plugin", true)
+    }) {
 
     /**
      * 如果加载成功则为真
