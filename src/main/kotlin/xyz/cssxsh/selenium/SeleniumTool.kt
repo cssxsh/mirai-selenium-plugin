@@ -14,9 +14,11 @@ import org.openqa.selenium.*
 import org.openqa.selenium.chromium.*
 import org.openqa.selenium.edge.*
 import org.openqa.selenium.firefox.*
+import org.openqa.selenium.print.*
 import org.openqa.selenium.remote.*
 import java.io.*
 import java.time.*
+import java.util.*
 import java.util.function.*
 import java.util.logging.*
 import java.util.zip.*
@@ -118,9 +120,9 @@ internal fun setupEdgeDriver() {
 }
 
 internal fun setMxSelenium(driverClass: Class<out RemoteWebDriver>, driverSupplier: DriverSupplier) {
-    MxSelenium::class.java.getDeclaredField("initialized").apply { isAccessible = true }.set(null, true)
-    MxSelenium::class.java.getDeclaredField("driverClass").apply { isAccessible = true }.set(null, driverClass)
-    MxSelenium::class.java.getDeclaredField("driverSupplier").apply { isAccessible = true }.set(null, driverSupplier)
+    MxSeleniumInstance.initialized = true
+    MxSeleniumInstance.driverClass = driverClass
+    MxSeleniumInstance.driverSupplier = driverSupplier
 }
 
 /**
@@ -331,6 +333,14 @@ suspend fun RemoteWebDriver.getScreenshot(url: String, vararg hide: String): Byt
         tab.close()
         switchTo().window(home)
     }
+}
+
+/**
+ * 将当前页面打印为PDF
+ */
+fun RemoteWebDriver.printToPDF(consumer: PrintOptions.() -> Unit = {}): ByteArray {
+    val pdf = print(PrintOptions().apply(consumer))
+    return Base64.getMimeDecoder().decode(pdf.content)
 }
 
 // endregion
