@@ -106,15 +106,15 @@ private val IS_READY_SCRIPT by lazy { JavaScript("IsReady") }
 
 private val HIDE by lazy { JavaScript("Hide") }
 
-internal const val INIT = "xyz.cssxsh.selenium.screenshot.init"
+internal const val INIT = "xyz.cssxsh.selenium.timeout.init"
 
-internal const val TIMEOUT = "xyz.cssxsh.selenium.screenshot.timeout"
+internal const val PAGE = "xyz.cssxsh.selenium.timeout.page"
 
-internal const val INTERVAL = "xyz.cssxsh.selenium.screenshot.interval"
+internal const val INTERVAL = "xyz.cssxsh.selenium.timeout.interval"
 
 private val Init by lazy { Duration.ofMillis(System.getProperty(INIT)?.toLongOrNull() ?: 10_000) }
 
-private val Timeout by lazy { Duration.ofMillis(System.getProperty(TIMEOUT)?.toLongOrNull() ?: 180_000) }
+private val PageLoad by lazy { Duration.ofMillis(System.getProperty(PAGE)?.toLongOrNull() ?: 180_000) }
 
 private val Interval by lazy { Duration.ofMillis(System.getProperty(INTERVAL)?.toLongOrNull() ?: 10_000) }
 
@@ -137,7 +137,7 @@ fun RemoteWebDriver(config: RemoteWebDriverConfig): RemoteWebDriver {
             // 诡异的等级
             setLogLevel(Level.ALL)
             manage().timeouts().apply {
-                pageLoadTimeout(Timeout)
+                pageLoadTimeout(PageLoad)
                 scriptTimeout(Interval)
             }
         }
@@ -174,7 +174,7 @@ suspend fun RemoteWebDriver.getScreenshot(url: String, vararg hide: String): Byt
     val tab = switchTo().newWindow(WindowType.TAB) as RemoteWebDriver
 
     return try {
-        withTimeout(Timeout.toMillis()) {
+        withTimeout(PageLoad.toMillis()) {
             tab.get(url)
             delay(Init.toMillis())
             while (!isReady()) {
