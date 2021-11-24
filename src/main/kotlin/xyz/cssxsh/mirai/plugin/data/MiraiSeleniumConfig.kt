@@ -24,6 +24,10 @@ object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"), Remote
     @ValueDescription("无头模式（后台模式）")
     override val headless: Boolean by value(true)
 
+    @ValueName("proxy")
+    @ValueDescription("代理地址")
+    override val proxy: String by value("")
+
     @ValueName("browser")
     @ValueDescription("指定使用的浏览器，Chrome/Firefox")
     override val browser: String by value("")

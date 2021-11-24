@@ -8,6 +8,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 import kotlinx.coroutines.*
 import org.openqa.selenium.*
 import org.openqa.selenium.chromium.*
@@ -180,6 +181,9 @@ private fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capab
                 listOf("enable-automation", "ignore-certificate-errors")
             )
             addArguments("--hide-scrollbars")
+            if (proxy.isNotBlank()) {
+                addArguments("--proxy-server=${proxy}")
+            }
             setExperimentalOption(
                 "mobileEmulation",
                 mapOf(
@@ -188,7 +192,7 @@ private fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capab
                         "height" to height,
                         "pixelRatio" to pixelRatio
                     ),
-                    "userAgent" to "$userAgent MicroMessenger"
+                    "userAgent" to userAgent
                 )
             )
         }
@@ -197,15 +201,23 @@ private fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capab
             setPageLoadStrategy(PageLoadStrategy.NORMAL)
             setLogLevel(FirefoxDriverLogLevel.FATAL)
             setAcceptInsecureCerts(true)
+            if (proxy.isNotBlank()) {
+                val url = Url(proxy)
+                addPreference("network.proxy.type", 1)
+                addPreference("network.proxy.http", url.host)
+                addPreference("network.proxy.http_port", url.port)
+                addPreference("network.proxy.share_proxy_settings", true)
+            }
+
             // XXX 手动关闭 webgl
             addPreference("webgl.disabled", true)
             addPreference("devtools.responsive.touchSimulation.enabled", true)
             addPreference("devtools.responsive.viewport.width", width)
             addPreference("devtools.responsive.viewport.height", height)
             addPreference("devtools.responsive.viewport.pixelRatio", pixelRatio)
-            addPreference("devtools.responsive.userAgent", "$userAgent MicroMessenger")
+            addPreference("devtools.responsive.userAgent", userAgent)
             // XXX responsive 无法调用
-            addPreference("general.useragent.override", "$userAgent MicroMessenger")
+            addPreference("general.useragent.override", userAgent)
             addArguments("--width=${width}", "--height=${height}")
         }
         else -> throw IllegalArgumentException("不支持设置参数的浏览器")
