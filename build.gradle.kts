@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "xyz.cssxsh.mirai"
-version = "1.0.0"
+version = "1.0.1"
 
 mavenCentralPublish {
     useCentralS01()
@@ -22,6 +22,8 @@ repositories {
     mavenLocal()
     maven("https://maven.aliyun.com/repository/central")
     mavenCentral()
+    maven(url = "https://maven.aliyun.com/repository/gradle-plugin")
+    gradlePluginPortal()
 }
 
 dependencies {
