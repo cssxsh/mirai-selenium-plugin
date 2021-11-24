@@ -36,6 +36,18 @@ dependencies {
 
 * [BiliBili Helper](https://github.com/cssxsh/bilibili-helper)
 
+## 配置
+
+### MiraiSeleniumConfig.yml
+
+* user_agent 截图UA
+* width 截图宽度
+* height 截图高度
+* pixel_ratio 截图像素比
+* headless 无头模式（后台模式）
+* browser 指定使用的浏览器，`Chrome`,`Firefox`,`Edge`
+* factory 指定使用的Factory, `ktor`,`netty`
+
 ## 安装
 
 ### MCL 指令安装
