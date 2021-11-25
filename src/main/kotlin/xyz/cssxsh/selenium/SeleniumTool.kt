@@ -47,6 +47,25 @@ private inline fun <reified T : Any, reified R> reflect() = object : ReadWritePr
     }
 }
 
+/**
+ * @see org.openqa.selenium.chromium.ChromiumDriver
+ * @see org.openqa.selenium.devtools.CdpVersionFinder
+ * @see org.openqa.selenium.devtools.CdpEndpointFinder
+ * @see org.openqa.selenium.devtools.Connection
+ * @see org.openqa.selenium.devtools.idealized.Network
+ * @see org.openqa.selenium.devtools.v95.V95Network
+ * @see org.openqa.selenium.remote.ErrorCodes
+ * @see org.openqa.selenium.remote.ProtocolHandshake
+ * @see org.openqa.selenium.remote.RemoteLogs
+ * @see org.openqa.selenium.remote.RemoteWebDriver
+ * @see org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec
+ * @see org.openqa.selenium.remote.http.netty.NettyWebSocket
+ * @see org.openqa.selenium.net.UrlChecker
+ * @see org.openqa.selenium.json.JsonOutput
+ * @see org.openqa.selenium.os.OsProcess
+ */
+internal val logger: Logger = Logger.getLogger("org.openqa.selenium")
+
 internal const val USER_CHOICE_KEY =
     "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\Shell\\Associations\\URLAssociations\\https\\UserChoice"
 
@@ -306,8 +325,6 @@ fun RemoteWebDriver(config: RemoteWebDriverConfig): RemoteWebDriver {
         thread.contextClassLoader = KtorHttpClient.Factory::class.java.classLoader
 
         MxSelenium.newDriver(null, config.toConsumer()).apply {
-            // 诡异的等级
-            setLogLevel(Level.ALL)
             manage().timeouts().apply {
                 pageLoadTimeout(PageLoad)
                 scriptTimeout(Interval)
