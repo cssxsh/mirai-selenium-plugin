@@ -330,7 +330,7 @@ fun RemoteWebDriver.isReady(): Boolean {
         """
         function imagesComplete() {
             const images = document.getElementsByTagName('img');
-            let complete = images.length !== 0;
+            let complete = true;
             let count = 0;
             try {
                 for (const image of images) {
@@ -352,9 +352,15 @@ fun RemoteWebDriver.isReady(): Boolean {
  * @param css CSS过滤器
  */
 fun RemoteWebDriver.hide(vararg css: String): List<RemoteWebElement> {
+    if (css.isEmpty()) return emptyList()
     @Suppress("UNCHECKED_CAST")
-    return executeScript("""return Array.from(arguments).flatMap((selector) => $(selector).hide().toArray())""", *css)
-        as ArrayList<RemoteWebElement>
+    return executeScript(
+        """
+        const nodes = Array.from(arguments).flatMap((selector) => Array.from(document.querySelectorAll(selector)));
+        for (const node of nodes) node.style.display = 'none';
+        return nodes;
+    """.trimIndent(), *css
+    ) as ArrayList<RemoteWebElement>
 }
 
 /**
@@ -379,7 +385,7 @@ suspend fun RemoteWebDriver.getScreenshot(url: String, vararg hide: String): Byt
     }
 
     return try {
-        tab.hide(*hide)
+        tab.hide(css = hide)
         tab.getScreenshotAs(OutputType.BYTES)
     } finally {
         tab.close()
