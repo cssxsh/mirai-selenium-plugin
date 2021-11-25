@@ -11,6 +11,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.*
 import org.openqa.selenium.*
+import org.openqa.selenium.chrome.*
 import org.openqa.selenium.chromium.*
 import org.openqa.selenium.edge.*
 import org.openqa.selenium.firefox.*
@@ -26,6 +27,14 @@ import kotlin.properties.*
 import kotlin.reflect.*
 
 // region Setup Selenium
+
+private object AllIgnoredOutputStream : OutputStream() {
+    override fun close() {}
+    override fun write(b: ByteArray, off: Int, len: Int) {}
+    override fun write(b: ByteArray) {}
+    override fun write(b: Int) {}
+    override fun flush() {}
+}
 
 private inline fun <reified T : Any, reified R> reflect() = object : ReadWriteProperty<T, R> {
 
@@ -66,15 +75,16 @@ private var MxSelenium.driverClass: Class<out RemoteWebDriver> by reflect()
 
 private var MxSelenium.driverSupplier: DriverSupplier by reflect()
 
+private val MxSelenium.data: File by reflect()
+
 /**
  * Only Windows
  */
 internal fun setupEdgeDriver() {
     val version = requireNotNull(File(EDGE_APPLICATION).list()?.firstOrNull { it matches VERSION }) { "Edge 版本获取失败" }
-    val data = MxLib.getDataStorage().resolve("selenium")
     val client = HttpClient(OkHttp) { install(HttpTimeout) }
 
-    val xml = data.resolve("msedgedriver-${version}.xml")
+    val xml = MxSeleniumInstance.data.resolve("msedgedriver-${version}.xml")
     if (xml.exists().not()) {
         xml.writeBytes(runBlocking(KtorContext) {
             client.get("https://msedgewebdriverstorage.blob.core.windows.net/edgewebdriver") {
@@ -87,7 +97,7 @@ internal fun setupEdgeDriver() {
 
     val url = ZIP_URL.findAll(xml.readText()).first { "win32" in it.value }.value
 
-    val zip = data.resolve("msedgedriver-${version}.zip")
+    val zip = MxSeleniumInstance.data.resolve("msedgedriver-${version}.zip")
     if (zip.exists().not()) {
         zip.writeBytes(runBlocking(KtorContext) {
             client.get(url) {
@@ -100,7 +110,7 @@ internal fun setupEdgeDriver() {
         })
     }
 
-    val driver = data.resolve("msedgedriver-${version}.exe")
+    val driver = MxSeleniumInstance.data.resolve("msedgedriver-${version}.exe")
     if (driver.exists().not()) {
         with(ZipFile(zip)) {
             getInputStream(getEntry("msedgedriver.exe")).use { input ->
@@ -115,7 +125,9 @@ internal fun setupEdgeDriver() {
         val options = EdgeOptions()
         if (agent != null) options.addArguments("user-agent=$agent")
         consumer?.accept(options)
-        EdgeDriver(options)
+        val service = EdgeDriverService.createDefaultService()
+        service.sendOutputTo(AllIgnoredOutputStream)
+        EdgeDriver(service, options)
     }
 }
 
@@ -164,6 +176,28 @@ internal fun setupSelenium(folder: File, browser: String = "", factory: String =
         MxSelenium.initialize()
     } finally {
         thread.contextClassLoader = oc
+    }
+
+    if (MxSeleniumInstance.driverClass == FirefoxDriver::class.java) {
+        setMxSelenium(FirefoxDriver::class.java) { agent, consumer ->
+            val options = FirefoxOptions()
+            if (agent != null) options.addPreference("general.useragent.override", agent)
+            consumer?.accept(options)
+            val service = GeckoDriverService.Builder().usingFirefoxBinary(options.binary).build()
+            service.sendOutputTo(AllIgnoredOutputStream)
+            FirefoxDriver(service, options)
+        }
+    }
+
+    if (MxSeleniumInstance.driverClass == ChromeDriver::class.java) {
+        setMxSelenium(ChromeDriver::class.java) { agent, consumer ->
+            val options = ChromeOptions()
+            if (agent != null) options.addArguments("user-agent=$agent")
+            consumer?.accept(options)
+            val service = ChromeDriverService.createServiceWithConfig(options)
+            service.sendOutputTo(AllIgnoredOutputStream)
+            ChromeDriver(service, options)
+        }
     }
 }
 
@@ -222,7 +256,7 @@ private fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capab
             addPreference("general.useragent.override", userAgent)
             addArguments("--width=${width}", "--height=${height}")
         }
-        else -> throw IllegalArgumentException("不支持设置参数的浏览器")
+        else -> throw UnsupportedOperationException("不支持设置参数的浏览器 ${capabilities::class}")
     }
 }
 
@@ -243,6 +277,24 @@ private val Interval by lazy { Duration.ofMillis(System.getProperty(INTERVAL)?.t
  * @param config 配置
  */
 fun RemoteWebDriver(config: RemoteWebDriverConfig): RemoteWebDriver {
+
+    if (config.log) {
+        when (MxSeleniumInstance.driverClass) {
+            ChromeDriver::class.java -> {
+                val log = MxSeleniumInstance.data.resolve("chromedriver.log")
+                System.setProperty(ChromeDriverService.CHROME_DRIVER_LOG_PROPERTY, log.absolutePath)
+            }
+            EdgeDriver::class.java -> {
+                val log = MxSeleniumInstance.data.resolve("msedgedriver.log")
+                System.setProperty(EdgeDriverService.EDGE_DRIVER_LOG_PROPERTY, log.absolutePath)
+            }
+            FirefoxDriver::class.java -> {
+                val log = MxSeleniumInstance.data.resolve("geckodriver.log")
+                System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, log.absolutePath)
+            }
+            else -> Unit
+        }
+    }
 
     /**
      * 切换线程上下文，加载相关配置
@@ -322,8 +374,8 @@ suspend fun RemoteWebDriver.getScreenshot(url: String, vararg hide: String): Byt
                 delay(Interval.toMillis())
             }
         }
-    } catch (_: Throwable) {
-        //
+    } catch (_: TimeoutCancellationException) {
+        // ignore
     }
 
     return try {
