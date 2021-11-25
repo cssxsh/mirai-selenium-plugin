@@ -2,6 +2,7 @@ package xyz.cssxsh.mirai.plugin
 
 import kotlinx.coroutines.runBlocking
 import net.mamoe.mirai.console.plugin.jvm.*
+import net.mamoe.mirai.utils.warning
 import org.openqa.selenium.remote.*
 import xyz.cssxsh.mirai.plugin.data.*
 import xyz.cssxsh.selenium.*
@@ -14,7 +15,14 @@ internal class MiraiSeleniumPluginTest :
     /**
      * 如果加载成功则为真
      */
-    val selenium: Boolean by lazy { MiraiSeleniumPlugin.setup() }
+    val selenium: Boolean by lazy {
+        try {
+            MiraiSeleniumPlugin.setup()
+        } catch (exception: NoClassDefFoundError) {
+            logger.warning { "相关类加载失败，请安装 https://github.com/cssxsh/mirai-selenium-plugin $exception" }
+            false
+        }
+    }
 
     override fun onEnable() {
         if (selenium) {
