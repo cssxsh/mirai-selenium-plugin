@@ -12,7 +12,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
-        version = "1.0.2",
+        version = "1.0.3",
     ) {
         author("cssxsh")
     }
