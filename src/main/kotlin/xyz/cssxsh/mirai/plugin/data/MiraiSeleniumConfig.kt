@@ -28,6 +28,10 @@ object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"), Remote
     @ValueDescription("代理地址")
     override val proxy: String by value("")
 
+    @ValueName("log")
+    @ValueDescription("启用日志文件")
+    override val log: Boolean by value(false)
+
     @ValueName("browser")
     @ValueDescription("指定使用的浏览器，Chrome/Firefox")
     override val browser: String by value("")

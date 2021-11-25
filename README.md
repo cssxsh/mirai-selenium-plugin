@@ -46,8 +46,9 @@ dependencies {
 * pixel_ratio 截图像素比
 * headless 无头模式（后台模式）
 * proxy 代理地址
-* browser 指定使用的浏览器，`Chrome`,`Firefox`,`Edge`
-* factory 指定使用的Factory, `ktor`,`netty`
+* log 启用日志文件
+* browser 指定使用的浏览器: `Chrome`,`Firefox`,`Edge`
+* factory 指定使用的Factory: `ktor`,`netty`
 
 ## 安装
 
