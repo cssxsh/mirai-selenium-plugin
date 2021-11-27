@@ -17,6 +17,7 @@ import org.openqa.selenium.edge.*
 import org.openqa.selenium.firefox.*
 import org.openqa.selenium.print.*
 import org.openqa.selenium.remote.*
+import xyz.cssxsh.mirai.plugin.MiraiSeleniumPlugin
 import java.io.*
 import java.time.*
 import java.util.*
@@ -69,7 +70,7 @@ internal val logger: Logger = Logger.getLogger("org.openqa.selenium")
 internal const val USER_CHOICE_KEY =
     "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\Shell\\Associations\\URLAssociations\\https\\UserChoice"
 
-fun queryUserChoice(): String {
+internal fun queryUserChoice(): String {
     if (System.getProperty("os.name").startsWith("Windows").not()) return ""
     return ProcessBuilder("reg", "query", USER_CHOICE_KEY, "/v", "ProgId").start()
         .inputStream.use { it.reader().readText() }
@@ -84,7 +85,7 @@ internal val VERSION = """\d+(.\d+)*""".toRegex()
 
 internal val ZIP_URL = "(?<=<Url>).{16,256}zip".toRegex()
 
-typealias DriverSupplier = BiFunction<String?, Consumer<Capabilities>?, RemoteWebDriver>
+internal typealias DriverSupplier = BiFunction<String?, Consumer<Capabilities>?, RemoteWebDriver>
 
 private val MxSeleniumInstance by lazy { MxSelenium() }
 
@@ -163,7 +164,12 @@ internal fun setMxSelenium(driverClass: Class<out RemoteWebDriver>, driverSuppli
  * @param factory [org.openqa.selenium.remote.http.HttpClient.Factory] , ktor, netty
  */
 internal fun setupSelenium(folder: File, browser: String = "", factory: String = "ktor") {
-    System.setProperty("io.ktor.random.secure.random.provider", "DRBG")
+
+    logger.level = Level.OFF
+
+    if (factory == "ktor") {
+        System.setProperty("io.ktor.random.secure.random.provider", "DRBG")
+    }
     try {
         MxLib.setLoggerFactory { name -> NopLogger(name) }
         MxLib.setDataStorage(folder)
@@ -189,9 +195,6 @@ internal fun setupSelenium(folder: File, browser: String = "", factory: String =
     val oc = thread.contextClassLoader
     try {
         thread.contextClassLoader = KtorHttpClient.Factory::class.java.classLoader
-
-        Logger.getLogger("org.openqa.selenium").level = Level.OFF
-
         MxSelenium.initialize()
     } finally {
         thread.contextClassLoader = oc
@@ -338,6 +341,15 @@ fun RemoteWebDriver(config: RemoteWebDriverConfig): RemoteWebDriver {
 // endregion
 
 // region Screenshot
+
+internal inline fun <reified T> useRemoteWebDriver(config: RemoteWebDriverConfig, block: (RemoteWebDriver) -> T): T {
+    val driver = RemoteWebDriver(config)
+    return try {
+        block(driver)
+    } finally {
+        driver.quit()
+    }
+}
 
 /**
  * 判断页面是否加载完全
