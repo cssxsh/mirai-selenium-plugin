@@ -17,7 +17,6 @@ import org.openqa.selenium.edge.*
 import org.openqa.selenium.firefox.*
 import org.openqa.selenium.print.*
 import org.openqa.selenium.remote.*
-import xyz.cssxsh.mirai.plugin.MiraiSeleniumPlugin
 import java.io.*
 import java.time.*
 import java.util.*
@@ -102,7 +101,7 @@ private val MxSelenium.data: File by reflect()
  */
 internal fun setupEdgeDriver() {
     val version = requireNotNull(File(EDGE_APPLICATION).list()?.firstOrNull { it matches VERSION }) { "Edge 版本获取失败" }
-    val client = HttpClient(OkHttp) { install(HttpTimeout) }
+    val client = HttpClient(OkHttp)
 
     val xml = MxSeleniumInstance.data.resolve("msedgedriver-${version}.xml")
     if (xml.exists().not()) {
@@ -110,32 +109,25 @@ internal fun setupEdgeDriver() {
             client.get("https://msedgewebdriverstorage.blob.core.windows.net/edgewebdriver") {
                 parameter("prefix", version)
                 parameter("comp", "list")
-                parameter("timeout", 60000)
+                parameter("timeout", 60_000)
             }
         })
     }
 
     val url = ZIP_URL.findAll(xml.readText()).first { "win32" in it.value }.value
 
-    val zip = MxSeleniumInstance.data.resolve("msedgedriver-${version}.zip")
-    if (zip.exists().not()) {
-        zip.writeBytes(runBlocking(KtorContext) {
-            client.get(url) {
-                timeout {
-                    socketTimeoutMillis = 60_000
-                    connectTimeoutMillis = 60_000
-                    requestTimeoutMillis = 180_000
-                }
-            }
+    val file = MxSeleniumInstance.data.resolve("msedgedriver-${version}.zip")
+    if (file.exists().not()) {
+        file.writeBytes(runBlocking(KtorContext) {
+            client.get(url)
         })
     }
 
     val driver = MxSeleniumInstance.data.resolve("msedgedriver-${version}.exe")
     if (driver.exists().not()) {
-        with(ZipFile(zip)) {
-            getInputStream(getEntry("msedgedriver.exe")).use { input ->
-                driver.writeBytes(input.readAllBytes())
-            }
+        val zip = ZipFile(file)
+        zip.getInputStream(zip.getEntry("msedgedriver.exe")).use { input ->
+            driver.writeBytes(input.readAllBytes())
         }
     }
 
