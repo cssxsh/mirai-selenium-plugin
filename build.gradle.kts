@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "xyz.cssxsh.mirai"
-version = "1.0.3"
+version = "1.0.4"
 
 mavenCentralPublish {
     useCentralS01()
@@ -31,8 +31,11 @@ dependencies {
         exclude("org.seleniumhq.selenium")
         exclude("junit")
         exclude("classworlds")
+        exclude("io.netty")
     }
-    api("org.seleniumhq.selenium:selenium-java:4.0.0")
+    api("org.seleniumhq.selenium:selenium-java:4.1.0") {
+        exclude("io.netty")
+    }
 
     testImplementation(kotlin("test", "1.5.31"))
 }

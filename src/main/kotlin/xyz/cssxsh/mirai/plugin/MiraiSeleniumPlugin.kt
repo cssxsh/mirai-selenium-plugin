@@ -1,5 +1,6 @@
 package xyz.cssxsh.mirai.plugin
 
+import kotlinx.coroutines.*
 import net.mamoe.mirai.console.extension.*
 import net.mamoe.mirai.console.plugin.jvm.*
 import net.mamoe.mirai.console.util.*
@@ -12,7 +13,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
-        version = "1.0.3",
+        version = "1.0.4",
     ) {
         author("cssxsh")
     }
@@ -56,7 +57,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
 
     @OptIn(ConsoleExperimentalApi::class)
     override fun PluginComponentStorage.onLoad() {
-        KtorContext = this@MiraiSeleniumPlugin.childScopeContext("SeleniumHttpClient")
+        KtorContext = childScopeContext(name = "SeleniumHttpClient", context = Dispatchers.IO)
     }
 
     override fun onEnable() {
