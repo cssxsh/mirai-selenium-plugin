@@ -23,9 +23,9 @@ class KtorHttpClient(private val config: SeleniumHttpClientConfig) : SeleniumHtt
         }
         expectSuccess = false
         install(HttpTimeout) {
-            connectTimeoutMillis = config.connectionTimeout().toMillis()
-            requestTimeoutMillis = config.readTimeout().toMillis()
             socketTimeoutMillis = config.readTimeout().toMillis()
+            connectTimeoutMillis = config.connectionTimeout().toMillis()
+            requestTimeoutMillis = null
         }
         install(WebSockets)
         install(UserAgent) {

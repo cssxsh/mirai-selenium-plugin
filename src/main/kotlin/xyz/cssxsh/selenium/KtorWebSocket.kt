@@ -24,8 +24,7 @@ class KtorWebSocket(private val session: DefaultClientWebSocketSession, private 
                             listener.onClose(code.toInt(), reason)
                             return@launch
                         }
-                        else -> {
-                        }
+                        else -> Unit
                     }
                 } catch (cause: Throwable) {
                     listener.onError(cause)
@@ -37,29 +36,29 @@ class KtorWebSocket(private val session: DefaultClientWebSocketSession, private 
 
     override fun close(): Unit = runBlocking(KtorContext) { session.close() }
 
-    override fun send(message: Message?): WebSocket = apply {
+    override fun send(message: Message?): KtorWebSocket {
         runBlocking(KtorContext) {
             when (message) {
                 is BinaryMessage -> session.send(message.data())
                 is TextMessage -> session.send(message.text())
                 is CloseMessage -> session.close()
-                else -> {
-                }
+                else -> Unit
             }
         }
+        return this
     }
 
-    override fun sendBinary(data: ByteArray?): WebSocket = apply {
-        if (data == null) return@apply
-        runBlocking(KtorContext) {
+    override fun sendBinary(data: ByteArray?): KtorWebSocket {
+        if (data != null) runBlocking(KtorContext) {
             session.send(data)
         }
+        return this
     }
 
-    override fun sendText(data: CharSequence?): WebSocket = apply {
-        if (data == null) return@apply
-        runBlocking(KtorContext) {
+    override fun sendText(data: CharSequence?): KtorWebSocket {
+        if (data != null) runBlocking(KtorContext) {
             session.send(StringBuilder(data).toString())
         }
+        return this
     }
 }
