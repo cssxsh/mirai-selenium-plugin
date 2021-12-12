@@ -6,7 +6,6 @@ import io.github.karlatemp.mxlib.logger.*
 import io.github.karlatemp.mxlib.selenium.*
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.*
@@ -280,11 +279,11 @@ internal const val PAGE = "xyz.cssxsh.selenium.timeout.page"
 
 internal const val INTERVAL = "xyz.cssxsh.selenium.timeout.interval"
 
-private val Init by lazy { Duration.ofMillis(System.getProperty(INIT)?.toLongOrNull() ?: 10_000) }
+private val Init: Duration by lazy { Duration.ofMillis(System.getProperty(INIT)?.toLongOrNull() ?: 10_000) }
 
-private val PageLoad by lazy { Duration.ofMillis(System.getProperty(PAGE)?.toLongOrNull() ?: 180_000) }
+private val PageLoad: Duration by lazy { Duration.ofMillis(System.getProperty(PAGE)?.toLongOrNull() ?: 180_000) }
 
-private val Interval by lazy { Duration.ofMillis(System.getProperty(INTERVAL)?.toLongOrNull() ?: 10_000) }
+private val Interval: Duration by lazy { Duration.ofMillis(System.getProperty(INTERVAL)?.toLongOrNull() ?: 10_000) }
 
 /**
  * 创建一个 RemoteWebDriver
@@ -334,7 +333,7 @@ fun RemoteWebDriver(config: RemoteWebDriverConfig): RemoteWebDriver {
 
 // region Screenshot
 
-internal inline fun <reified T> useRemoteWebDriver(config: RemoteWebDriverConfig, block: (RemoteWebDriver) -> T): T {
+inline fun <reified T> useRemoteWebDriver(config: RemoteWebDriverConfig, block: (RemoteWebDriver) -> T): T {
     val driver = RemoteWebDriver(config)
     return try {
         block(driver)
