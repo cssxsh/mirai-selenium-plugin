@@ -153,6 +153,7 @@ internal fun setMxSelenium(driverClass: Class<out RemoteWebDriver>, driverSuppli
  * @param folder 数据缓存文件夹
  * @param browser 浏览器类型 Chrome, Firefox ...
  * @param factory [org.openqa.selenium.remote.http.HttpClient.Factory] , ktor, netty
+ * @see setupEdgeDriver
  */
 internal fun setupSelenium(folder: File, browser: String = "", factory: String = "ktor") {
 

@@ -28,7 +28,6 @@ object MiraiSeleniumPlugin : KotlinPlugin(
      * 请自行实现 初始化方法(判断浏览器类型，下载驱动，配置路径)
      *
      * @see [setupSelenium]
-     * @see [setupEdgeDriver]
      */
     fun setup(flush: Boolean = false): Boolean = synchronized(this) {
         if (!flush && installed) return true
