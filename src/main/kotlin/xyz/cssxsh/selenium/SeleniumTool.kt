@@ -375,6 +375,24 @@ fun RemoteWebDriver.hide(vararg css: String): List<RemoteWebElement> {
 }
 
 /**
+ * @see [WebDriver.close]
+ * @see [FirefoxDriver.maybeGetDevTools]
+ */
+fun RemoteWebDriver.closeTab() {
+    /**
+     * 切换线程上下文
+     */
+    val thread = Thread.currentThread()
+    val oc = thread.contextClassLoader
+    try {
+        thread.contextClassLoader = KtorHttpClient.Factory::class.java.classLoader
+        close()
+    } finally {
+        thread.contextClassLoader = oc
+    }
+}
+
+/**
  * 打开指定 url 页面，并截取图片
  * @param hide CSS过滤器
  * @return 返回的图片文件数据，格式PNG
@@ -399,7 +417,7 @@ suspend fun RemoteWebDriver.getScreenshot(url: String, vararg hide: String): Byt
         tab.hide(css = hide)
         tab.getScreenshotAs(OutputType.BYTES)
     } finally {
-        tab.close()
+        tab.closeTab()
         switchTo().window(home)
     }
 }
