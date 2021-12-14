@@ -1,8 +1,5 @@
 package xyz.cssxsh.selenium
 
-import io.github.karlatemp.mxlib.*
-import io.github.karlatemp.mxlib.exception.*
-import io.github.karlatemp.mxlib.logger.*
 import io.github.karlatemp.mxlib.selenium.*
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -150,23 +147,16 @@ internal fun setMxSelenium(driverClass: Class<out RemoteWebDriver>, driverSuppli
 
 /**
  * 初始化 Selenium/MxLib 配置
- * @param folder 数据缓存文件夹
  * @param browser 浏览器类型 Chrome, Firefox ...
  * @param factory [org.openqa.selenium.remote.http.HttpClient.Factory] , ktor, netty
  * @see setupEdgeDriver
  */
-internal fun setupSelenium(folder: File, browser: String = "", factory: String = "ktor") {
+internal fun setupSelenium(browser: String = "", factory: String = "ktor") {
 
     logger.level = Level.OFF
 
     if (factory == "ktor") {
         System.setProperty("io.ktor.random.secure.random.provider", "DRBG")
-    }
-    try {
-        MxLib.setLoggerFactory { name -> NopLogger(name) }
-        MxLib.setDataStorage(folder)
-    } catch (_: ValueInitializedException) {
-        //
     }
     if (MxSeleniumInstance.initialized) {
         MxSeleniumInstance.initialized = false

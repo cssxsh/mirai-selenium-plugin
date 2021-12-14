@@ -1,5 +1,8 @@
 package xyz.cssxsh.mirai.plugin
 
+import io.github.karlatemp.mxlib.*
+import io.github.karlatemp.mxlib.exception.*
+import io.github.karlatemp.mxlib.logger.*
 import kotlinx.coroutines.*
 import net.mamoe.mirai.console.extension.*
 import net.mamoe.mirai.console.plugin.jvm.*
@@ -36,10 +39,10 @@ object MiraiSeleniumPlugin : KotlinPlugin(
         installed = false
 
         try {
-            setupSelenium(dataFolder, MiraiSeleniumConfig.browser)
+            setupSelenium(browser = MiraiSeleniumConfig.browser, factory = MiraiSeleniumConfig.factory)
             installed = true
         } catch (exception: UnsupportedOperationException) {
-            logger.warning { "浏览器不受支持 $exception" }
+            logger.warning({ "浏览器不受支持 $exception" }, exception)
         } catch (cause: Throwable) {
             logger.warning({ "初始化浏览器驱动失败 $cause" }, cause)
         }
@@ -57,6 +60,12 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     @OptIn(ConsoleExperimentalApi::class)
     override fun PluginComponentStorage.onLoad() {
         KtorContext = childScopeContext(name = "SeleniumHttpClient", context = Dispatchers.IO)
+        try {
+            MxLib.setLoggerFactory { name -> NopLogger(name) }
+            MxLib.setDataStorage(dataFolder)
+        } catch (_: ValueInitializedException) {
+            //
+        }
     }
 
     override fun onEnable() {
