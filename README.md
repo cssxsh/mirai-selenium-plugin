@@ -4,7 +4,7 @@
 
 Mirai-Console的前置插件，用于使用Selenium调用浏览器进行截图等
 
-![maven-central](https://img.shields.io/maven-central/v/xyz.cssxsh.mirai/mirai-selenium-plugin)
+[![maven-central](https://img.shields.io/maven-central/v/xyz.cssxsh.mirai/mirai-selenium-plugin)](https://search.maven.org/artifact/xyz.cssxsh.mirai/mirai-selenium-plugin)
 
 ## 运行平台支持
 
