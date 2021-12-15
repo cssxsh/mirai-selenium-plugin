@@ -2,8 +2,9 @@ package xyz.cssxsh.selenium
 
 import kotlinx.coroutines.*
 import org.junit.jupiter.api.*
+import org.openqa.selenium.*
 import org.openqa.selenium.remote.*
-import xyz.cssxsh.mirai.plugin.data.MiraiSeleniumConfig
+import xyz.cssxsh.mirai.plugin.data.*
 import java.io.*
 
 internal class SeleniumToolKtTest {
@@ -13,6 +14,9 @@ internal class SeleniumToolKtTest {
     private val browsers = listOf("Chrome", "Edge", "Firefox")
 
     private val config = object : RemoteWebDriverConfig by MiraiSeleniumConfig {
+        init {
+            System.setProperty(SELENIUM_FOLDER, folder.resolve("selenium").apply { mkdirs() }.absolutePath)
+        }
         override val userAgent: String = UserAgents.IPAD + " MicroMessenger"
         override val headless: Boolean = true
         override val proxy: String = ""
@@ -22,16 +26,14 @@ internal class SeleniumToolKtTest {
 
     private fun useRemoteWebDriver(block: suspend CoroutineScope.(String, RemoteWebDriver) -> Unit) {
         for (browser in browsers) {
-            setupSelenium(folder = folder, browser = browser, factory = config.factory)
             runBlocking(KtorContext) {
-                var driver: RemoteWebDriver? = null
+                val driver = setupWebDriver(browser = browser).invoke(config)
                 try {
-                    driver = RemoteWebDriver(config = config)
                     block(browser, driver)
                 } catch (cause: Throwable) {
                     cause.printStackTrace()
                 } finally {
-                    driver?.quit()
+                    driver.quit()
                 }
             }
         }

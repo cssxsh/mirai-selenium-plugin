@@ -1,6 +1,6 @@
 # [Mirai Selenium Plugin](https://github.com/cssxsh/mirai-selenium-plugin)
 
-> 基于 [MxLib](https://github.com/Karlatemp/MxLib) 的 Mirai Selenium 前置插件
+> Mirai Selenium 前置插件
 
 Mirai-Console的前置插件，用于使用Selenium调用浏览器进行截图等
 
@@ -13,8 +13,10 @@ Mirai-Console的前置插件，用于使用Selenium调用浏览器进行截图�
 | Windows | Chrome  |   Yes   |
 | Windows | Firefox |   Yes   |
 | Windows | Edge    |   Yes   |
+| Linux   | Chrome  |   Yes   |
 | Linux   | Firefox |   Yes   |
-| MacOS   | Chrome  |   Yes   |
+| MacOS   | Chrome  |  Test   |
+| MacOS   | Firefox |  Test   |
 
 ## 在插件项目中引用
 

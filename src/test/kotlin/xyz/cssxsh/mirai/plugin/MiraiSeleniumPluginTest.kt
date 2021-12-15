@@ -45,6 +45,14 @@ internal class MiraiSeleniumPluginTest :
 
                 val screenshot = driver.getScreenshot(url = "https://mirai.mamoe.net/")
             }
+
+
+            /**
+             * 即用即关
+             */
+            useRemoteWebDriver(SeleniumConfig) { browser ->
+                browser.get("https://mirai.mamoe.net/")
+            }
         }
     }
 

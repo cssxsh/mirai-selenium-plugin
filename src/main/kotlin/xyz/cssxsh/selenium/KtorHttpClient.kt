@@ -17,7 +17,7 @@ import java.net.URI
 class KtorHttpClient(private val config: SeleniumHttpClientConfig) : SeleniumHttpClient {
 
     @OptIn(KtorExperimentalAPI::class)
-    val client = HttpClient(OkHttp) {
+    private val client = HttpClient(OkHttp) {
         engine {
             proxy = config.proxy()
         }
@@ -92,6 +92,10 @@ class KtorHttpClient(private val config: SeleniumHttpClientConfig) : SeleniumHtt
 
     @SeleniumHttpClientName("ktor")
     class Factory : SeleniumHttpClientFactory {
+        
+        init {
+            System.setProperty("io.ktor.random.secure.random.provider", "DRBG")
+        }
 
         private val clients = mutableListOf<HttpClient>()
 

@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "xyz.cssxsh.mirai"
-version = "1.0.5"
+version = "2.0.0-M1"
 
 mavenCentralPublish {
     useCentralS01()
@@ -27,12 +27,6 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.karlatemp.mxlib:mxlib-selenium:3.0-dev-20") {
-        exclude("org.seleniumhq.selenium")
-        exclude("junit")
-        exclude("classworlds")
-        exclude("io.netty")
-    }
     api("org.seleniumhq.selenium:selenium-java:4.1.0") {
         exclude("io.netty")
     }
