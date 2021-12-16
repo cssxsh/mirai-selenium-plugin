@@ -383,8 +383,10 @@ internal fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capa
                 addPreference("network.proxy.share_proxy_settings", true)
             }
 
-            // XXX: 手动关闭 webgl
-            addPreference("webgl.disabled", true)
+            if (headless) {
+                // XXX: 手动关闭 webgl
+                addPreference("webgl.disabled", true)
+            }
             addPreference("devtools.responsive.touchSimulation.enabled", true)
             addPreference("devtools.responsive.viewport.width", width)
             addPreference("devtools.responsive.viewport.height", height)
