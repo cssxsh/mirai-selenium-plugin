@@ -28,7 +28,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
      * @see [setupWebDriver]
      */
     fun setup(flush: Boolean = false): Boolean = synchronized(this) {
-        if (!flush && installed) return true
+        if (!flush && installed) return@synchronized true
 
         MiraiSeleniumConfig.reload()
         installed = false
@@ -43,7 +43,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
             logger.warning({ "初始化浏览器驱动失败" }, cause)
         }
 
-        return installed
+        return@synchronized installed
     }
 
     /**
