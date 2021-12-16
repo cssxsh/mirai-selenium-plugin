@@ -5,7 +5,7 @@ package xyz.cssxsh.selenium
  * 用来配置 RemoteWebDriver
  * @see [RemoteWebDriver]
  * @see [RemoteWebDriverConfig.toConsumer]
- * @see [setupSelenium]
+ * @see [RemoteWebDriverSupplier]
  */
 interface RemoteWebDriverConfig {
     val userAgent: String
