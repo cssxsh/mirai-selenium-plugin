@@ -14,7 +14,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
-        version = "2.0.0-M1",
+        version = "2.0.0",
     ) {
         author("cssxsh")
     }
@@ -33,6 +33,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
         MiraiSeleniumConfig.reload()
         installed = false
         val folder = dataFolder.resolve("selenium")
+        folder.mkdirs()
         System.setProperty(SELENIUM_FOLDER, folder.absolutePath)
         try {
             setupWebDriver(browser = MiraiSeleniumConfig.browser)

@@ -80,7 +80,6 @@ private fun download(url: String): ByteArray = runBlocking(KtorContext) {
  */
 internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
     val folder = File(System.getProperty(SELENIUM_FOLDER, "."))
-    folder.mkdirs()
     return when {
         browser.isBlank() -> {
             /**
@@ -292,7 +291,7 @@ private fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
         OperatingSystem.Linux -> "linux64"
         OperatingSystem.MacOS -> "macos"
     }
-    val url = """https://github\.com/mozilla/geckodriver/releases/download/.{16,64}(tar\.gz|zip)""".toRegex()
+    val url = """https://github\.com/mozilla/geckodriver/releases/download/.{16,64}\.(tar\.gz|zip)""".toRegex()
         .findAll(json.readText())
         .first { result -> suffix in result.value }.value
     val file = folder.resolve(url.substringAfterLast('/'))
