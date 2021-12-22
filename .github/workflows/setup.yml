@@ -8,9 +8,9 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - windows
-          - macos
-          - ubuntu
+          # - windowns-latest
+          - macos-latest
+          - ubuntu-latest
     steps:
       - name: Setup chrome
         uses: browser-actions/setup-chrome@latest
