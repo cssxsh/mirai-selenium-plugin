@@ -12,6 +12,12 @@ jobs:
           - macos-11
           - ubuntu-latest
     steps:
+      - uses: browser-actions/setup-chrome@latest
+      - run: chrome --version
+
+      - uses: browser-actions/setup-firefox@latest
+      - run: firefox --version
+
       - name: Checkout
         uses: actions/checkout@v2
 
