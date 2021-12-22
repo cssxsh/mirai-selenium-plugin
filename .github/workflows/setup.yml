@@ -8,15 +8,15 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - windows-latest
-          - macos-11
-          - ubuntu-latest
+          - windows
+          - macos
+          - ubuntu
     steps:
-      - uses: browser-actions/setup-chrome@latest
-      - run: chrome --version
+      - name: Setup chrome
+        uses: browser-actions/setup-chrome@latest
 
-      - uses: browser-actions/setup-firefox@latest
-      - run: firefox --version
+      - name: Setup firefox
+        uses: browser-actions/setup-firefox@latest
 
       - name: Checkout
         uses: actions/checkout@v2
