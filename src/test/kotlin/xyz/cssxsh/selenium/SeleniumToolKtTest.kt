@@ -2,7 +2,6 @@ package xyz.cssxsh.selenium
 
 import kotlinx.coroutines.*
 import org.junit.jupiter.api.*
-import org.openqa.selenium.*
 import org.openqa.selenium.remote.*
 import xyz.cssxsh.mirai.plugin.data.*
 import java.io.*
@@ -11,7 +10,7 @@ internal class SeleniumToolKtTest {
 
     private val folder = File("run")
 
-    private val browsers = listOf("Chrome", "Edge", "Firefox")
+    private val browsers = listOf("Chrome", "Firefox")
 
     private val config = object : RemoteWebDriverConfig by MiraiSeleniumConfig {
         init {
@@ -24,7 +23,7 @@ internal class SeleniumToolKtTest {
         override val factory: String = "netty"
     }
 
-    private fun useRemoteWebDriver(block: suspend CoroutineScope.(String, RemoteWebDriver) -> Unit) {
+    private fun testRemoteWebDriver(block: suspend CoroutineScope.(String, RemoteWebDriver) -> Unit) {
         for (browser in browsers) {
             runBlocking(KtorContext) {
                 val driver = setupWebDriver(browser = browser).invoke(config)
@@ -40,7 +39,7 @@ internal class SeleniumToolKtTest {
     }
 
     @Test
-    fun screenshot(): Unit = useRemoteWebDriver { browser, driver ->
+    fun screenshot(): Unit = testRemoteWebDriver { browser, driver ->
 
         val url = "https://t.bilibili.com/h5/dynamic/detail/450055453856015371"
 
@@ -52,9 +51,9 @@ internal class SeleniumToolKtTest {
     }
 
     @Test
-    fun pdf(): Unit = useRemoteWebDriver { browser, driver ->
+    fun pdf(): Unit = testRemoteWebDriver { browser, driver ->
 
-        driver.get("https://hub.fastgit.org/mamoe/mirai/blob/dev/README.md")
+        driver.get("https://github.com/mamoe/mirai/blob/dev/README.md")
 
         val start = System.currentTimeMillis()
         while (isActive) {
