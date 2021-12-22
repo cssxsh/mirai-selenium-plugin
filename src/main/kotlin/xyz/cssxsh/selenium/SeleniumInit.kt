@@ -22,7 +22,7 @@ internal const val SELENIUM_DOWNLOAD_ATTEMPT = "xyz.cssxsh.selenium.download.att
 private enum class OperatingSystem {
     Windows,
     Linux,
-    MacOS;
+    Mac;
 
     companion object {
         @JvmStatic
@@ -101,7 +101,7 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                         throw UnsupportedOperationException("xdg-settings 执行失败，可能需要安装 xdg-utils", cause)
                     }
                 }
-                OperatingSystem.MacOS -> {
+                OperatingSystem.Mac -> {
                     // XXX: MacOS/Default
                     File("/Applications").list().orEmpty()
                         .filter { it.endsWith(".app") }
@@ -190,7 +190,7 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
                 ProcessBuilder(if (chromium) "chromium-browser" else "google-chrome", "--version").start()
                     .inputStream.use { it.reader().readText() }
             }
-            OperatingSystem.MacOS -> {
+            OperatingSystem.Mac -> {
                 val path = if (chromium) {
                     "/Applications/Chromium.app/Contents/MacOS/Chromium"
                 } else {
@@ -231,7 +231,7 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
     val suffix = when (OperatingSystem.current) {
         OperatingSystem.Windows -> "win32"
         OperatingSystem.Linux -> "linux64"
-        OperatingSystem.MacOS -> "mac64"
+        OperatingSystem.Mac -> "mac64"
     }
     val url = "${base}/${version}/chromedriver_${suffix}.zip"
     val file = folder.resolve("chromedriver-${version}_${suffix}.zip")
@@ -289,7 +289,7 @@ private fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     val suffix = when (OperatingSystem.current) {
         OperatingSystem.Windows -> "win32"
         OperatingSystem.Linux -> "linux64"
-        OperatingSystem.MacOS -> "macos"
+        OperatingSystem.Mac -> "macos"
     }
     val url = """https://github\.com/mozilla/geckodriver/releases/download/.{16,64}\.(tar\.gz|zip)""".toRegex()
         .findAll(json.readText())
