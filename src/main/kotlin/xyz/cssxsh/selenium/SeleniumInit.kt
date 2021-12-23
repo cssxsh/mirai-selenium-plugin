@@ -19,6 +19,8 @@ internal const val SELENIUM_FOLDER = "xyz.cssxsh.selenium.folder"
 
 internal const val SELENIUM_DOWNLOAD_ATTEMPT = "xyz.cssxsh.selenium.download.attempt"
 
+internal const val CHROME_BROWSER_BINARY = "webdriver.chrome.bin"
+
 private enum class OperatingSystem {
     Windows,
     Linux,
@@ -192,9 +194,9 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
             }
             OperatingSystem.Mac -> {
                 val path = if (chromium) {
-                    "/Applications/Chromium.app/Contents/MacOS/Chromium"
+                    System.getProperty(CHROME_BROWSER_BINARY, "/Applications/Chromium.app/Contents/MacOS/Chromium")
                 } else {
-                    "/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome"
+                    System.getProperty(CHROME_BROWSER_BINARY,"/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome")
                 }
                 ProcessBuilder(path, "--version").start()
                     .inputStream.use { it.reader().readText() }
@@ -264,6 +266,7 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
         if (config.log) {
             val path = folder.resolve("chromedriver.log").absolutePath
             System.setProperty(ChromeDriverService.CHROME_DRIVER_LOG_PROPERTY, path)
+            System.setProperty(ChromeDriverService.CHROME_DRIVER_APPEND_LOG_PROPERTY, "true")
         }
         if (config.factory.isNotBlank()) System.setProperty("webdriver.http.factory", config.factory)
         val options = ChromeOptions().also(config.toConsumer())

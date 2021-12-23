@@ -37,4 +37,4 @@ jobs:
         run: ./gradlew assemble --scan
 
       - name: SeleniumToolKtTest
-        run: ./gradlew test --tests "xyz.cssxsh.selenium.SeleniumToolKtTest" --scan
+        run: ./gradlew test --tests "xyz.cssxsh.selenium.SeleniumToolKtTest" --scan -Dwebdriver.chrome.bin=/Users/runner/hostedtoolcache/chromium/latest/x64/Chromium.app/Contents/MacOS/Chromium
