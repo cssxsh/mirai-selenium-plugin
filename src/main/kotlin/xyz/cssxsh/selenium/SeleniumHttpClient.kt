@@ -23,4 +23,4 @@ typealias SeleniumUserAgent = AddSeleniumUserAgent
 typealias SeleniumHttpContents = Contents
 
 
-internal var KtorContext: CoroutineContext = Dispatchers.IO
+internal var KtorContext: CoroutineContext = Dispatchers.IO + SupervisorJob()

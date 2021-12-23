@@ -10,7 +10,13 @@ internal class SeleniumToolKtTest {
 
     private val folder = File("run")
 
-    private val browsers = listOf("Chromium", "Firefox")
+    private val browsers by lazy {
+        when (OperatingSystem.current) {
+            OperatingSystem.Windows -> listOf("Edge", "Chromium", "Firefox")
+            OperatingSystem.Linux -> listOf("Chromium", "Firefox")
+            OperatingSystem.Mac -> listOf("Chromium", "Firefox")
+        }
+    }
 
     private val config = object : RemoteWebDriverConfig by MiraiSeleniumConfig {
         init {

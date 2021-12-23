@@ -21,7 +21,7 @@ internal const val SELENIUM_DOWNLOAD_ATTEMPT = "xyz.cssxsh.selenium.download.att
 
 internal const val CHROME_BROWSER_BINARY = "webdriver.chrome.bin"
 
-private enum class OperatingSystem {
+internal enum class OperatingSystem {
     Windows,
     Linux,
     Mac;
@@ -194,9 +194,9 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
             }
             OperatingSystem.Mac -> {
                 val path = if (chromium) {
-                    System.getProperty(CHROME_BROWSER_BINARY, "/Applications/Chromium.app/Contents/MacOS/Chromium")
+                    System.getProperty(CHROME_BROWSER_BINARY, "Chromium")
                 } else {
-                    System.getProperty(CHROME_BROWSER_BINARY,"/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome")
+                    System.getProperty(CHROME_BROWSER_BINARY,"Google\\ Chrome")
                 }
                 ProcessBuilder(path, "--version").start()
                     .inputStream.use { it.reader().readText() }
