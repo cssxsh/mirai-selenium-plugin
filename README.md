@@ -8,15 +8,15 @@ Mirai-Console的前置插件，用于使用Selenium调用浏览器进行截图�
 
 ## 运行平台支持
 
-| OS      | Browser | Support |
-|---------|---------|:-------:|
+|   OS    | Browser | Support |
+|:-------:|:-------:|:-------:|
 | Windows | Chrome  |   Yes   |
 | Windows | Firefox |   Yes   |
-| Windows | Edge    |   Yes   |
-| Linux   | Chrome  |   Yes   |
-| Linux   | Firefox |   Yes   |
-| MacOS   | Chrome  |  Test   |
-| MacOS   | Firefox |  Test   |
+| Windows |  Edge   |   Yes   |
+|  Linux  | Chrome  |   Yes   |
+|  Linux  | Firefox |   Yes   |
+|  MacOS  | Chrome  |  Test   |
+|  MacOS  | Firefox |  Test   |
 
 ## 在插件项目中引用
 
@@ -49,7 +49,7 @@ dependencies {
 * headless 无头模式（后台模式）
 * proxy 代理地址
 * log 启用日志文件
-* browser 指定使用的浏览器: `Chrome`,`Firefox`,`Edge`
+* browser 指定使用的浏览器: `Chrome`,`Chromium`,`Firefox`,`Edge`
 * factory 指定使用的Factory: `ktor`,`netty`
 
 ## 安装

@@ -33,7 +33,7 @@ object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"), Remote
     override val log: Boolean by value(false)
 
     @ValueName("browser")
-    @ValueDescription("指定使用的浏览器，Chrome/Firefox/Edge")
+    @ValueDescription("指定使用的浏览器，Chrome/Chromium/Firefox/Edge")
     override val browser: String by value("")
 
     @ValueName("factory")
