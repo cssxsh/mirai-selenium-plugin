@@ -42,6 +42,7 @@ dependencies {
 
 ### [MiraiSeleniumConfig.yml](src/main/kotlin/xyz/cssxsh/mirai/plugin/data/MiraiSeleniumConfig.kt)
 
+* expires 驱动文件过期时间，默认一星期 (单位：天)
 * user_agent 截图UA
 * width 截图宽度
 * height 截图高度
@@ -51,6 +52,7 @@ dependencies {
 * log 启用日志文件
 * browser 指定使用的浏览器: `Chrome`,`Chromium`,`Firefox`,`Edge`
 * factory 指定使用的Factory: `ktor`,`netty`
+* arguments 自定义 arguments, 可以尝试加入 `--no-sandbox`, `--disable-dev-shm-usage`, 解决兼容性问题  
 
 ## 安装
 
