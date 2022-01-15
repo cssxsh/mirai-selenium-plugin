@@ -6,6 +6,7 @@ import net.mamoe.mirai.console.plugin.jvm.*
 import net.mamoe.mirai.console.util.*
 import net.mamoe.mirai.console.util.CoroutineScopeUtils.childScopeContext
 import net.mamoe.mirai.utils.*
+import xyz.cssxsh.mirai.plugin.MiraiSeleniumPlugin.reload
 import xyz.cssxsh.mirai.plugin.data.*
 import xyz.cssxsh.selenium.*
 import java.util.logging.*
@@ -54,6 +55,14 @@ object MiraiSeleniumPlugin : KotlinPlugin(
      */
     fun driver(config: RemoteWebDriverConfig = MiraiSeleniumConfig) = RemoteWebDriver(config)
 
+    fun clear(): Unit = synchronized(this) {
+        check(installed) { "驱动还未安装" }
+
+        val deleted = clearWebDriver(expires = MiraiSeleniumConfig.expires)
+
+        logger.info { "以下文件已清理 ${deleted.joinToString { it.name }}" }
+    }
+
     @OptIn(ConsoleExperimentalApi::class)
     override fun PluginComponentStorage.onLoad() {
         KtorContext = childScopeContext(name = "Selenium", context = Dispatchers.IO)
@@ -62,5 +71,9 @@ object MiraiSeleniumPlugin : KotlinPlugin(
 
     override fun onEnable() {
         MiraiSeleniumConfig.reload()
+    }
+
+    override fun onDisable() {
+        clear()
     }
 }

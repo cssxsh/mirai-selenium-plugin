@@ -401,3 +401,11 @@ internal fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capa
         else -> throw UnsupportedOperationException("不支持设置参数的浏览器 ${capabilities::class}")
     }
 }
+
+internal fun clearWebDriver(expires: Int): List<File> {
+    val folder = File(System.getProperty(SELENIUM_FOLDER, "."))
+    val current = System.currentTimeMillis()
+    return (folder.listFiles() ?: return emptyList()).filter { file ->
+        (current - file.lastModified()) / (24 * 60 * 60 * 1000) > expires && file.delete()
+    }
+}

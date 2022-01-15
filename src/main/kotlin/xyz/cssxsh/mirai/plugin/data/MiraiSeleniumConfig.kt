@@ -4,6 +4,11 @@ import net.mamoe.mirai.console.data.*
 import xyz.cssxsh.selenium.*
 
 object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"), RemoteWebDriverConfig {
+
+    @ValueName("expires")
+    @ValueDescription("驱动文件过期时间，默认一星期 (单位：天)")
+    val expires by value( 7)
+
     @ValueName("user_agent")
     @ValueDescription("截图UA")
     override val userAgent: String by value(UserAgents.IPAD)
