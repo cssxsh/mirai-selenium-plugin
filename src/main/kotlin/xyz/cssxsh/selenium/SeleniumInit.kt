@@ -371,6 +371,8 @@ internal fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capa
                     "userAgent" to userAgent
                 )
             )
+
+            addArguments(arguments)
         }
         is FirefoxOptions -> capabilities.apply {
             setHeadless(headless)
@@ -397,6 +399,8 @@ internal fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capa
             // XXX: responsive 无法调用
             addPreference("general.useragent.override", userAgent)
             addArguments("--width=${width}", "--height=${height}")
+
+            addArguments(arguments)
         }
         else -> throw UnsupportedOperationException("不支持设置参数的浏览器 ${capabilities::class}")
     }

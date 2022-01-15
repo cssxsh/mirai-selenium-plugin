@@ -17,4 +17,5 @@ interface RemoteWebDriverConfig {
     val log: Boolean get() = false
     val browser: String
     val factory: String
+    val arguments: List<String> get() = emptyList()
 }
