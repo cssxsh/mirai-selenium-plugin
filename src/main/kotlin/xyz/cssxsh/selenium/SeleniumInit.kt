@@ -196,7 +196,7 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
                 val path = if (chromium) {
                     System.getProperty(CHROME_BROWSER_BINARY, "Chromium")
                 } else {
-                    System.getProperty(CHROME_BROWSER_BINARY,"Google\\ Chrome")
+                    System.getProperty(CHROME_BROWSER_BINARY, "Google\\ Chrome")
                 }
                 ProcessBuilder(path, "--version").start()
                     .inputStream.use { it.reader().readText() }

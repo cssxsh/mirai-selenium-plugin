@@ -2,12 +2,12 @@ plugins {
     kotlin("jvm") version "1.5.31"
     kotlin("plugin.serialization") version "1.5.31"
 
-    id("net.mamoe.mirai-console") version "2.9.0-M1"
+    id("net.mamoe.mirai-console") version "2.9.2"
     id("net.mamoe.maven-central-publish") version "0.7.0"
 }
 
 group = "xyz.cssxsh.mirai"
-version = "2.0.0"
+version = "2.0.1"
 
 mavenCentralPublish {
     useCentralS01()
@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    api("org.seleniumhq.selenium:selenium-java:4.1.0") {
+    api("org.seleniumhq.selenium:selenium-java:4.1.1") {
         exclude("io.netty")
     }
 

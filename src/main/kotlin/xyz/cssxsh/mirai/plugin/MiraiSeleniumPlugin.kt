@@ -6,7 +6,6 @@ import net.mamoe.mirai.console.plugin.jvm.*
 import net.mamoe.mirai.console.util.*
 import net.mamoe.mirai.console.util.CoroutineScopeUtils.childScopeContext
 import net.mamoe.mirai.utils.*
-import xyz.cssxsh.mirai.plugin.MiraiSeleniumPlugin.reload
 import xyz.cssxsh.mirai.plugin.data.*
 import xyz.cssxsh.selenium.*
 import java.util.logging.*
@@ -15,7 +14,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
-        version = "2.0.0",
+        version = "2.0.1",
     ) {
         author("cssxsh")
     }
