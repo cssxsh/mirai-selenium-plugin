@@ -14,7 +14,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
-        version = "2.0.1",
+        version = "2.0.2",
     ) {
         author("cssxsh")
     }
@@ -62,7 +62,8 @@ object MiraiSeleniumPlugin : KotlinPlugin(
 
         val deleted = clearWebDriver(expires = MiraiSeleniumConfig.expires)
 
-        logger.info { "以下文件已清理 ${deleted.joinToString { it.name }}" }
+        if (deleted.isEmpty()) return@synchronized
+        logger.info { "以下文件已清理: ${deleted.joinToString { it.name }}" }
     }
 
     @OptIn(ConsoleExperimentalApi::class)
@@ -90,7 +91,9 @@ object MiraiSeleniumPlugin : KotlinPlugin(
             true
         }
 
-        logger.info { "DriverCache: $DriverCache" }
+        if (DriverCache.isNotEmpty()) {
+            logger.info { "DriverCache: $DriverCache" }
+        }
     }
 
     override fun onEnable() {

@@ -7,11 +7,11 @@ object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"), Remote
 
     @ValueName("expires")
     @ValueDescription("驱动文件过期时间，默认一星期 (单位：天)")
-    val expires by value( 7)
+    val expires by value(7)
 
     @ValueName("destroy")
     @ValueDescription("清理浏览器驱动，默认30 (单位：分钟)")
-    val destroy by value( 30)
+    val destroy by value(30)
 
     @ValueName("user_agent")
     @ValueDescription("截图UA")

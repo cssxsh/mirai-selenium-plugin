@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "xyz.cssxsh.mirai"
-version = "2.0.1"
+version = "2.0.2"
 
 mavenCentralPublish {
     useCentralS01()
@@ -28,6 +28,7 @@ repositories {
 
 dependencies {
     api("org.seleniumhq.selenium:selenium-java:4.1.1") {
+        exclude("org.slf4j")
         exclude("io.netty")
     }
 
@@ -38,9 +39,6 @@ mirai {
     jvmTarget = JavaVersion.VERSION_11
     configureShadow {
         exclude("module-info.class")
-        exclude {
-            it.path.startsWith("kotlin")
-        }
     }
 }
 
