@@ -58,7 +58,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     fun driver(config: RemoteWebDriverConfig = MiraiSeleniumConfig) = RemoteWebDriver(config)
 
     fun clear(): Unit = synchronized(this) {
-        check(installed) { "驱动还未安装" }
+        if (!installed) return@synchronized
 
         val deleted = clearWebDriver(expires = MiraiSeleniumConfig.expires)
 
