@@ -52,4 +52,6 @@ object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"), Remote
     @ValueName("arguments")
     @ValueDescription("自定义 arguments")
     override val arguments: List<String> by value(emptyList())
+
+    class DriverConfig : RemoteWebDriverConfig by MiraiSeleniumConfig
 }

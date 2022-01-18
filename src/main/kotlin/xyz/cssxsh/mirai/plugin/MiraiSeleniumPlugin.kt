@@ -30,19 +30,18 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     fun setup(flush: Boolean = false): Boolean = synchronized(this) {
         if (!flush && installed) return@synchronized true
 
-        MiraiSeleniumConfig.reload()
-        if (MiraiSeleniumConfig.arguments.isNotEmpty()) {
-            logger.info { "额外参数: ${MiraiSeleniumConfig.arguments}" }
+        if (RemoteWebDriverConfig.arguments.isNotEmpty()) {
+            logger.info { "额外参数: ${RemoteWebDriverConfig.arguments}" }
         }
         installed = false
         val folder = dataFolder.resolve("selenium")
         folder.mkdirs()
         System.setProperty(SELENIUM_FOLDER, folder.absolutePath)
         try {
-            setupWebDriver(browser = MiraiSeleniumConfig.browser)
+            setupWebDriver(browser = RemoteWebDriverConfig.browser)
             installed = true
         } catch (exception: UnsupportedOperationException) {
-            logger.warning({ "浏览器 ${MiraiSeleniumConfig.browser} 不受支持" }, exception)
+            logger.warning({ "浏览器 ${RemoteWebDriverConfig.browser} 不受支持" }, exception)
         } catch (cause: Throwable) {
             logger.warning({ "初始化浏览器驱动失败" }, cause)
         }
@@ -55,7 +54,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
      * @param config 配置
      * @see RemoteWebDriver
      */
-    fun driver(config: RemoteWebDriverConfig = MiraiSeleniumConfig) = RemoteWebDriver(config)
+    fun driver(config: RemoteWebDriverConfig = RemoteWebDriverConfig.INSTANCE) = RemoteWebDriver(config)
 
     fun clear(): Unit = synchronized(this) {
         if (!installed) return@synchronized
