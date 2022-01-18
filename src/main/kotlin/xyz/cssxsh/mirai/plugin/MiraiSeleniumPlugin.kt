@@ -71,11 +71,41 @@ object MiraiSeleniumPlugin : KotlinPlugin(
         SeleniumLogger.level = Level.OFF
     }
 
+    private fun destroy(enable: Boolean = true) {
+        DriverCache.entries.removeIf { (driver, service) ->
+            if (enable && driver.sessionId != null && service.isRunning) return@removeIf false
+
+            try {
+                driver.quit()
+            } catch (cause: Throwable) {
+                logger.warning({ "Driver ${driver.sessionId} quit failure." }, cause)
+            }
+
+            try {
+                service.stop()
+            } catch (cause: Throwable) {
+                logger.warning({ "Service ${service.url} stop failure." }, cause)
+            }
+
+            true
+        }
+
+        logger.info { "DriverCache: $DriverCache" }
+    }
+
     override fun onEnable() {
         MiraiSeleniumConfig.reload()
+
+        launch(SeleniumContext) {
+            while (isActive) {
+                delay(MiraiSeleniumConfig.destroy * 3600_000L)
+                destroy()
+            }
+        }
     }
 
     override fun onDisable() {
+        destroy(enable = false)
         clear()
     }
 }

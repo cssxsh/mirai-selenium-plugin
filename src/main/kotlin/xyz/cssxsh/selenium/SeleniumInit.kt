@@ -179,7 +179,7 @@ private fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
         val options = EdgeOptions().also(config.toConsumer())
         val service = EdgeDriverService.createDefaultService()
         service.sendOutputTo(AllIgnoredOutputStream)
-        EdgeDriver(service, options)
+        EdgeDriver(service, options).also { DriverCache[it] = service }
     }
 }
 
@@ -272,7 +272,7 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
         val options = ChromeOptions().also(config.toConsumer())
         val service = ChromeDriverService.createServiceWithConfig(options)
         service.sendOutputTo(AllIgnoredOutputStream)
-        ChromeDriver(service, options)
+        ChromeDriver(service, options).also { DriverCache[it] = service }
     }
 }
 
@@ -341,7 +341,7 @@ private fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
         val options = FirefoxOptions().also(config.toConsumer())
         val service = GeckoDriverService.Builder().usingFirefoxBinary(options.binary).build()
         service.sendOutputTo(AllIgnoredOutputStream)
-        FirefoxDriver(service, options)
+        FirefoxDriver(service, options).also { DriverCache[it] = service }
     }
 }
 
