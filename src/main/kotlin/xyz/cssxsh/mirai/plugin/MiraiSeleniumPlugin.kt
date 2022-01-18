@@ -31,6 +31,9 @@ object MiraiSeleniumPlugin : KotlinPlugin(
         if (!flush && installed) return@synchronized true
 
         MiraiSeleniumConfig.reload()
+        if (MiraiSeleniumConfig.arguments.isNotEmpty()) {
+            logger.info { "额外参数: ${MiraiSeleniumConfig.arguments}" }
+        }
         installed = false
         val folder = dataFolder.resolve("selenium")
         folder.mkdirs()
