@@ -11,6 +11,7 @@ import org.openqa.selenium.chrome.*
 import org.openqa.selenium.chromium.*
 import org.openqa.selenium.edge.*
 import org.openqa.selenium.firefox.*
+import org.openqa.selenium.net.*
 import org.openqa.selenium.remote.*
 import java.io.*
 import java.util.zip.*
@@ -171,14 +172,18 @@ private fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
     System.setProperty(EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY, driver.absolutePath)
 
     return { config ->
-        if (config.log) {
-            val path = folder.resolve("msedgedriver.log").absolutePath
-            System.setProperty(EdgeDriverService.EDGE_DRIVER_LOG_PROPERTY, path)
-        }
         if (config.factory.isNotBlank()) System.setProperty("webdriver.http.factory", config.factory)
         val options = EdgeOptions().also(config.toConsumer())
-        val service = EdgeDriverService.createDefaultService()
-        service.sendOutputTo(AllIgnoredOutputStream)
+        val port = PortProber.findFreePort()
+        val uuid = "${System.currentTimeMillis()}-${port}"
+        val service = EdgeDriverService.Builder()
+            .withLogFile(folder.resolve("msedgedriver.${uuid}.log").takeIf { config.log })
+            .usingDriverExecutable(driver)
+            .usingPort(port)
+            .build()
+        val output = folder.resolve("msedgedriver.${uuid}.output")
+            .takeIf { config.log }?.outputStream() ?: AllIgnoredOutputStream
+        service.sendOutputTo(output)
         EdgeDriver(service, options).also { DriverCache[it] = service }
     }
 }
@@ -263,15 +268,20 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
     System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, driver.absolutePath)
 
     return { config ->
-        if (config.log) {
-            val path = folder.resolve("chromedriver.log").absolutePath
-            System.setProperty(ChromeDriverService.CHROME_DRIVER_LOG_PROPERTY, path)
-            System.setProperty(ChromeDriverService.CHROME_DRIVER_APPEND_LOG_PROPERTY, "true")
-        }
         if (config.factory.isNotBlank()) System.setProperty("webdriver.http.factory", config.factory)
         val options = ChromeOptions().also(config.toConsumer())
-        val service = ChromeDriverService.createServiceWithConfig(options)
-        service.sendOutputTo(AllIgnoredOutputStream)
+        val port = PortProber.findFreePort()
+        val uuid = "${System.currentTimeMillis()}-${port}"
+        val service = ChromeDriverService.Builder()
+                .withAppendLog(config.log)
+                .withLogFile(folder.resolve("chromedriver.${uuid}.log").takeIf { config.log })
+                .withLogLevel(options.logLevel)
+                .usingDriverExecutable(driver)
+                .usingPort(port)
+                .build()
+        val output = folder.resolve("chromedriver.${uuid}.output")
+            .takeIf { config.log }?.outputStream() ?:  AllIgnoredOutputStream
+        service.sendOutputTo(output)
         ChromeDriver(service, options).also { DriverCache[it] = service }
     }
 }
@@ -333,14 +343,19 @@ private fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     System.setProperty(GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, driver.absolutePath)
 
     return { config ->
-        if (config.log) {
-            val path = folder.resolve("geckodriver.log").absolutePath
-            System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, path)
-        }
         if (config.factory.isNotBlank()) System.setProperty("webdriver.http.factory", config.factory)
         val options = FirefoxOptions().also(config.toConsumer())
-        val service = GeckoDriverService.Builder().usingFirefoxBinary(options.binary).build()
-        service.sendOutputTo(AllIgnoredOutputStream)
+        val port = PortProber.findFreePort()
+        val uuid = "${System.currentTimeMillis()}-${port}"
+        val service = GeckoDriverService.Builder()
+            .withLogFile(folder.resolve("geckodriver.${uuid}.log").takeIf { config.log })
+            .usingDriverExecutable(driver)
+            .usingPort(port)
+            .usingFirefoxBinary(options.binary)
+            .build()
+        val output = folder.resolve("geckodriver.${uuid}.output")
+            .takeIf { config.log }?.outputStream() ?: AllIgnoredOutputStream
+        service.sendOutputTo(output)
         FirefoxDriver(service, options).also { DriverCache[it] = service }
     }
 }
