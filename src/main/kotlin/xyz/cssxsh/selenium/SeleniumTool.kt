@@ -7,6 +7,7 @@ import org.openqa.selenium.remote.*
 import java.time.*
 import java.util.*
 import java.util.logging.*
+import kotlin.coroutines.*
 
 // region Selenium
 
@@ -28,6 +29,8 @@ import java.util.logging.*
  * @see org.openqa.selenium.os.OsProcess
  */
 internal val SeleniumLogger: Logger = Logger.getLogger("org.openqa.selenium")
+
+internal var SeleniumContext: CoroutineContext = Dispatchers.IO + SupervisorJob()
 
 // endregion
 

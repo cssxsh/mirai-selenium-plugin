@@ -9,7 +9,7 @@ class KtorWebSocket(private val session: DefaultClientWebSocketSession, private 
     WebSocket {
 
     init {
-        session.launch(KtorContext) {
+        session.launch(SeleniumContext) {
             while (isActive) {
                 try {
                     when (val frame = session.incoming.receive()) {
@@ -34,10 +34,10 @@ class KtorWebSocket(private val session: DefaultClientWebSocketSession, private 
         }
     }
 
-    override fun close(): Unit = runBlocking(KtorContext) { session.close() }
+    override fun close(): Unit = runBlocking(SeleniumContext) { session.close() }
 
     override fun send(message: Message?): KtorWebSocket {
-        runBlocking(KtorContext) {
+        runBlocking(SeleniumContext) {
             when (message) {
                 is BinaryMessage -> session.send(message.data())
                 is TextMessage -> session.send(message.text())
@@ -49,14 +49,14 @@ class KtorWebSocket(private val session: DefaultClientWebSocketSession, private 
     }
 
     override fun sendBinary(data: ByteArray?): KtorWebSocket {
-        if (data != null) runBlocking(KtorContext) {
+        if (data != null) runBlocking(SeleniumContext) {
             session.send(data)
         }
         return this
     }
 
     override fun sendText(data: CharSequence?): KtorWebSocket {
-        if (data != null) runBlocking(KtorContext) {
+        if (data != null) runBlocking(SeleniumContext) {
             session.send(StringBuilder(data).toString())
         }
         return this

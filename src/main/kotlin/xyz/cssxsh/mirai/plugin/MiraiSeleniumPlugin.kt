@@ -67,7 +67,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
 
     @OptIn(ConsoleExperimentalApi::class)
     override fun PluginComponentStorage.onLoad() {
-        KtorContext = childScopeContext(name = "Selenium", context = Dispatchers.IO)
+        SeleniumContext = childScopeContext(name = "Selenium", context = Dispatchers.IO)
         SeleniumLogger.level = Level.OFF
     }
 

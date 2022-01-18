@@ -61,7 +61,7 @@ private fun queryRegister(key: String): String {
         .substringAfter("REG_SZ").trim()
 }
 
-private fun download(url: String): ByteArray = runBlocking(KtorContext) {
+private fun download(url: String): ByteArray = runBlocking(SeleniumContext) {
     val client = HttpClient(OkHttp)
     var attempt = System.getProperty(SELENIUM_DOWNLOAD_ATTEMPT, "3").toInt()
     while (isActive) {

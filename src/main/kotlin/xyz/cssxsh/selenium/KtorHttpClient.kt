@@ -69,30 +69,35 @@ class KtorHttpClient(private val config: SeleniumHttpClientConfig) : SeleniumHtt
         }
     }
 
-    override fun execute(request: SeleniumHttpRequest?): SeleniumHttpResponse = runBlocking(KtorContext) {
+    override fun execute(request: SeleniumHttpRequest?): SeleniumHttpResponse {
         requireNotNull(request) { "SeleniumHttpRequest Not Null" }
-        client.request<HttpResponse> { takeFrom(request, config.baseUri()) }.toSeleniumHttpResponse()
+        return runBlocking(SeleniumContext) {
+            client.request<HttpResponse> { takeFrom(request, config.baseUri()) }.toSeleniumHttpResponse()
+        }
     }
 
-    override fun openSocket(request: SeleniumHttpRequest?, listener: SeleniumWebListener?) = runBlocking(KtorContext) {
+    override fun openSocket(request: SeleniumHttpRequest?, listener: SeleniumWebListener?): KtorWebSocket {
         requireNotNull(request) { "SeleniumHttpRequest Not Null" }
         requireNotNull(listener) { "SeleniumWebSocket.Listener Not Null" }
-        val session = client.webSocketSession {
-            takeFrom(request, config.baseUri())
-            url {
-                protocol = when (protocol) {
-                    URLProtocol.HTTPS, URLProtocol.WSS -> URLProtocol.WSS
-                    URLProtocol.HTTP, URLProtocol.WS -> URLProtocol.WS
-                    else -> throw IllegalArgumentException("$protocol Not WebSocket")
+        val session = runBlocking(SeleniumContext) {
+            client.webSocketSession {
+                takeFrom(request, config.baseUri())
+                url {
+                    protocol = when (protocol) {
+                        URLProtocol.HTTPS, URLProtocol.WSS -> URLProtocol.WSS
+                        URLProtocol.HTTP, URLProtocol.WS -> URLProtocol.WS
+                        else -> throw IllegalArgumentException("$protocol Not WebSocket")
+                    }
                 }
             }
         }
-        KtorWebSocket(session, listener)
+
+        return KtorWebSocket(session, listener)
     }
 
     @SeleniumHttpClientName("ktor")
     class Factory : SeleniumHttpClientFactory {
-        
+
         init {
             System.setProperty("io.ktor.random.secure.random.provider", "DRBG")
         }

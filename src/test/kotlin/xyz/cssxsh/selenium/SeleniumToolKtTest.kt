@@ -31,7 +31,7 @@ internal class SeleniumToolKtTest {
 
     private fun testRemoteWebDriver(block: suspend CoroutineScope.(String, RemoteWebDriver) -> Unit) {
         for (browser in browsers) {
-            runBlocking(KtorContext) {
+            runBlocking(SeleniumContext) {
                 val driver = setupWebDriver(browser = browser).invoke(config)
                 try {
                     block(browser, driver)
