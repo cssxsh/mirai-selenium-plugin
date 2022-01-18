@@ -6,6 +6,6 @@ import java.util.*
 
 internal object DriverCache : MutableMap<RemoteWebDriver, DriverService> by HashMap() {
     override fun toString(): String {
-        return entries.joinToString(separator = ", ", prefix = "{ ", postfix = " }") { "${it.key}: ${it.value}" }
+        return entries.joinToString(prefix = "{", postfix = "}") { "${it.key.sessionId}=${it.value.url} " }
     }
 }

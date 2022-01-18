@@ -73,14 +73,11 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     }
 
     private fun destroy(enable: Boolean = true) {
+
         DriverCache.entries.removeIf { (driver, service) ->
             if (enable && driver.sessionId != null && service.isRunning) return@removeIf false
 
-            try {
-                driver.quit()
-            } catch (cause: Throwable) {
-                logger.warning({ "Driver ${driver.sessionId} quit failure." }, cause)
-            }
+            logger.info { "Destroy driver, sessionId: ${driver.sessionId}, ${service.url}" }
 
             try {
                 service.stop()
@@ -90,10 +87,6 @@ object MiraiSeleniumPlugin : KotlinPlugin(
 
             true
         }
-
-        if (DriverCache.isNotEmpty()) {
-            logger.info { "DriverCache: $DriverCache" }
-        }
     }
 
     override fun onEnable() {
@@ -102,6 +95,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
         launch(SeleniumContext) {
             while (isActive) {
                 delay(MiraiSeleniumConfig.destroy * 3600_000L)
+                logger.info { "DriverCache: $DriverCache" }
                 destroy()
             }
         }
