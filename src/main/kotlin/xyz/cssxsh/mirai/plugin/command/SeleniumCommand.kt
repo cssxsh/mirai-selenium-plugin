@@ -2,6 +2,8 @@ package xyz.cssxsh.mirai.plugin.command
 
 import net.mamoe.mirai.console.command.*
 import xyz.cssxsh.mirai.plugin.*
+import xyz.cssxsh.mirai.plugin.MiraiSeleniumPlugin.reload
+import xyz.cssxsh.mirai.plugin.data.*
 import xyz.cssxsh.selenium.*
 
 object SeleniumCommand : CompositeCommand(
@@ -15,6 +17,7 @@ object SeleniumCommand : CompositeCommand(
     suspend fun CommandSender.setup(flush: Boolean = true) {
         sendMessage("安装驱动开始, flush: $flush")
         try {
+            if (flush) MiraiSeleniumConfig.reload()
             val result = MiraiSeleniumPlugin.setup(flush = flush)
             sendMessage("安装驱动${if (result) "成功" else "失败"}")
         } catch (cause: Throwable) {
@@ -48,7 +51,7 @@ object SeleniumCommand : CompositeCommand(
     @Description("驱动进程状态")
     suspend fun CommandSender.status() {
         try {
-            sendMessage(DriverCache.status().joinToString(separator = "\n"))
+            sendMessage(DriverCache.status().joinToString(separator = "\n").ifEmpty { "当前没有驱动进程" })
         } catch (cause: Throwable) {
             sendMessage("驱动进程状态异常, $cause")
         }
