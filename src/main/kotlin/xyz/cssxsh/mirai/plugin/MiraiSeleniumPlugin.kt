@@ -24,7 +24,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
 
     /**
      * 初始化 Selenium
-     *
+     * @param flush 是否重新安装
      * @see [setupWebDriver]
      */
     fun setup(flush: Boolean = false): Boolean = synchronized(this) {
@@ -51,11 +51,14 @@ object MiraiSeleniumPlugin : KotlinPlugin(
 
     /**
      * 创建一个 RemoteWebDriver
-     * @param config 配置
-     * @see RemoteWebDriver
+     * @param config 驱动配置
      */
     fun driver(config: RemoteWebDriverConfig = RemoteWebDriverConfig.INSTANCE) = RemoteWebDriver(config)
 
+    /**
+     * 清理驱动文件
+     * @see clearWebDriver
+     */
     fun clear(): Unit = synchronized(this) {
         if (!installed) return@synchronized
 
@@ -71,8 +74,10 @@ object MiraiSeleniumPlugin : KotlinPlugin(
         SeleniumLogger.level = Level.OFF
     }
 
-    private fun destroy(enable: Boolean = true) {
-
+    /**
+     * @param enable 判断是否进程是否正常工作，false 时清除所有进程
+     */
+    fun destroy(enable: Boolean = true) {
         DriverCache.entries.removeIf { (driver, service) ->
             if (enable && driver.sessionId != null && service.isRunning) return@removeIf false
 
