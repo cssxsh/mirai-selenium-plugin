@@ -4,6 +4,7 @@ import kotlinx.coroutines.*
 import org.openqa.selenium.*
 import org.openqa.selenium.print.*
 import org.openqa.selenium.remote.*
+import org.openqa.selenium.remote.service.*
 import java.time.*
 import java.util.*
 import java.util.logging.*
@@ -35,6 +36,17 @@ internal var SeleniumContext: CoroutineContext = Dispatchers.IO + SupervisorJob(
 // endregion
 
 // region RemoteWebDriver
+
+internal fun DriverService.getProcess(): Process? {
+    val process = DriverService::class.java.getDeclaredField("process")
+        .apply { isAccessible = true }.get(this) ?: return null
+    val osProcess = process::class.java.getDeclaredField("process")
+        .apply { isAccessible = true }.get(process) ?: return null
+    val watchdog = osProcess::class.java.getDeclaredField("executeWatchdog")
+        .apply { isAccessible = true }.get(osProcess) ?: return null
+    return watchdog::class.java.getDeclaredField("process")
+        .apply { isAccessible = true }.get(watchdog) as Process?
+}
 
 internal const val SELENIUM_TIMEOUT_INIT = "xyz.cssxsh.selenium.timeout.init"
 

@@ -1,11 +1,14 @@
 package xyz.cssxsh.mirai.plugin
 
 import kotlinx.coroutines.*
+import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
+import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
 import net.mamoe.mirai.console.extension.*
 import net.mamoe.mirai.console.plugin.jvm.*
 import net.mamoe.mirai.console.util.*
 import net.mamoe.mirai.console.util.CoroutineScopeUtils.childScopeContext
 import net.mamoe.mirai.utils.*
+import xyz.cssxsh.mirai.plugin.command.SeleniumCommand
 import xyz.cssxsh.mirai.plugin.data.*
 import xyz.cssxsh.selenium.*
 import java.util.logging.*
@@ -81,7 +84,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
         DriverCache.entries.removeIf { (driver, service) ->
             if (enable && driver.sessionId != null && service.isRunning) return@removeIf false
 
-            logger.info { "Destroy driver, sessionId: ${driver.sessionId}, ${service.url}" }
+            logger.info { "Destroy driver, session: ${driver.sessionId}, process: ${service.getProcess()}" }
 
             try {
                 service.stop()
@@ -95,17 +98,23 @@ object MiraiSeleniumPlugin : KotlinPlugin(
 
     override fun onEnable() {
         MiraiSeleniumConfig.reload()
+        SeleniumCommand.register()
 
         launch(SeleniumContext) {
             while (isActive) {
                 delay(MiraiSeleniumConfig.destroy * 60_000L)
-                logger.info { "DriverCache: $DriverCache" }
+                try {
+                    logger.info { "DriverCache: ${DriverCache.status()}" }
+                } catch (cause: Throwable) {
+                    logger.warning { "DriverCache: $cause" }
+                }
                 destroy()
             }
         }
     }
 
     override fun onDisable() {
+        SeleniumCommand.unregister()
         destroy(enable = false)
         clear()
     }
