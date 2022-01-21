@@ -20,6 +20,8 @@ internal const val SELENIUM_FOLDER = "xyz.cssxsh.selenium.folder"
 
 internal const val SELENIUM_DOWNLOAD_ATTEMPT = "xyz.cssxsh.selenium.download.attempt"
 
+internal const val SELENIUM_DOWNLOAD_EXPIRES = "xyz.cssxsh.selenium.download.expires"
+
 internal const val CHROME_BROWSER_BINARY = "webdriver.chrome.bin"
 
 internal enum class OperatingSystem {
@@ -283,14 +285,14 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
         val port = PortProber.findFreePort()
         val uuid = "${System.currentTimeMillis()}-${port}"
         val service = ChromeDriverService.Builder()
-                .withAppendLog(config.log)
-                .withLogFile(folder.resolve("chromedriver.${uuid}.log").takeIf { config.log })
-                .withLogLevel(options.logLevel)
-                .usingDriverExecutable(driver)
-                .usingPort(port)
-                .build()
+            .withAppendLog(config.log)
+            .withLogFile(folder.resolve("chromedriver.${uuid}.log").takeIf { config.log })
+            .withLogLevel(options.logLevel)
+            .usingDriverExecutable(driver)
+            .usingPort(port)
+            .build()
         val output = folder.resolve("chromedriver.${uuid}.output")
-            .takeIf { config.log }?.outputStream() ?:  AllIgnoredOutputStream
+            .takeIf { config.log }?.outputStream() ?: AllIgnoredOutputStream
         service.sendOutputTo(output)
         ChromeDriver(service, options).also { DriverCache[it] = service }
     }
@@ -300,7 +302,8 @@ private fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     // 取版本
     val latest = "https://api.github.com/repos/mozilla/geckodriver/releases/latest"
     val json = folder.resolve("geckodriver.json")
-    if (json.exists().not() || System.currentTimeMillis() - json.lastModified() > 1000L * 60 * 60 * 24 * 7) {
+    val expires = System.getProperty(SELENIUM_DOWNLOAD_EXPIRES, "7").toLong()
+    if (json.exists().not() || System.currentTimeMillis() - json.lastModified() > 1000L * 60 * 60 * 24 * expires) {
         json.writeBytes(
             try {
                 download(url = latest)
@@ -431,10 +434,11 @@ internal fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capa
     }
 }
 
-internal fun clearWebDriver(expires: Int): List<File> {
+internal fun clearWebDriver(): List<File> {
+    val expires = System.getProperty(SELENIUM_DOWNLOAD_EXPIRES, "7").toLong()
     val folder = File(System.getProperty(SELENIUM_FOLDER, "."))
     val current = System.currentTimeMillis()
     return (folder.listFiles() ?: return emptyList()).filter { file ->
-        (current - file.lastModified()) / (24 * 60 * 60 * 1000) > expires && file.delete()
+        file.isFile && (current - file.lastModified()) / (24 * 60 * 60 * 1000) > expires && file.delete()
     }
 }

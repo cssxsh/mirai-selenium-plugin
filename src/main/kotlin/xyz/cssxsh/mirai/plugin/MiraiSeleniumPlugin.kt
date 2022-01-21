@@ -65,7 +65,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     fun clear(): Unit = synchronized(this) {
         if (!installed) return@synchronized
 
-        val deleted = clearWebDriver(expires = MiraiSeleniumConfig.expires)
+        val deleted = clearWebDriver()
 
         if (deleted.isEmpty()) return@synchronized
         logger.info { "以下文件已清理: ${deleted.joinToString { it.name }}" }
@@ -99,6 +99,8 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     override fun onEnable() {
         MiraiSeleniumConfig.reload()
         SeleniumCommand.register()
+
+        System.setProperty(SELENIUM_DOWNLOAD_EXPIRES, "${MiraiSeleniumConfig.expires}")
 
         launch(SeleniumContext) {
             while (isActive) {
