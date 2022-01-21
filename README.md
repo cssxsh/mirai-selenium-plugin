@@ -38,6 +38,13 @@ dependencies {
 
 * [BiliBili Helper](https://github.com/cssxsh/bilibili-helper)
 
+## 管理指令
+
+* `/selenium setup` 安装驱动文件
+* `/selenium clear` 清理驱动文件
+* `/selenium destroy` 清理驱动进程
+* `/selenium status` 驱动进程状态
+
 ## 配置
 
 ### [MiraiSeleniumConfig.yml](src/main/kotlin/xyz/cssxsh/mirai/plugin/data/MiraiSeleniumConfig.kt)
