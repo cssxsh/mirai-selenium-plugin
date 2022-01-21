@@ -93,7 +93,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
 
         launch(SeleniumContext) {
             while (isActive) {
-                delay(MiraiSeleniumConfig.destroy * 3600_000L)
+                delay(MiraiSeleniumConfig.destroy * 60_000L)
                 logger.info { "DriverCache: $DriverCache" }
                 destroy()
             }
