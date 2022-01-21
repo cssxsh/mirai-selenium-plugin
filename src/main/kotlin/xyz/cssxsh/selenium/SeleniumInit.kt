@@ -63,7 +63,17 @@ private fun queryRegister(key: String): String {
 }
 
 private fun download(url: String): ByteArray = runBlocking(SeleniumContext) {
-    val client = HttpClient(OkHttp)
+    val token = when {
+        "api.github.com" in url -> System.getenv("GITHUB_TOKEN")
+        else -> null
+    }
+    val client = HttpClient(OkHttp) {
+        defaultRequest {
+            if (token != null) {
+                header(HttpHeaders.Authorization, "token $token")
+            }
+        }
+    }
     var attempt = System.getProperty(SELENIUM_DOWNLOAD_ATTEMPT, "3").toInt()
     while (isActive) {
         try {
