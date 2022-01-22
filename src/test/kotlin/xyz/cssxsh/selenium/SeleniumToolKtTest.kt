@@ -10,6 +10,10 @@ internal class SeleniumToolKtTest {
 
     private val folder = File("run")
 
+    init {
+        System.setProperty(SELENIUM_FOLDER, folder.resolve("selenium").apply { mkdirs() }.absolutePath)
+    }
+
     private val browsers by lazy {
         when (OperatingSystem.current) {
             OperatingSystem.Windows -> listOf("Edge", "Chromium", "Firefox")
@@ -19,9 +23,6 @@ internal class SeleniumToolKtTest {
     }
 
     private val config = object : RemoteWebDriverConfig by MiraiSeleniumConfig {
-        init {
-            System.setProperty(SELENIUM_FOLDER, folder.resolve("selenium").apply { mkdirs() }.absolutePath)
-        }
         override val userAgent: String = UserAgents.IPAD + " MicroMessenger"
         override val headless: Boolean = true
         override val proxy: String = ""
@@ -42,6 +43,18 @@ internal class SeleniumToolKtTest {
                 }
             }
         }
+    }
+
+    @AfterEach
+    fun destroy() {
+        DriverCache.forEach { (_, service) ->
+            try {
+                service.stop()
+            } catch (_: Throwable) {
+                //
+            }
+        }
+        DriverCache.clear()
     }
 
     @Test
@@ -70,5 +83,37 @@ internal class SeleniumToolKtTest {
 
         val pdf = driver.printToPDF()
         folder.resolve("print.${browser.lowercase()}.pdf").writeBytes(pdf)
+    }
+
+    @Test
+    fun browser(): Unit = runBlocking {
+        // chrome: chrome://prefs-internals/
+        // firefox about:config
+        try {
+            setupFirefox(folder = folder, version = "68.0.1esr")
+        } catch (_: IllegalStateException) {
+            //
+        }
+        val driver = RemoteWebDriver(config = object : RemoteWebDriverConfig {
+            override val browser: String = "firefox"
+            override val headless: Boolean = false
+            override val log: Boolean = true
+            override val factory: String = "netty"
+            override val preferences: Map<String, String> = mapOf(
+                "network.security.esni.enabled" to "true",
+                "network.captive-portal-service.enabled" to "false",
+                "network.proxy.no_proxies_on" to
+                    listOf(".mozilla.org", ".firefox.com", ".digicert.com", ".mozilla.com", ".amazontrust.com").joinToString()
+            )
+            override val proxy: String = "http://127.0.0.1:8080"
+        })
+
+        try {
+            driver.get("about:config")
+        } catch (cause: Throwable) {
+            cause.printStackTrace()
+        }
+
+        delay(30_000)
     }
 }
