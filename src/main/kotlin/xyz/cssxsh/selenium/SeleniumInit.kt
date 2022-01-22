@@ -528,8 +528,10 @@ internal fun setupFirefox(folder: File, version: String): File {
     val bin = when (OperatingSystem.current) {
         OperatingSystem.Windows -> setup.resolve("core/firefox.exe")
         OperatingSystem.Linux -> setup.resolve("firefox")
-        OperatingSystem.Mac -> setup.resolve("Firefox.app/firefox")
+        OperatingSystem.Mac -> setup.resolve("Firefox.app")
     }
+
+    bin.setExecutable(true)
 
     System.setProperty(FirefoxDriver.SystemProperty.BROWSER_BINARY, bin.absolutePath)
 

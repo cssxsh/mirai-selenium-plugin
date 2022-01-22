@@ -92,7 +92,7 @@ internal class SeleniumToolKtTest {
         setupFirefox(folder = folder, version = "68.0.1esr")
         val driver = RemoteWebDriver(config = object : RemoteWebDriverConfig {
             override val browser: String = "firefox"
-            override val headless: Boolean = false
+            override val headless: Boolean = true
             override val log: Boolean = true
             override val factory: String = "netty"
         })
@@ -102,7 +102,5 @@ internal class SeleniumToolKtTest {
         } catch (cause: Throwable) {
             cause.printStackTrace()
         }
-
-        delay(30_000)
     }
 }
