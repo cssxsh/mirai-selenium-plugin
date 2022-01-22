@@ -317,7 +317,7 @@ private fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
         OperatingSystem.Linux -> "linux64"
         OperatingSystem.Mac -> "macos"
     }
-    val url = """mozilla/geckodriver/releases/download/.{16,64}\.(tar\.gz|zip)""".toRegex()
+    val url = """https://github\.com/mozilla/geckodriver/releases/download/.{16,64}\.(tar\.gz|zip)""".toRegex()
         .findAll(json.readText())
         .first { result -> suffix in result.value }.value
     val file = folder.resolve(url.substringAfterLast('/'))
