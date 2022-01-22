@@ -414,6 +414,12 @@ internal fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capa
                 addPreference("network.proxy.type", 1)
                 addPreference("network.proxy.http", url.host)
                 addPreference("network.proxy.http_port", url.port)
+                addPreference("network.proxy.ssl", url.host)
+                addPreference("network.proxy.ssl_port", url.port)
+                addPreference("network.proxy.ftp", url.host)
+                addPreference("network.proxy.ftp_port", url.port)
+                addPreference("network.proxy.socks", url.host)
+                addPreference("network.proxy.socks_port", url.port)
                 addPreference("network.proxy.share_proxy_settings", true)
             }
 
@@ -431,6 +437,8 @@ internal fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capa
             addArguments("--width=${width}", "--height=${height}")
 
             addArguments(arguments)
+            addPreference("browser.aboutConfig.showWarning", false)
+            addPreference("general.warnOnAboutConfig", false)
             for ((key, value) in preferences) {
                 addPreference(key, value.toBooleanStrictOrNull() ?: value.toDoubleOrNull() ?: value)
             }

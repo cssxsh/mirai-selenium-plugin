@@ -17,7 +17,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
-        version = "2.0.4-RC",
+        version = "2.0.4-RC2",
     ) {
         author("cssxsh")
     }
@@ -70,6 +70,8 @@ object MiraiSeleniumPlugin : KotlinPlugin(
         if (deleted.isEmpty()) return@synchronized
         logger.info { "以下文件已清理: ${deleted.joinToString { it.name }}" }
     }
+
+    fun firefox(version: String) = setupFirefox(folder = dataFolder, version = version)
 
     @OptIn(ConsoleExperimentalApi::class)
     override fun PluginComponentStorage.onLoad() {
