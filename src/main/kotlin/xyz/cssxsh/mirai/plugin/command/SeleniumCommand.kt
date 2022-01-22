@@ -56,4 +56,16 @@ object SeleniumCommand : CompositeCommand(
             sendMessage("驱动进程状态异常, $cause")
         }
     }
+
+    @SubCommand
+    @Description("下载解压 firefox, https://archive.mozilla.org/pub/firefox/releases/")
+    suspend fun CommandSender.firefox(version: String) {
+        sendMessage("下载 firefox 开始, version: $version")
+        try {
+            val bin = MiraiSeleniumPlugin.firefox(version = version)
+            sendMessage("下载结束，path: ${bin.absolutePath}")
+        } catch (cause: Throwable) {
+            sendMessage("下载 firefox 异常, $cause")
+        }
+    }
 }

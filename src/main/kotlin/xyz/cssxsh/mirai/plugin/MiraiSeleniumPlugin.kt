@@ -71,6 +71,11 @@ object MiraiSeleniumPlugin : KotlinPlugin(
         logger.info { "以下文件已清理: ${deleted.joinToString { it.name }}" }
     }
 
+    /**
+     * 下载解压 firefox, [版本列表](https://archive.mozilla.org/pub/firefox/releases/)
+     * @param version 浏览器版本
+     * @see dataFolder
+     */
     fun firefox(version: String) = setupFirefox(folder = dataFolder, version = version)
 
     @OptIn(ConsoleExperimentalApi::class)
