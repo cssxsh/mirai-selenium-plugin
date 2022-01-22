@@ -37,6 +37,10 @@ object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"), Remote
     @ValueDescription("代理地址")
     override val proxy: String by value("")
 
+    @ValueName("preferences")
+    @ValueDescription("User Preferences")
+    override val preferences: Map<String, String> by value(emptyMap())
+
     @ValueName("log")
     @ValueDescription("启用日志文件")
     override val log: Boolean by value(false)
@@ -53,5 +57,5 @@ object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"), Remote
     @ValueDescription("自定义 arguments")
     override val arguments: List<String> by value(emptyList())
 
-    class DriverConfig : RemoteWebDriverConfig by MiraiSeleniumConfig
+    internal class DriverConfig : RemoteWebDriverConfig by MiraiSeleniumConfig
 }

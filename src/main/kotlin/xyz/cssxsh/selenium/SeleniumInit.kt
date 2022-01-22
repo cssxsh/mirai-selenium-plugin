@@ -401,11 +401,13 @@ internal fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capa
             )
 
             addArguments(arguments)
+            setExperimentalOption("prefs", preferences.mapValues { (_, value) ->
+                value.toBooleanStrictOrNull() ?: value.toDoubleOrNull() ?: value
+            })
         }
         is FirefoxOptions -> capabilities.apply {
             setHeadless(headless)
             setPageLoadStrategy(PageLoadStrategy.NORMAL)
-            setLogLevel(FirefoxDriverLogLevel.FATAL)
             setAcceptInsecureCerts(true)
             if (proxy.isNotBlank()) {
                 val url = Url(proxy)
@@ -429,6 +431,9 @@ internal fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capa
             addArguments("--width=${width}", "--height=${height}")
 
             addArguments(arguments)
+            for ((key, value) in preferences) {
+                addPreference(key, value.toBooleanStrictOrNull() ?: value.toDoubleOrNull() ?: value)
+            }
         }
         else -> throw UnsupportedOperationException("不支持设置参数的浏览器 ${capabilities::class}")
     }

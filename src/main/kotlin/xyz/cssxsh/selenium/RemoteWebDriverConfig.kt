@@ -15,6 +15,7 @@ interface RemoteWebDriverConfig {
     val pixelRatio: Int get() = INSTANCE.pixelRatio
     val headless: Boolean get() = INSTANCE.headless
     val proxy: String get() = INSTANCE.proxy
+    val preferences: Map<String, String> get() = INSTANCE.preferences
     val log: Boolean get() = INSTANCE.log
     val browser: String get() = INSTANCE.browser
     val factory: String get() = INSTANCE.factory
@@ -36,6 +37,7 @@ interface RemoteWebDriverConfig {
         override val pixelRatio: Int get() = instance.pixelRatio
         override val headless: Boolean get() = instance.headless
         override val proxy: String get() = instance.proxy
+        override val preferences: Map<String, String> get() = instance.preferences
         override val log: Boolean get() = instance.log
         override val browser: String get() = instance.browser
         override val factory: String get() = instance.factory
