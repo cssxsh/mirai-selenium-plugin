@@ -451,61 +451,63 @@ internal fun clearWebDriver(): List<File> {
 internal fun setupFirefox(folder: File, version: String): File {
     val base = "https://archive.mozilla.org/pub/firefox/releases"
     val setup = folder.resolve("Firefox-${version}")
-    if (setup.exists()) throw IllegalStateException("安装目录已存在")
+    if (setup.exists().not()) {
+        when (OperatingSystem.current) {
+            OperatingSystem.Windows -> {
+                val exe = folder.resolve("Firefox Setup ${version}.exe")
+                if (exe.exists().not()) {
+                    exe.writeBytes(download(url = "${base}/${version}/win64/zh-CN/${exe.name}"))
+                }
+                val sevenZA = folder.resolve("7za.exe")
+                if (sevenZA.exists().not()) {
+                    val url = "https://www.7-zip.org/a/7za920.zip"
+                    val pack = folder.resolve(url.substringAfterLast('/'))
+                    if (pack.exists().not()) {
+                        pack.writeBytes(download(url = url))
+                    }
 
-    val bin = when (OperatingSystem.current) {
-        OperatingSystem.Windows -> {
-            val exe = folder.resolve("Firefox Setup ${version}.exe")
-            if (exe.exists().not()) {
-                exe.writeBytes(download(url = "${base}/${version}/win64/zh-CN/${exe.name}"))
-            }
-            val sevenZA = folder.resolve("7za.exe")
-            if (sevenZA.exists().not()) {
-                val url = "https://www.7-zip.org/a/7za920.zip"
-                val pack = folder.resolve(url.substringAfterLast('/'))
-                if (pack.exists().not()) {
-                    pack.writeBytes(download(url = url))
+                    sevenZA.writeBytes(ZipFile(pack).use { file ->
+                        val entry = file.getEntry("7za.exe")
+                        file.getInputStream(entry).readAllBytes()
+                    })
+                    sevenZA.setExecutable(true)
                 }
 
-                sevenZA.writeBytes(ZipFile(pack).use { file ->
-                    val entry = file.getEntry("7za.exe")
-                    file.getInputStream(entry).readAllBytes()
-                })
-                sevenZA.setExecutable(true)
+                // XXX: bcj2
+                ProcessBuilder(sevenZA.absolutePath, "x", exe.absolutePath, "-o${setup.name}")
+                    .directory(folder)
+                    .start()
+                    .waitFor()
             }
+            OperatingSystem.Linux -> {
+                val bz2 = folder.resolve("firefox-${version}.tar.bz2")
+                if (bz2.exists().not()) {
+                    bz2.writeBytes(download(url = "${base}/${version}/linux-x86_64/zh-CN/${bz2.name}"))
+                }
 
-            // XXX: bcj2
-            ProcessBuilder(sevenZA.absolutePath, "x", exe.absolutePath, "-o${setup.name}")
-                .directory(folder)
-                .start()
-                .waitFor()
+                // XXX: tar.bz2
+                ProcessBuilder("tar", "-xjf", bz2.absolutePath)
+                    .directory(folder)
+                    .start()
+                    .waitFor()
 
-            setup.resolve("core/firefox.exe")
-        }
-        OperatingSystem.Linux -> {
-            val bz2 = folder.resolve("firefox-${version}.tar.bz2")
-            if (bz2.exists().not()) {
-                bz2.writeBytes(download(url = "${base}/${version}/linux-x86_64/zh-CN/${bz2.name}"))
+                folder.resolve("firefox").renameTo(setup)
             }
+            OperatingSystem.Mac -> {
+                val dmg = folder.resolve("Firefox ${version}.dmg")
+                if (dmg.exists().not()) {
+                    dmg.writeBytes(download(url = "${base}/${version}/mac/zh-CN/${dmg.name}"))
+                }
 
-            // XXX: tar.bz2
-            ProcessBuilder("tar", "-xjf", bz2.absolutePath)
-                .directory(folder)
-                .start()
-                .waitFor()
-
-            folder.resolve("firefox").renameTo(setup)
-
-            setup.resolve("firefox")
-        }
-        OperatingSystem.Mac -> {
-            val dmg = folder.resolve("Firefox ${version}.dmg")
-            if (dmg.exists().not()) {
-                dmg.writeBytes(download(url = "${base}/${version}/mac/zh-CN/${dmg.name}"))
+                TODO()
             }
-
-            TODO()
         }
+    }
+
+    val bin = when (OperatingSystem.current) {
+        OperatingSystem.Windows -> setup.resolve("core/firefox.exe")
+        OperatingSystem.Linux -> setup.resolve("firefox")
+        OperatingSystem.Mac -> TODO()
     }
 
     System.setProperty(FirefoxDriver.SystemProperty.BROWSER_BINARY, bin.absolutePath)
