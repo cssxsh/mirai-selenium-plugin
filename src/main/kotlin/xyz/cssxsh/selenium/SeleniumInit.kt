@@ -507,7 +507,20 @@ internal fun setupFirefox(folder: File, version: String): File {
                     dmg.writeBytes(download(url = "${base}/${version}/mac/zh-CN/${dmg.name}"))
                 }
 
-                TODO()
+                ProcessBuilder("hdiutil", "attach", dmg.absolutePath)
+                    .directory(folder)
+                    .start()
+                    .waitFor()
+
+                ProcessBuilder("cp", "-rf", "/Volumes/${dmg.nameWithoutExtension}/Firefox.app", setup.absolutePath)
+                    .directory(folder)
+                    .start()
+                    .waitFor()
+
+                ProcessBuilder("hdiutil", "detach", "/Volumes/${dmg.nameWithoutExtension}")
+                    .directory(folder)
+                    .start()
+                    .waitFor()
             }
         }
     }
@@ -515,7 +528,7 @@ internal fun setupFirefox(folder: File, version: String): File {
     val bin = when (OperatingSystem.current) {
         OperatingSystem.Windows -> setup.resolve("core/firefox.exe")
         OperatingSystem.Linux -> setup.resolve("firefox")
-        OperatingSystem.Mac -> TODO()
+        OperatingSystem.Mac -> setup.resolve("Firefox.app/firefox")
     }
 
     System.setProperty(FirefoxDriver.SystemProperty.BROWSER_BINARY, bin.absolutePath)

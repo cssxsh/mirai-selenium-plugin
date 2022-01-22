@@ -89,23 +89,12 @@ internal class SeleniumToolKtTest {
     fun browser(): Unit = runBlocking {
         // chrome: chrome://prefs-internals/
         // firefox about:config
-        try {
-            setupFirefox(folder = folder, version = "68.0.1esr")
-        } catch (_: IllegalStateException) {
-            //
-        }
+        setupFirefox(folder = folder, version = "68.0.1esr")
         val driver = RemoteWebDriver(config = object : RemoteWebDriverConfig {
             override val browser: String = "firefox"
             override val headless: Boolean = false
             override val log: Boolean = true
             override val factory: String = "netty"
-            override val preferences: Map<String, String> = mapOf(
-                "network.security.esni.enabled" to "true",
-                "network.captive-portal-service.enabled" to "false",
-                "network.proxy.no_proxies_on" to
-                    listOf(".mozilla.org", ".firefox.com", ".digicert.com", ".mozilla.com", ".amazontrust.com").joinToString()
-            )
-            override val proxy: String = "http://127.0.0.1:8080"
         })
 
         try {
