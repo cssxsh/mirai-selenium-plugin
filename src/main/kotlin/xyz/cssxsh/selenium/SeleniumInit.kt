@@ -624,7 +624,7 @@ internal fun setupFirefox(folder: File, version: String): File {
     val binary = when {
         platform.`is`(Platform.WINDOWS) -> setup.resolve("firefox.exe")
         platform.`is`(Platform.LINUX) -> setup.resolve("firefox")
-        platform.`is`(Platform.MAC) -> setup
+        platform.`is`(Platform.MAC) -> setup.resolve("Firefox.app")
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
 
