@@ -96,7 +96,7 @@ private fun download(urlString: String): ByteArray = runBlocking(SeleniumContext
             return@runBlocking client.get(url)
         } catch (exception: IOException) {
             if (attempt-- <= 0) {
-                throw exception
+                throw IllegalStateException("download fail: $urlString", exception)
             }
         }
     }
@@ -390,6 +390,7 @@ private fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
         platform.`is`(Platform.MAC) -> "macos"
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
+    // https://npm.taobao.org/mirrors/geckodriver/
     val url = """https://github\.com/mozilla/geckodriver/releases/download/.{16,64}\.(tar\.gz|zip)""".toRegex()
         .findAll(json.readText())
         .first { result -> suffix in result.value }.value
@@ -539,41 +540,58 @@ internal fun clearWebDriver(): List<File> {
 }
 
 /**
+ * [Platform.WINDOWS] 安装 7za
+ * @param folder 安装目录
+ * @return binary
+ */
+internal fun sevenZA(folder: File): File {
+    return folder.resolve("7za.exe").apply {
+        if (exists().not()) {
+            val url = "https://www.7-zip.org/a/7za920.zip"
+            val pack = folder.resolve(url.substringAfterLast('/'))
+            if (pack.exists().not()) {
+                pack.writeBytes(download(urlString = url))
+            }
+
+            writeBytes(ZipFile(pack).use { file ->
+                val entry = file.getEntry("7za.exe")
+                file.getInputStream(entry).readAllBytes()
+            })
+            setExecutable(true)
+        }
+    }
+}
+
+/**
  * 安装 Firefox 浏览器
  * @param folder 安装目录
- * @param version 版本
+ * @param version 版本, 为空时下载 release-latest 版
  * @return binary
  * @see FirefoxBinary
  * @see FirefoxDriver.SystemProperty.BROWSER_BINARY
  */
 internal fun setupFirefox(folder: File, version: String): File {
-    val base = "https://archive.mozilla.org/pub/firefox/releases"
-    val setup = folder.resolve("Firefox-${version}")
+    val setup = folder.resolve("Firefox-${version.ifBlank { "latest" }}")
     val platform = Platform.getCurrent()
     if (setup.exists().not()) {
         when {
             platform.`is`(Platform.WINDOWS) -> {
-                val exe = folder.resolve("Firefox Setup ${version}.exe")
-                if (exe.exists().not()) {
-                    exe.writeBytes(download(urlString = "${base}/${version}/win64/zh-CN/${exe.name}"))
-                }
-                val sevenZA = folder.resolve("7za.exe")
-                if (sevenZA.exists().not()) {
-                    val url = "https://www.7-zip.org/a/7za920.zip"
-                    val pack = folder.resolve(url.substringAfterLast('/'))
-                    if (pack.exists().not()) {
-                        pack.writeBytes(download(urlString = url))
+                val exe = if (version.isBlank()) {
+                    folder.resolve("Firefox Setup Latest.exe").apply {
+                        if (exists().not()) {
+                            writeBytes(download(urlString = "https://download.mozilla.org/?product=firefox-latest-ssl&os=win64&lang=zh-CN"))
+                        }
                     }
-
-                    sevenZA.writeBytes(ZipFile(pack).use { file ->
-                        val entry = file.getEntry("7za.exe")
-                        file.getInputStream(entry).readAllBytes()
-                    })
-                    sevenZA.setExecutable(true)
+                } else {
+                    folder.resolve("Firefox Setup ${version}.exe").apply {
+                        if (exists().not()) {
+                            writeBytes(download(urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/win64/zh-CN/${name}"))
+                        }
+                    }
                 }
 
                 // XXX: bcj2
-                ProcessBuilder(sevenZA.absolutePath, "x", exe.absolutePath, "'-x!setup.exe'", "-y")
+                ProcessBuilder(sevenZA(folder = folder).absolutePath, "x", exe.absolutePath, "'-x!setup.exe'", "-y")
                     .directory(folder)
                     .start()
                     .waitFor()
@@ -581,9 +599,18 @@ internal fun setupFirefox(folder: File, version: String): File {
                 folder.resolve("core").renameTo(setup)
             }
             platform.`is`(Platform.LINUX) -> {
-                val bz2 = folder.resolve("firefox-${version}.tar.bz2")
-                if (bz2.exists().not()) {
-                    bz2.writeBytes(download(urlString = "${base}/${version}/linux-x86_64/zh-CN/${bz2.name}"))
+                val bz2 = if (version.isBlank()) {
+                    folder.resolve("firefox-latest.tar.bz2").apply {
+                        if (exists().not()) {
+                            writeBytes(download(urlString = "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=zh-CN"))
+                        }
+                    }
+                } else {
+                    folder.resolve("firefox-${version}.tar.bz2").apply {
+                        if (exists().not()) {
+                            writeBytes(download(urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/linux-x86_64/zh-CN/${name}"))
+                        }
+                    }
                 }
 
                 // XXX: tar.bz2
@@ -595,9 +622,18 @@ internal fun setupFirefox(folder: File, version: String): File {
                 folder.resolve("firefox").renameTo(setup)
             }
             platform.`is`(Platform.MAC) -> {
-                val dmg = folder.resolve("Firefox ${version}.dmg")
-                if (dmg.exists().not()) {
-                    dmg.writeBytes(download(urlString = "${base}/${version}/mac/zh-CN/${dmg.name}"))
+                val dmg = if (version.isBlank()) {
+                    folder.resolve("Firefox Latest.dmg").apply {
+                        if (exists().not()) {
+                            writeBytes(download(urlString = "https://download.mozilla.org/?product=firefox-latest-ssl&os=osx&lang=zh-CN"))
+                        }
+                    }
+                } else {
+                    folder.resolve("Firefox ${version}.dmg").apply {
+                        if (exists().not()) {
+                            writeBytes(download(urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/mac/zh-CN/${name}"))
+                        }
+                    }
                 }
 
                 ProcessBuilder("hdiutil", "attach", dmg.absolutePath)
@@ -634,89 +670,99 @@ internal fun setupFirefox(folder: File, version: String): File {
     return binary
 }
 
+/**
+ * 安装 Chromium 浏览器
+ * @param folder 安装目录
+ * @param version 版本, 为空时下载 snapshots-latest 版
+ * @return binary
+ * @see CHROME_BROWSER_BINARY
+ */
 internal fun setupChromium(folder: File, version: String): File {
-    val base = "https://archive.mozilla.org/pub/firefox/releases"
-    val setup = folder.resolve("Firefox-${version}")
+    val setup = folder.resolve("Chromium-${version.ifBlank { "snapshots" }}")
     val platform = Platform.getCurrent()
     if (setup.exists().not()) {
         when {
             platform.`is`(Platform.WINDOWS) -> {
-                val exe = folder.resolve("Firefox Setup ${version}.exe")
-                if (exe.exists().not()) {
-                    exe.writeBytes(download(urlString = "${base}/${version}/win64/zh-CN/${exe.name}"))
-                }
-                val sevenZA = folder.resolve("7za.exe")
-                if (sevenZA.exists().not()) {
-                    val url = "https://www.7-zip.org/a/7za920.zip"
-                    val pack = folder.resolve(url.substringAfterLast('/'))
-                    if (pack.exists().not()) {
-                        pack.writeBytes(download(urlString = url))
+                val zip = if (version.isBlank()) {
+                    folder.resolve("chromium-snapshots-win.zip").apply {
+                        if (exists().not()) {
+                            writeBytes(download(urlString = "https://download-chromium.appspot.com/dl/Win_x64?type=snapshots"))
+                        }
                     }
-
-                    sevenZA.writeBytes(ZipFile(pack).use { file ->
-                        val entry = file.getEntry("7za.exe")
-                        file.getInputStream(entry).readAllBytes()
-                    })
-                    sevenZA.setExecutable(true)
+                } else {
+                    folder.resolve("chromium-${version}-win.zip").apply {
+                        if (exists().not()) {
+                            writeBytes(download(urlString = "https://commondatastorage.googleapis.com/chromium-browser-snapshots/Win_x64/${version}/chrome-win.zip"))
+                        }
+                    }
                 }
 
-                // XXX: bcj2
-                ProcessBuilder(sevenZA.absolutePath, "x", exe.absolutePath, "'-x!setup.exe'", "-y")
+                // XXX: big zip
+                ProcessBuilder(sevenZA(folder = folder).absolutePath, "x", zip.absolutePath, "-y")
                     .directory(folder)
                     .start()
                     .waitFor()
 
-                folder.resolve("core").renameTo(setup)
+                folder.resolve("chrome-win").renameTo(setup)
             }
             platform.`is`(Platform.LINUX) -> {
-                val bz2 = folder.resolve("firefox-${version}.tar.bz2")
-                if (bz2.exists().not()) {
-                    bz2.writeBytes(download(urlString = "${base}/${version}/linux-x86_64/zh-CN/${bz2.name}"))
+                val zip = if (version.isBlank()) {
+                    folder.resolve("chromium-snapshots-linux.zip").apply {
+                        if (exists().not()) {
+                            writeBytes(download(urlString = "https://download-chromium.appspot.com/dl/Linux_x64?type=snapshots"))
+                        }
+                    }
+                } else {
+                    folder.resolve("chromium-${version}-linux.zip").apply {
+                        if (exists().not()) {
+                            writeBytes(download(urlString = "https://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/${version}/chrome-linux.zip"))
+                        }
+                    }
                 }
 
-                // XXX: tar.bz2
-                ProcessBuilder("tar", "-xjf", bz2.absolutePath)
+                // XXX: big zip
+                ProcessBuilder("unzip", zip.absolutePath)
                     .directory(folder)
                     .start()
                     .waitFor()
 
-                folder.resolve("firefox").renameTo(setup)
+                folder.resolve("chrome-linux").renameTo(setup)
             }
             platform.`is`(Platform.MAC) -> {
-                val dmg = folder.resolve("Firefox ${version}.dmg")
-                if (dmg.exists().not()) {
-                    dmg.writeBytes(download(urlString = "${base}/${version}/mac/zh-CN/${dmg.name}"))
+                val zip = if (version.isBlank()) {
+                    folder.resolve("chromium-snapshots-mac.zip").apply {
+                        if (exists().not()) {
+                            writeBytes(download(urlString = "https://download-chromium.appspot.com/dl/Mac?type=snapshots"))
+                        }
+                    }
+                } else {
+                    folder.resolve("chromium-${version}-mac.zip").apply {
+                        if (exists().not()) {
+                            writeBytes(download(urlString = "https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac/${version}/chrome-mac.zip"))
+                        }
+                    }
                 }
 
-                ProcessBuilder("hdiutil", "attach", dmg.absolutePath)
+                // XXX: big zip
+                ProcessBuilder("unzip", zip.absolutePath)
                     .directory(folder)
                     .start()
                     .waitFor()
 
-                System.err.println(File("/Volumes/Firefox/Firefox.app").list()?.toList())
-
-                ProcessBuilder("cp", "-rf", "/Volumes/Firefox/Firefox.app", setup.absolutePath)
-                    .directory(folder)
-                    .start()
-                    .waitFor()
-
-                ProcessBuilder("hdiutil", "detach", "/Volumes/Firefox")
-                    .directory(folder)
-                    .start()
-                    .waitFor()
+                folder.resolve("chrome-mac").renameTo(setup)
             }
             else -> throw UnsupportedOperationException("不受支持的平台 $platform")
         }
     }
 
     val binary = when {
-        platform.`is`(Platform.WINDOWS) -> setup.resolve("firefox.exe")
-        platform.`is`(Platform.LINUX) -> setup.resolve("firefox")
-        platform.`is`(Platform.MAC) -> setup.resolve("Firefox.app")
+        platform.`is`(Platform.WINDOWS) -> setup.resolve("chrome.exe")
+        platform.`is`(Platform.LINUX) -> setup.resolve("chrome")
+        platform.`is`(Platform.MAC) -> setup.resolve("chrome")
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
 
-    System.setProperty(FirefoxDriver.SystemProperty.BROWSER_BINARY, binary.absolutePath)
+    System.setProperty(CHROME_BROWSER_BINARY, binary.absolutePath)
 
     return binary
 }
