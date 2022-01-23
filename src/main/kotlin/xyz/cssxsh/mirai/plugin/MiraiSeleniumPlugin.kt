@@ -82,6 +82,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     override fun PluginComponentStorage.onLoad() {
         SeleniumContext = childScopeContext(name = "Selenium", context = Dispatchers.IO)
         SeleniumLogger.level = Level.OFF
+        System.setProperty(CHROME_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/chromedriver")
     }
 
     /**

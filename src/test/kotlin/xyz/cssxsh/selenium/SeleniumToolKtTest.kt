@@ -2,6 +2,7 @@ package xyz.cssxsh.selenium
 
 import kotlinx.coroutines.*
 import org.junit.jupiter.api.*
+import org.openqa.selenium.*
 import org.openqa.selenium.remote.*
 import xyz.cssxsh.mirai.plugin.data.*
 import java.io.*
@@ -15,10 +16,15 @@ internal class SeleniumToolKtTest {
     }
 
     private val browsers by lazy {
-        when (OperatingSystem.current) {
-            OperatingSystem.Windows -> listOf("Edge", "Chromium", "Firefox")
-            OperatingSystem.Linux -> listOf("Chromium", "Firefox")
-            OperatingSystem.Mac -> listOf("Chromium", "Firefox")
+        val platform = Platform.getCurrent()
+        if (platform.`is`(Platform.MAC)) {
+            System.err.println(queryPreference())
+        }
+        when {
+            platform.`is`(Platform.WINDOWS) -> listOf("Edge", "Chromium", "Firefox")
+            platform.`is`(Platform.LINUX) -> listOf("Chromium", "Firefox")
+            platform.`is`(Platform.MAC) -> listOf("Chromium", "Firefox")
+            else -> throw UnsupportedOperationException("不受支持的平台 $platform")
         }
     }
 
