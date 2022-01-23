@@ -24,7 +24,7 @@ mavenCentralPublish {
 repositories {
     mavenLocal()
     if (Locale.getDefault() == Locale.CHINA) {
-        maven("https://maven.aliyun.com/repository/central")
+        maven(url = "https://maven.aliyun.com/repository/central")
         maven(url = "https://maven.aliyun.com/repository/gradle-plugin")
     }
     mavenCentral()

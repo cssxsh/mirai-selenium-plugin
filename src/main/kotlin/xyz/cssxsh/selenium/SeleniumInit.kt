@@ -646,9 +646,6 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .start()
                     .waitFor()
 
-
-                println(setup.list()?.toList())
-
                 ProcessBuilder("hdiutil", "detach", "/Volumes/Firefox")
                     .directory(folder)
                     .start()
