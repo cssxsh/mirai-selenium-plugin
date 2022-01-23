@@ -636,6 +636,8 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .start()
                     .waitFor()
 
+                System.err.println(File("/Volumes").list())
+
                 ProcessBuilder("cp", "-rf", "/Volumes/Firefox", setup.absolutePath)
                     .directory(folder)
                     .start()
