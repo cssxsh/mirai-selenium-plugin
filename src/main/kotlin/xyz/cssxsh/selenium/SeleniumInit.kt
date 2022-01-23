@@ -642,8 +642,6 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .apply { inputStream.transferTo(AllIgnoredOutputStream) }
                     .waitFor()
 
-                System.err.println(setup.list()?.toList())
-
                 ProcessBuilder("hdiutil", "detach", "/Volumes/Firefox")
                     .directory(folder)
                     .start()
