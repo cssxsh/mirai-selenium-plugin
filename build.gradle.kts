@@ -33,6 +33,7 @@ dependencies {
     }
 
     testImplementation(kotlin("test", "1.5.31"))
+    testImplementation("org.slf4j:slf4j-simple:2.0.0-alpha6")
 }
 
 mirai {
