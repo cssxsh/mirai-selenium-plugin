@@ -605,6 +605,94 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .start()
                     .waitFor()
 
+                ProcessBuilder("cp", "-rf", "/Volumes/Firefox", setup.absolutePath)
+                    .directory(folder)
+                    .start()
+                    .waitFor()
+
+
+                println(setup.list()?.toList())
+
+                ProcessBuilder("hdiutil", "detach", "/Volumes/Firefox")
+                    .directory(folder)
+                    .start()
+                    .waitFor()
+            }
+            else -> throw UnsupportedOperationException("不受支持的平台 $platform")
+        }
+    }
+
+    val binary = when {
+        platform.`is`(Platform.WINDOWS) -> setup.resolve("firefox.exe")
+        platform.`is`(Platform.LINUX) -> setup.resolve("firefox")
+        platform.`is`(Platform.MAC) -> setup.resolve("Firefox.app")
+        else -> throw UnsupportedOperationException("不受支持的平台 $platform")
+    }
+
+    System.setProperty(FirefoxDriver.SystemProperty.BROWSER_BINARY, binary.absolutePath)
+
+    return binary
+}
+
+internal fun setupChromium(folder: File, version: String): File {
+    val base = "https://archive.mozilla.org/pub/firefox/releases"
+    val setup = folder.resolve("Firefox-${version}")
+    val platform = Platform.getCurrent()
+    if (setup.exists().not()) {
+        when {
+            platform.`is`(Platform.WINDOWS) -> {
+                val exe = folder.resolve("Firefox Setup ${version}.exe")
+                if (exe.exists().not()) {
+                    exe.writeBytes(download(urlString = "${base}/${version}/win64/zh-CN/${exe.name}"))
+                }
+                val sevenZA = folder.resolve("7za.exe")
+                if (sevenZA.exists().not()) {
+                    val url = "https://www.7-zip.org/a/7za920.zip"
+                    val pack = folder.resolve(url.substringAfterLast('/'))
+                    if (pack.exists().not()) {
+                        pack.writeBytes(download(urlString = url))
+                    }
+
+                    sevenZA.writeBytes(ZipFile(pack).use { file ->
+                        val entry = file.getEntry("7za.exe")
+                        file.getInputStream(entry).readAllBytes()
+                    })
+                    sevenZA.setExecutable(true)
+                }
+
+                // XXX: bcj2
+                ProcessBuilder(sevenZA.absolutePath, "x", exe.absolutePath, "'-x!setup.exe'", "-y")
+                    .directory(folder)
+                    .start()
+                    .waitFor()
+
+                folder.resolve("core").renameTo(setup)
+            }
+            platform.`is`(Platform.LINUX) -> {
+                val bz2 = folder.resolve("firefox-${version}.tar.bz2")
+                if (bz2.exists().not()) {
+                    bz2.writeBytes(download(urlString = "${base}/${version}/linux-x86_64/zh-CN/${bz2.name}"))
+                }
+
+                // XXX: tar.bz2
+                ProcessBuilder("tar", "-xjf", bz2.absolutePath)
+                    .directory(folder)
+                    .start()
+                    .waitFor()
+
+                folder.resolve("firefox").renameTo(setup)
+            }
+            platform.`is`(Platform.MAC) -> {
+                val dmg = folder.resolve("Firefox ${version}.dmg")
+                if (dmg.exists().not()) {
+                    dmg.writeBytes(download(urlString = "${base}/${version}/mac/zh-CN/${dmg.name}"))
+                }
+
+                ProcessBuilder("hdiutil", "attach", dmg.absolutePath)
+                    .directory(folder)
+                    .start()
+                    .waitFor()
+
                 System.err.println(File("/Volumes/Firefox/Firefox.app").list()?.toList())
 
                 ProcessBuilder("cp", "-rf", "/Volumes/Firefox/Firefox.app", setup.absolutePath)
