@@ -49,7 +49,12 @@ internal class SeleniumToolKtTest {
 
     @AfterEach
     fun destroy() {
-        DriverCache.forEach { (_, service) ->
+        DriverCache.forEach { (driver, service) ->
+            try {
+                driver.quit()
+            } catch (_: Throwable) {
+                //
+            }
             try {
                 service.stop()
             } catch (_: Throwable) {
