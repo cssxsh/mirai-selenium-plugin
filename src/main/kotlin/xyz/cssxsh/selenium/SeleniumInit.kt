@@ -1,10 +1,14 @@
 package xyz.cssxsh.selenium
 
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.utils.io.*
+import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.*
 import org.openqa.selenium.*
 import org.openqa.selenium.chrome.*
@@ -18,8 +22,6 @@ import java.util.zip.*
 
 internal const val SELENIUM_FOLDER = "xyz.cssxsh.selenium.folder"
 
-internal const val SELENIUM_DOWNLOAD_ATTEMPT = "xyz.cssxsh.selenium.download.attempt"
-
 internal const val SELENIUM_DOWNLOAD_EXPIRES = "xyz.cssxsh.selenium.download.expires"
 
 internal const val WEBDRIVER_HTTP_FACTORY = "webdriver.http.factory"
@@ -27,6 +29,8 @@ internal const val WEBDRIVER_HTTP_FACTORY = "webdriver.http.factory"
 internal const val CHROME_BROWSER_BINARY = "webdriver.chrome.bin"
 
 internal const val CHROME_DRIVER_MIRRORS = "webdriver.chrome.mirrors"
+
+internal const val FIREFOX_DRIVER_MIRRORS = "webdriver.firefox.mirrors"
 
 internal const val EDGE_BROWSER_BINARY = "webdriver.edge.bin"
 
@@ -67,17 +71,32 @@ private fun queryVersion(folder: File): String {
  * [Platform.MAC] 通过 Preferences 获取默认浏览器
  */
 internal fun queryPreference(): String {
-    return ProcessBuilder("plutil", "-p", "~/Library/Preferences/com.apple.LaunchServices/com.apple.LaunchServices.secure.plist")
+    return ProcessBuilder(
+        "plutil",
+        "-p",
+        "~/Library/Preferences/com.apple.LaunchServices/com.apple.LaunchServices.secure.plist"
+    )
         .start()
         .inputStream.use { it.reader().readText() }
+}
+
+internal fun HttpMessage.contentDisposition(): ContentDisposition? {
+    return headers[HttpHeaders.ContentDisposition]?.let { ContentDisposition.parse(it) }
 }
 
 /**
  * 下载文件
  * @param urlString 下载链接
- * @see SELENIUM_DOWNLOAD_ATTEMPT
+ * @param folder 下载目录
+ * @param filename 文件名，为空时从 header 或者 url 获取
  */
-private fun download(urlString: String): ByteArray = runBlocking(SeleniumContext) {
+private fun download(urlString: String, folder: File, filename: String? = null): File = runBlocking(SeleniumContext) {
+
+    if (filename != null) {
+        val current = folder.resolve(filename)
+        if (current.exists()) return@runBlocking current
+    }
+
     val url = Url(urlString = urlString)
     val token = when (url.host) {
         "api.github.com" -> System.getenv("GITHUB_TOKEN")
@@ -85,22 +104,30 @@ private fun download(urlString: String): ByteArray = runBlocking(SeleniumContext
     }
     val client = HttpClient(OkHttp) {
         defaultRequest {
+
             if (token != null) {
                 header(HttpHeaders.Authorization, "token $token")
             }
         }
     }
-    var attempt = System.getProperty(SELENIUM_DOWNLOAD_ATTEMPT, "3").toInt()
-    while (isActive) {
-        try {
-            return@runBlocking client.get(url)
-        } catch (exception: IOException) {
-            if (attempt-- <= 0) {
-                throw IllegalStateException("download fail: $urlString", exception)
+    client.get<HttpStatement>(url).execute { response ->
+        val relative = filename
+            ?: response.contentDisposition()?.parameter(ContentDisposition.Parameters.FileName)
+            ?: response.request.url.encodedPath.substringAfterLast('/').decodeURLPart()
+
+        val file = folder.resolve(relative)
+
+        @Suppress("BlockingMethodInNonBlockingContext")
+        FileOutputStream(file, true).use { output ->
+            val channel: ByteReadChannel = response.receive()
+
+            while (!channel.isClosedForRead) {
+                channel.copyTo(output)
             }
         }
+
+        file
     }
-    throw CancellationException("无法下载 $urlString")
 }
 
 /**
@@ -182,31 +209,22 @@ private fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
         throw UnsupportedOperationException("Edge 版本获取失败", cause)
     }
 
-    val xml = folder.resolve("msedgedriver-${version}.xml")
-    if (xml.exists().not()) {
-        xml.writeBytes(
-            try {
-                download(urlString = "https://msedgewebdriverstorage.blob.core.windows.net/edgewebdriver?prefix=${version}&comp=list&timeout=60000")
-            } catch (cause: Throwable) {
-                throw UnsupportedOperationException("无法下载 msedgewebdriver 版本信息", cause)
-            }
-        )
-    }
+
+    val xml = download(
+        urlString = "https://msedgewebdriverstorage.blob.core.windows.net/edgewebdriver?prefix=${version}&comp=list&timeout=60000",
+        folder = folder,
+        filename = "msedgedriver-${version}.xml"
+    )
 
     val url = """(?<=<Url>).{16,256}\.zip""".toRegex()
         .findAll(xml.readText())
         .first { "win32" in it.value }.value
 
-    val file = folder.resolve("msedgedriver-${version}_${url.substringAfterLast('_')}")
-    if (file.exists().not()) {
-        file.writeBytes(
-            try {
-                download(urlString = url)
-            } catch (cause: Throwable) {
-                throw UnsupportedOperationException("无法下载 msedgedriver", cause)
-            }
-        )
-    }
+    val file = download(
+        urlString = url,
+        folder = folder,
+        filename = "msedgedriver-${version}_${url.substringAfterLast('_')}"
+    )
 
     val driver = folder.resolve("${file.nameWithoutExtension}.exe")
     if (driver.exists().not()) {
@@ -283,7 +301,7 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
         throw UnsupportedOperationException("Chrome/Chromium 版本获取失败", cause)
     }
     // MIRRORS "https://npm.taobao.org/mirrors/chromedriver"
-    val base = System.getProperty(CHROME_DRIVER_MIRRORS,"https://chromedriver.storage.googleapis.com")
+    val base = System.getProperty(CHROME_DRIVER_MIRRORS, "https://chromedriver.storage.googleapis.com")
 
     // 映射
     val mapping = folder.resolve("chromedriver-${version0}.mapping")
@@ -294,16 +312,18 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
             "LATEST_RELEASE"
         )
 
-        var bytes: ByteArray? = null
         for (release in list) {
             try {
-                bytes = download(urlString = "${base}/${release}")
+                download(
+                    urlString = "${base}/${release}",
+                    folder = folder,
+                    filename = "chromedriver-${version0}.mapping"
+                )
                 break
             } catch (_: ClientRequestException) {
                 continue
             }
         }
-        mapping.writeBytes(bytes ?: throw UnsupportedOperationException("无法找到 chromedriver $version0 版本信息"))
     }
     val version = mapping.readText()
 
@@ -313,17 +333,11 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
         platform.`is`(Platform.MAC) -> "mac64"
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
-    val url = "${base}/${version}/chromedriver_${suffix}.zip"
-    val file = folder.resolve("chromedriver-${version}_${suffix}.zip")
-    if (file.exists().not()) {
-        file.writeBytes(
-            try {
-                download(urlString = url)
-            } catch (cause: Throwable) {
-                throw UnsupportedOperationException("无法下载 chromedriver ", cause)
-            }
-        )
-    }
+    val file = download(
+        urlString = "${base}/${version}/chromedriver_${suffix}.zip",
+        folder = folder,
+        filename = "chromedriver-${version}_${suffix}.zip"
+    )
 
     val driver = if (platform.`is`(Platform.WINDOWS)) {
         folder.resolve("chromedriver-${version}_${suffix}.exe")
@@ -372,38 +386,25 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
 private fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     // 取版本
     val platform = Platform.getCurrent()
-    val latest = "https://api.github.com/repos/mozilla/geckodriver/releases/latest"
-    val json = folder.resolve("geckodriver.json")
-    val expires = System.getProperty(SELENIUM_DOWNLOAD_EXPIRES, "7").toLong()
-    if (json.exists().not() || System.currentTimeMillis() - json.lastModified() > 1000L * 60 * 60 * 24 * expires) {
-        json.writeBytes(
-            try {
-                download(urlString = latest)
-            } catch (cause: Throwable) {
-                throw UnsupportedOperationException("无法下载 geckodriver 版本信息", cause)
-            }
-        )
-    }
-    val suffix = when {
-        platform.`is`(Platform.WINDOWS) -> "win32"
-        platform.`is`(Platform.LINUX) -> "linux64"
-        platform.`is`(Platform.MAC) -> "macos"
+    val json = download(
+        urlString = "https://api.github.com/repos/mozilla/geckodriver/releases/latest",
+        folder = folder,
+        filename = "geckodriver.json"
+    )
+    val version = """v\d+\.\d+\.\d+""".toRegex().find(json.readText())!!.value
+    val filename = when {
+        platform.`is`(Platform.WINDOWS) -> "geckodriver-$version-win32.zip"
+        platform.`is`(Platform.LINUX) -> "geckodriver-$version-linux64.tar.gz"
+        platform.`is`(Platform.MAC) -> "geckodriver-$version-macos.tar.gz"
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
     // https://npm.taobao.org/mirrors/geckodriver/
-    val url = """https://github\.com/mozilla/geckodriver/releases/download/.{16,64}\.(tar\.gz|zip)""".toRegex()
-        .findAll(json.readText())
-        .first { result -> suffix in result.value }.value
-    val file = folder.resolve(url.substringAfterLast('/'))
-    if (file.exists().not()) {
-        file.writeBytes(
-            try {
-                download(urlString = url)
-            } catch (cause: Throwable) {
-                throw UnsupportedOperationException("无法下载 geckodriver", cause)
-            }
-        )
-    }
+    val base = System.getProperty(FIREFOX_DRIVER_MIRRORS, "https://github.com/mozilla/geckodriver/releases/download")
+    val file = download(
+        urlString = "$base/$version/$filename",
+        folder = folder,
+        filename = filename
+    )
 
     val driver = if (platform.`is`(Platform.WINDOWS)) {
         folder.resolve("${file.nameWithoutExtension}.exe")
@@ -547,12 +548,7 @@ internal fun clearWebDriver(): List<File> {
 internal fun sevenZA(folder: File): File {
     return folder.resolve("7za.exe").apply {
         if (exists().not()) {
-            val url = "https://www.7-zip.org/a/7za920.zip"
-            val pack = folder.resolve(url.substringAfterLast('/'))
-            if (pack.exists().not()) {
-                pack.writeBytes(download(urlString = url))
-            }
-
+            val pack = download(urlString = "https://www.7-zip.org/a/7za920.zip", folder = folder)
             writeBytes(ZipFile(pack).use { file ->
                 val entry = file.getEntry("7za.exe")
                 file.getInputStream(entry).readAllBytes()
@@ -577,17 +573,16 @@ internal fun setupFirefox(folder: File, version: String): File {
         when {
             platform.`is`(Platform.WINDOWS) -> {
                 val exe = if (version.isBlank()) {
-                    folder.resolve("Firefox Setup Latest.exe").apply {
-                        if (exists().not()) {
-                            writeBytes(download(urlString = "https://download.mozilla.org/?product=firefox-latest-ssl&os=win64&lang=zh-CN"))
-                        }
-                    }
+                    download(
+                        urlString = "https://download.mozilla.org/?product=firefox-latest-ssl&os=win64&lang=zh-CN",
+                        folder = folder
+                    )
                 } else {
-                    folder.resolve("Firefox Setup ${version}.exe").apply {
-                        if (exists().not()) {
-                            writeBytes(download(urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/win64/zh-CN/${name}"))
-                        }
-                    }
+                    download(
+                        urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/win64/zh-CN/Firefox Setup ${version}.exe",
+                        folder = folder,
+                        filename = "Firefox Setup ${version}.exe"
+                    )
                 }
 
                 // XXX: bcj2
@@ -602,17 +597,16 @@ internal fun setupFirefox(folder: File, version: String): File {
             }
             platform.`is`(Platform.LINUX) -> {
                 val bz2 = if (version.isBlank()) {
-                    folder.resolve("firefox-latest.tar.bz2").apply {
-                        if (exists().not()) {
-                            writeBytes(download(urlString = "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=zh-CN"))
-                        }
-                    }
+                    download(
+                        urlString = "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=zh-CN",
+                        folder = folder
+                    )
                 } else {
-                    folder.resolve("firefox-${version}.tar.bz2").apply {
-                        if (exists().not()) {
-                            writeBytes(download(urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/linux-x86_64/zh-CN/${name}"))
-                        }
-                    }
+                    download(
+                        urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/linux-x86_64/zh-CN/firefox-${version}.tar.bz2",
+                        folder = folder,
+                        filename = "firefox-${version}.tar.bz2"
+                    )
                 }
 
                 // XXX: tar.bz2
@@ -625,17 +619,16 @@ internal fun setupFirefox(folder: File, version: String): File {
             }
             platform.`is`(Platform.MAC) -> {
                 val dmg = if (version.isBlank()) {
-                    folder.resolve("Firefox Latest.dmg").apply {
-                        if (exists().not()) {
-                            writeBytes(download(urlString = "https://download.mozilla.org/?product=firefox-latest-ssl&os=osx&lang=zh-CN"))
-                        }
-                    }
+                    download(
+                        urlString = "https://download.mozilla.org/?product=firefox-latest-ssl&os=osx&lang=zh-CN",
+                        folder = folder
+                    )
                 } else {
-                    folder.resolve("Firefox ${version}.dmg").apply {
-                        if (exists().not()) {
-                            writeBytes(download(urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/mac/zh-CN/${name}"))
-                        }
-                    }
+                    download(
+                        urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/mac/zh-CN/Firefox ${version}.dmg",
+                        folder = folder,
+                        filename = "Firefox ${version}.dmg"
+                    )
                 }
 
                 ProcessBuilder("hdiutil", "attach", dmg.absolutePath)
@@ -683,17 +676,16 @@ internal fun setupChromium(folder: File, version: String): File {
         when {
             platform.`is`(Platform.WINDOWS) -> {
                 val zip = if (version.isBlank()) {
-                    folder.resolve("chromium-snapshots-win.zip").apply {
-                        if (exists().not()) {
-                            writeBytes(download(urlString = "https://download-chromium.appspot.com/dl/Win_x64?type=snapshots"))
-                        }
-                    }
+                    download(
+                        urlString = "https://download-chromium.appspot.com/dl/Win_x64?type=snapshots",
+                        folder = folder
+                    )
                 } else {
-                    folder.resolve("chromium-${version}-win.zip").apply {
-                        if (exists().not()) {
-                            writeBytes(download(urlString = "https://commondatastorage.googleapis.com/chromium-browser-snapshots/Win_x64/${version}/chrome-win.zip"))
-                        }
-                    }
+                    download(
+                        urlString = "https://commondatastorage.googleapis.com/chromium-browser-snapshots/Win_x64/${version}/chrome-win.zip",
+                        folder = folder,
+                        filename = "chromium-${version}-win.zip"
+                    )
                 }
 
                 // XXX: big zip
@@ -708,17 +700,16 @@ internal fun setupChromium(folder: File, version: String): File {
             }
             platform.`is`(Platform.LINUX) -> {
                 val zip = if (version.isBlank()) {
-                    folder.resolve("chromium-snapshots-linux.zip").apply {
-                        if (exists().not()) {
-                            writeBytes(download(urlString = "https://download-chromium.appspot.com/dl/Linux_x64?type=snapshots"))
-                        }
-                    }
+                    download(
+                        urlString = "https://download-chromium.appspot.com/dl/Linux_x64?type=snapshots",
+                        folder = folder
+                    )
                 } else {
-                    folder.resolve("chromium-${version}-linux.zip").apply {
-                        if (exists().not()) {
-                            writeBytes(download(urlString = "https://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/${version}/chrome-linux.zip"))
-                        }
-                    }
+                    download(
+                        urlString = "https://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/${version}/chrome-linux.zip",
+                        folder = folder,
+                        filename = "chrome-${version}-linux.zip"
+                    )
                 }
 
                 // XXX: big zip
@@ -731,17 +722,16 @@ internal fun setupChromium(folder: File, version: String): File {
             }
             platform.`is`(Platform.MAC) -> {
                 val zip = if (version.isBlank()) {
-                    folder.resolve("chromium-snapshots-mac.zip").apply {
-                        if (exists().not()) {
-                            writeBytes(download(urlString = "https://download-chromium.appspot.com/dl/Mac?type=snapshots"))
-                        }
-                    }
+                    download(
+                        urlString = "https://download-chromium.appspot.com/dl/Mac?type=snapshots",
+                        folder = folder
+                    )
                 } else {
-                    folder.resolve("chromium-${version}-mac.zip").apply {
-                        if (exists().not()) {
-                            writeBytes(download(urlString = "https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac/${version}/chrome-mac.zip"))
-                        }
-                    }
+                    download(
+                        urlString = "https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac/${version}/chrome-mac.zip",
+                        folder = folder,
+                        filename = "chrome-${version}-mac.zip"
+                    )
                 }
 
                 // XXX: big zip
