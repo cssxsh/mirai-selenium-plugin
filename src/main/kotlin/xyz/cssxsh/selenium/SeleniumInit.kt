@@ -636,11 +636,12 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .start()
                     .waitFor()
 
-                System.err.println(File("/Volumes").list())
+                System.err.println(File("/Volumes").list()?.toList())
 
                 ProcessBuilder("cp", "-rf", "/Volumes/Firefox", setup.absolutePath)
                     .directory(folder)
                     .start()
+                    .apply { inputStream.transferTo(AllIgnoredOutputStream) }
                     .waitFor()
 
                 ProcessBuilder("hdiutil", "detach", "/Volumes/Firefox")
