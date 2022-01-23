@@ -631,18 +631,18 @@ internal fun setupFirefox(folder: File, version: String): File {
                     )
                 }
 
-                ProcessBuilder("hdiutil", "attach", dmg.absolutePath)
+                ProcessBuilder("hdiutil", "attach", "-quiet", "-noautofsck", "-noautoopen", dmg.absolutePath)
                     .directory(folder)
                     .start()
                     .waitFor()
 
-                System.err.println(File("/Volumes").list()?.toList())
-
-                ProcessBuilder("cp", "-rf", "/Volumes/Firefox", setup.absolutePath)
+                ProcessBuilder("cp", "-rf", "/Volumes/Firefox/Firefox.app", setup.absolutePath)
                     .directory(folder)
                     .start()
                     .apply { inputStream.transferTo(AllIgnoredOutputStream) }
                     .waitFor()
+
+                System.err.println(setup.list()?.toList())
 
                 ProcessBuilder("hdiutil", "detach", "/Volumes/Firefox")
                     .directory(folder)
@@ -656,7 +656,7 @@ internal fun setupFirefox(folder: File, version: String): File {
     val binary = when {
         platform.`is`(Platform.WINDOWS) -> setup.resolve("firefox.exe")
         platform.`is`(Platform.LINUX) -> setup.resolve("firefox")
-        platform.`is`(Platform.MAC) -> setup.resolve("Firefox.app")
+        platform.`is`(Platform.MAC) -> setup.resolve("Contents/MacOS/firefox")
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
 
