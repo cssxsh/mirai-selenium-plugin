@@ -591,9 +591,11 @@ internal fun setupFirefox(folder: File, version: String): File {
                 }
 
                 // XXX: bcj2
-                ProcessBuilder(sevenZA(folder = folder).absolutePath, "x", exe.absolutePath, "'-x!setup.exe'", "-y")
+                ProcessBuilder(sevenZA(folder = folder).absolutePath, "x", exe.absolutePath, "-x!setup.exe", "-y")
                     .directory(folder)
                     .start()
+                    // 防止卡顿
+                    .apply { inputStream.transferTo(AllIgnoredOutputStream) }
                     .waitFor()
 
                 folder.resolve("core").renameTo(setup)
@@ -698,6 +700,8 @@ internal fun setupChromium(folder: File, version: String): File {
                 ProcessBuilder(sevenZA(folder = folder).absolutePath, "x", zip.absolutePath, "-y")
                     .directory(folder)
                     .start()
+                    // 防止卡顿
+                    .apply { inputStream.transferTo(AllIgnoredOutputStream) }
                     .waitFor()
 
                 folder.resolve("chrome-win").renameTo(setup)
