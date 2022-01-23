@@ -344,7 +344,6 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
         if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
         val options = ChromeOptions().also(config.toConsumer())
         if (binary != null) options.setBinary(binary)
-        options.setBinary(System.getProperty(CHROME_BROWSER_BINARY))
         val port = PortProber.findFreePort()
         val uuid = "${System.currentTimeMillis()}-${port}"
         val service = ChromeDriverService.Builder()
