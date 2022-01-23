@@ -6,6 +6,7 @@ import org.openqa.selenium.*
 import org.openqa.selenium.remote.*
 import xyz.cssxsh.mirai.plugin.data.*
 import java.io.*
+import java.util.concurrent.*
 
 internal class SeleniumToolKtTest {
 
@@ -65,6 +66,7 @@ internal class SeleniumToolKtTest {
     }
 
     @Test
+    @Timeout(value = 3, unit = TimeUnit.MINUTES)
     fun screenshot(): Unit = testRemoteWebDriver { browser, driver ->
 
         val url = "https://t.bilibili.com/h5/dynamic/detail/450055453856015371"
@@ -77,6 +79,7 @@ internal class SeleniumToolKtTest {
     }
 
     @Test
+    @Timeout(value = 3, unit = TimeUnit.MINUTES)
     fun pdf(): Unit = testRemoteWebDriver { browser, driver ->
 
         driver.get("https://github.com/mamoe/mirai/blob/dev/README.md")
@@ -93,6 +96,7 @@ internal class SeleniumToolKtTest {
     }
 
     @Test
+    @Timeout(value = 3, unit = TimeUnit.MINUTES)
     fun firefox(): Unit = runBlocking {
         setupFirefox(folder = folder, version = "")
         val driver = RemoteWebDriver(config = object : RemoteWebDriverConfig {
