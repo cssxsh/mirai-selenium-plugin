@@ -605,6 +605,9 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .start()
                     .waitFor()
 
+                val volume = File("/Volumes/${dmg.nameWithoutExtension}")
+                System.err.println(volume.list()?.toList())
+
                 ProcessBuilder("cp", "-rf", "/Volumes/${dmg.nameWithoutExtension}", setup.absolutePath)
                     .directory(folder)
                     .start()
