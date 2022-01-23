@@ -20,7 +20,7 @@ internal class SeleniumToolKtTest {
         when {
             platform.`is`(Platform.WINDOWS) -> listOf("Edge", "Chromium", "Firefox")
             platform.`is`(Platform.LINUX) -> listOf("Chromium", "Firefox")
-            platform.`is`(Platform.MAC) -> listOf("Chromium", "Firefox")
+            platform.`is`(Platform.MAC) -> listOf("Chromium")
             else -> throw UnsupportedOperationException("不受支持的平台 $platform")
         }
     }
@@ -28,8 +28,7 @@ internal class SeleniumToolKtTest {
     private val config = object : RemoteWebDriverConfig by MiraiSeleniumConfig {
         override val userAgent: String = UserAgents.IPAD + " MicroMessenger"
         override val headless: Boolean = true
-        override val proxy: String = ""
-        override val browser: String = ""
+        override val log: Boolean = true
         override val factory: String = "netty"
     }
 
@@ -89,10 +88,8 @@ internal class SeleniumToolKtTest {
     }
 
     @Test
-    fun browser(): Unit = runBlocking {
-        // chrome: chrome://prefs-internals/
-        // firefox about:config
-        setupFirefox(folder = folder, version = "68.0.1esr")
+    fun firefox(): Unit = runBlocking {
+        setupFirefox(folder = folder, version = "")
         val driver = RemoteWebDriver(config = object : RemoteWebDriverConfig {
             override val browser: String = "firefox"
             override val headless: Boolean = true
