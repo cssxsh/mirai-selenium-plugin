@@ -605,14 +605,14 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .start()
                     .waitFor()
 
-                System.err.println(File("/Volumes").list()?.toList())
+                System.err.println(File("/Volumes/Firefox").list()?.toList())
 
-                ProcessBuilder("cp", "-rf", "/Volumes/${dmg.nameWithoutExtension}", setup.absolutePath)
+                ProcessBuilder("cp", "-rf", "/Volumes/Firefox", setup.absolutePath)
                     .directory(folder)
                     .start()
                     .waitFor()
 
-                ProcessBuilder("hdiutil", "detach", "/Volumes/${dmg.nameWithoutExtension}")
+                ProcessBuilder("hdiutil", "detach", "/Volumes/Firefox")
                     .directory(folder)
                     .start()
                     .waitFor()

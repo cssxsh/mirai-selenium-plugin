@@ -17,9 +17,6 @@ internal class SeleniumToolKtTest {
 
     private val browsers by lazy {
         val platform = Platform.getCurrent()
-        if (platform.`is`(Platform.MAC)) {
-            System.err.println(queryPreference())
-        }
         when {
             platform.`is`(Platform.WINDOWS) -> listOf("Edge", "Chromium", "Firefox")
             platform.`is`(Platform.LINUX) -> listOf("Chromium", "Firefox")
