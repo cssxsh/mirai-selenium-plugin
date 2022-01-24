@@ -114,4 +114,22 @@ internal class SeleniumToolKtTest {
             cause.printStackTrace()
         }
     }
+
+    @Test
+    @Timeout(value = 3, unit = TimeUnit.MINUTES)
+    fun chromium(): Unit = runBlocking {
+        setupChromium(folder = folder, version = "")
+        val driver = RemoteWebDriver(config = object : RemoteWebDriverConfig {
+            override val browser: String = "chromium"
+            override val headless: Boolean = true
+            override val log: Boolean = true
+            override val factory: String = "netty"
+        })
+
+        try {
+            driver.get("chrome://settings/help")
+        } catch (cause: Throwable) {
+            cause.printStackTrace()
+        }
+    }
 }
