@@ -577,6 +577,7 @@ internal fun sevenZA(folder: File): File {
  * @see FirefoxDriver.SystemProperty.BROWSER_BINARY
  */
 internal fun setupFirefox(folder: File, version: String): File {
+    folder.mkdirs()
     val platform = Platform.getCurrent()
     val binary = when {
         platform.`is`(Platform.WINDOWS) -> {
@@ -671,8 +672,7 @@ internal fun setupFirefox(folder: File, version: String): File {
                 println(setup.absolutePath)
                 println(setup.list()?.asList())
 
-                setup.mkdirs()
-                ProcessBuilder("cp", "-rf", "/Volumes/Firefox/*", setup.absolutePath)
+                ProcessBuilder("cp", "-rf", "/Volumes/Firefox", setup.absolutePath)
                     .directory(folder)
                     .start()
                     .apply {
@@ -707,6 +707,7 @@ internal fun setupFirefox(folder: File, version: String): File {
  * @see CHROME_BROWSER_BINARY
  */
 internal fun setupChromium(folder: File, version: String): File {
+    folder.mkdirs()
     val platform = Platform.getCurrent()
     fun release(repo: String): GitHubRelease {
         return if (version.isBlank()) {
