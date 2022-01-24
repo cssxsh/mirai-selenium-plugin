@@ -164,7 +164,8 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                 }
                 platform.`is`(Platform.MAC) -> {
                     // XXX: MacOS/Default
-                    File("/Applications").list().orEmpty()
+                    (File("/Applications").list().orEmpty().asList() +
+                        File("${System.getProperty("user.home")}/Applications").list().orEmpty())
                         .filter { it.endsWith(".app") }
                         .firstOrNull { """(?i)Chrome|Chromium|Firefox""".toRegex() in it }
                         ?: throw UnsupportedOperationException("未找到受支持的浏览器")
@@ -650,10 +651,10 @@ internal fun setupFirefox(folder: File, version: String): File {
                     folder = folder
                 ).apply {
                     val latest = name.substringAfterLast(' ').removeSuffix(".dmg")
-                    setup = folder.resolve("Firefox-${latest}.app")
+                    setup = folder.resolve("Firefox-${latest}-mac")
                 }
             } else {
-                setup = folder.resolve("Firefox-${version}.app")
+                setup = folder.resolve("Firefox-${version}-mac")
                 download(
                     urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/mac/zh-CN/Firefox ${version}.dmg",
                     folder = folder,
@@ -667,7 +668,7 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .start()
                     .waitFor()
 
-                ProcessBuilder("cp", "-rf", "/Volumes/Firefox/Firefox.app", setup.absolutePath)
+                ProcessBuilder("cp", "-rf", "/Volumes/Firefox", setup.absolutePath)
                     .directory(folder)
                     .start()
                     .apply { inputStream.transferTo(AllIgnoredOutputStream) }
@@ -679,7 +680,7 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .waitFor()
             }
 
-            setup.resolve("Contents/MacOS/firefox")
+            setup.resolve("Firefox.app/Contents/MacOS/firefox")
         }
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
@@ -756,7 +757,7 @@ internal fun setupChromium(folder: File, version: String): File {
         // https://github.com/macchrome/linchrome/releases
         platform.`is`(Platform.LINUX) -> {
             val release = release(repo = "linchrome")
-            val setup = folder.resolve("Chromium-${release.tagName}-linux")
+            val setup = folder.resolve("Chromium-${release.tagName}")
 
             if (setup.exists().not()) {
                 val url = release.assets
@@ -788,16 +789,15 @@ internal fun setupChromium(folder: File, version: String): File {
 
                 val zip = download(urlString = url, folder = folder, filename = url.substringAfterLast('/'))
 
+                setup.mkdirs()
                 // XXX: big zip
                 ProcessBuilder("unzip", "-o", "-q", zip.absolutePath)
-                    .directory(folder)
+                    .directory(setup)
                     .start()
                     .waitFor()
-
-                folder.resolve("Chromium.app").renameTo(setup)
             }
 
-            setup.resolve("Contents/MacOS/firefox")
+            setup.resolve("Chromium.app/Contents/MacOS/firefox")
         }
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
