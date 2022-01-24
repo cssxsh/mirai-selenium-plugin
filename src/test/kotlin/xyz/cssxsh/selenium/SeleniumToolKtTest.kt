@@ -87,7 +87,7 @@ internal class SeleniumToolKtTest {
         val start = System.currentTimeMillis()
         while (isActive) {
             if (driver.isReady()) break
-            if (System.currentTimeMillis() - start > 180_000) break
+            if (System.currentTimeMillis() - start > 60_000) break
             delay(10_000)
         }
 
