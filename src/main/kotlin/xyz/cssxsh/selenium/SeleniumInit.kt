@@ -673,7 +673,10 @@ internal fun setupFirefox(folder: File, version: String): File {
                 ProcessBuilder("cp", "-rf", "/Volumes/Firefox", setup.absolutePath)
                     .directory(folder)
                     .start()
-                    .apply { inputStream.transferTo(AllIgnoredOutputStream) }
+                    .apply {
+                        inputStream.transferTo(System.out)
+                        errorStream.transferTo(System.err)
+                    }
                     .waitFor()
 
                 ProcessBuilder("hdiutil", "detach", "/Volumes/Firefox")
