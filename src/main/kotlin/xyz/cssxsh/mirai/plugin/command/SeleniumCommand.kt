@@ -2,7 +2,6 @@ package xyz.cssxsh.mirai.plugin.command
 
 import net.mamoe.mirai.console.command.*
 import xyz.cssxsh.mirai.plugin.*
-import xyz.cssxsh.mirai.plugin.MiraiSeleniumPlugin.reload
 import xyz.cssxsh.mirai.plugin.data.*
 import xyz.cssxsh.selenium.*
 
@@ -17,7 +16,7 @@ object SeleniumCommand : CompositeCommand(
     suspend fun CommandSender.setup(flush: Boolean = true) {
         sendMessage("安装驱动开始, flush: $flush")
         try {
-            if (flush) MiraiSeleniumConfig.reload()
+            if (flush) with(MiraiSeleniumPlugin) { MiraiSeleniumConfig.reload() }
             val result = MiraiSeleniumPlugin.setup(flush = flush)
             sendMessage("安装驱动${if (result) "成功" else "失败"}")
         } catch (cause: Throwable) {
@@ -66,6 +65,8 @@ object SeleniumCommand : CompositeCommand(
             sendMessage("下载结束，path: ${bin.absolutePath}")
         } catch (cause: Throwable) {
             sendMessage("下载 firefox 异常, $cause")
+        } finally {
+            MiraiBrowserConfig.firefox = System.getProperty(FIREFOX_BROWSER_BINARY).orEmpty()
         }
     }
 
@@ -78,6 +79,8 @@ object SeleniumCommand : CompositeCommand(
             sendMessage("下载结束，path: ${bin.absolutePath}")
         } catch (cause: Throwable) {
             sendMessage("下载 chromium 异常, $cause")
+        } finally {
+            MiraiBrowserConfig.chrome = System.getProperty(CHROME_BROWSER_BINARY).orEmpty()
         }
     }
 }

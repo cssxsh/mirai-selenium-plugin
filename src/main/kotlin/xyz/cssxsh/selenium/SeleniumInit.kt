@@ -35,6 +35,8 @@ internal const val FIREFOX_DRIVER_MIRRORS = "webdriver.firefox.mirrors"
 
 internal const val EDGE_BROWSER_BINARY = "webdriver.edge.bin"
 
+internal const val FIREFOX_BROWSER_BINARY = FirefoxDriver.SystemProperty.BROWSER_BINARY
+
 private object AllIgnoredOutputStream : OutputStream() {
     override fun close() {}
     override fun write(b: ByteArray, off: Int, len: Int) {}
@@ -574,7 +576,7 @@ internal fun sevenZA(folder: File): File {
  * @param version 版本, 为空时下载 release-latest 版
  * @return binary
  * @see FirefoxBinary
- * @see FirefoxDriver.SystemProperty.BROWSER_BINARY
+ * @see FIREFOX_BROWSER_BINARY
  */
 internal fun setupFirefox(folder: File, version: String): File {
     folder.mkdirs()
@@ -687,7 +689,7 @@ internal fun setupFirefox(folder: File, version: String): File {
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
 
-    System.setProperty(FirefoxDriver.SystemProperty.BROWSER_BINARY, binary.absolutePath)
+    System.setProperty(FIREFOX_BROWSER_BINARY, binary.absolutePath)
 
     return binary
 }

@@ -73,14 +73,14 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     /**
      * 下载解压 firefox, [版本列表](https://archive.mozilla.org/pub/firefox/releases/)
      * @param version 浏览器版本
-     * @see dataFolder
+     * @see setupFirefox
      */
     fun firefox(version: String) = setupFirefox(folder = dataFolder, version = version)
 
     /**
      * 下载解压 chromium
      * @param version 浏览器版本
-     * @see dataFolder
+     * @see setupChromium
      */
     fun chromium(version: String) = setupChromium(folder = dataFolder, version = version)
 
@@ -118,9 +118,15 @@ object MiraiSeleniumPlugin : KotlinPlugin(
 
     override fun onEnable() {
         MiraiSeleniumConfig.reload()
+        MiraiBrowserConfig.reload()
         SeleniumCommand.register()
 
         System.setProperty(SELENIUM_DOWNLOAD_EXPIRES, "${MiraiSeleniumConfig.expires}")
+        with(MiraiBrowserConfig) {
+            if (chrome.isNotBlank()) System.setProperty(CHROME_BROWSER_BINARY, chrome)
+            if (edge.isNotBlank()) System.setProperty(EDGE_BROWSER_BINARY, edge)
+            if (firefox.isNotBlank()) System.setProperty(FIREFOX_BROWSER_BINARY, firefox)
+        }
 
         launch(SeleniumContext) {
             while (isActive) {
