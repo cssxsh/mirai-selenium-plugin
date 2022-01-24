@@ -5,18 +5,19 @@
 Mirai-Console的前置插件，用于使用Selenium调用浏览器进行截图等
 
 [![maven-central](https://img.shields.io/maven-central/v/xyz.cssxsh.mirai/mirai-selenium-plugin)](https://search.maven.org/artifact/xyz.cssxsh.mirai/mirai-selenium-plugin)
+[![Setup](https://github.com/cssxsh/mirai-selenium-plugin/actions/workflows/setup.yml/badge.svg)](https://github.com/cssxsh/mirai-selenium-plugin/actions/workflows/setup.yml)
 
 ## 运行平台支持
 
-|   OS    | Browser | Support |
-|:-------:|:-------:|:-------:|
-| Windows | Chrome  |   Yes   |
-| Windows | Firefox |   Yes   |
-| Windows |  Edge   |   Yes   |
-|  Linux  | Chrome  |   Yes   |
-|  Linux  | Firefox |   Yes   |
-|  MacOS  | Chrome  |  Test   |
-|  MacOS  | Firefox |  Test   |
+|   OS    | Browser | Driver | Setup |
+|:-------:|:-------:|:------:|:-----:|
+| Windows | Chrome  |  Yes   |  Yes  |
+| Windows | Firefox |  Yes   |  Yes  |
+| Windows |  Edge   |  Yes   |   ~   |
+|  Linux  | Chrome  |  Yes   |  Yes  |
+|  Linux  | Firefox |  Yes   |  Yes  |
+|  MacOS  | Chrome  |  Yes   |  Yes  |
+|  MacOS  | Firefox |  Yes   |  Yes  |
 
 ## 在插件项目中引用
 
@@ -44,22 +45,31 @@ dependencies {
 * `/selenium clear` 清理驱动文件
 * `/selenium destroy` 清理驱动进程
 * `/selenium status` 驱动进程状态
+* `/selenium firefox` 下载解压 firefox
+* `/selenium chromium` 下载解压 chromium
 
 ## 配置
 
 ### [MiraiSeleniumConfig.yml](src/main/kotlin/xyz/cssxsh/mirai/plugin/data/MiraiSeleniumConfig.kt)
 
-* expires 驱动文件过期时间，默认一星期 (单位：天)
-* user_agent 截图UA
-* width 截图宽度
-* height 截图高度
-* pixel_ratio 截图像素比
-* headless 无头模式（后台模式）
-* proxy 代理地址
-* log 启用日志文件
-* browser 指定使用的浏览器: `Chrome`,`Chromium`,`Firefox`,`Edge`
-* factory 指定使用的Factory: `ktor`,`netty`
-* arguments 自定义 arguments, 可以尝试加入 `--no-sandbox`, `--disable-dev-shm-usage`, 解决兼容性问题  
+* `expires` 驱动文件过期时间，默认一星期 (单位：天)
+* `user_agent` 浏览器 UA
+* `width` 浏览器宽度
+* `height` 浏览器高度
+* `pixel_ratio` 浏览器像素比
+* `headless` 无头模式（后台模式）
+* `proxy` 代理地址
+* `log` 启用日志文件
+* `browser` 指定使用的浏览器: `Chrome`,`Chromium`,`Firefox`,`Edge`
+* `factory` 指定使用的Factory: `ktor`,`netty`
+* `arguments` 自定义 arguments, 可以尝试加入 `--no-sandbox`, `--disable-dev-shm-usage`, 解决兼容性问题
+* `preferences` 自定义 preferences，浏览器配置
+
+### [MiraiBrowserConfig.yml](src/main/kotlin/xyz/cssxsh/mirai/plugin/data/MiraiBrowserConfig.kt)
+
+* `chrome` Chrome/Chromium 二进制文件路径
+* `edge` Edge 二进制文件路径
+* `firefox` Firefox 二进制文件路径
 
 ## 安装
 

@@ -61,8 +61,8 @@ object SeleniumCommand : CompositeCommand(
     suspend fun CommandSender.firefox(version: String = "") {
         sendMessage("下载 firefox 开始, version: ${version.ifBlank { "latest" }}")
         try {
-            val bin = MiraiSeleniumPlugin.firefox(version = version)
-            sendMessage("下载结束，path: ${bin.absolutePath}")
+            val binary = MiraiSeleniumPlugin.firefox(version = version)
+            sendMessage("下载结束，binary: ${binary.absolutePath}")
         } catch (cause: Throwable) {
             sendMessage("下载 firefox 异常, $cause")
         } finally {
@@ -75,8 +75,8 @@ object SeleniumCommand : CompositeCommand(
     suspend fun CommandSender.chromium(version: String = "") {
         sendMessage("下载 chromium 开始, version: ${version.ifBlank { "latest" }}")
         try {
-            val bin = MiraiSeleniumPlugin.chromium(version = version)
-            sendMessage("下载结束，path: ${bin.absolutePath}")
+            val binary = MiraiSeleniumPlugin.chromium(version = version)
+            sendMessage("下载结束，binary: ${binary.absolutePath}")
         } catch (cause: Throwable) {
             sendMessage("下载 chromium 异常, $cause")
         } finally {
