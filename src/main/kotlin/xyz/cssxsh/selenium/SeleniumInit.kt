@@ -433,7 +433,7 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
                 .start()
                 .waitFor()
 
-            folder.resolve("geckodriver").renameTo(driver)
+            check(folder.resolve("geckodriver").renameTo(driver)) { "重命名 geckodriver 失败" }
         }
     }
     driver.setExecutable(true)
@@ -607,7 +607,7 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .apply { inputStream.transferTo(AllIgnoredOutputStream) }
                     .waitFor()
 
-                folder.resolve("core").renameTo(setup)
+                check(folder.resolve("core").renameTo(setup)) { "重命名 core 失败" }
             }
 
             setup.resolve("firefox.exe")
@@ -638,7 +638,7 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .start()
                     .waitFor()
 
-                folder.resolve("firefox").renameTo(setup)
+                check(folder.resolve("firefox").renameTo(setup)) { "重命名 firefox 失败" }
             }
 
             setup.resolve("firefox")
@@ -702,7 +702,7 @@ internal fun setupChromium(folder: File, version: String): File {
     fun release(repo: String): GitHubRelease {
         return if (version.isBlank()) {
             var page = 0
-            val release : GitHubRelease
+            val release: GitHubRelease
             while (true) {
                 val releases = GitHubJson.decodeFromString(
                     deserializer = ListSerializer(GitHubRelease.serializer()),
@@ -728,6 +728,7 @@ internal fun setupChromium(folder: File, version: String): File {
             )
         }
     }
+
     val binary = when {
         // https://github.com/macchrome/winchrome/releases
         platform.`is`(Platform.WINDOWS) -> {
@@ -749,7 +750,9 @@ internal fun setupChromium(folder: File, version: String): File {
                     .apply { inputStream.transferTo(AllIgnoredOutputStream) }
                     .waitFor()
 
-                folder.resolve(pack.nameWithoutExtension).renameTo(setup)
+                check(folder.resolve(pack.nameWithoutExtension).renameTo(setup)) {
+                    "重命名 ${pack.nameWithoutExtension} 失败"
+                }
             }
 
             setup.resolve("chrome.exe")
@@ -761,7 +764,7 @@ internal fun setupChromium(folder: File, version: String): File {
 
             if (setup.exists().not()) {
                 val url = release.assets
-                    .first { asset -> asset.browserDownloadUrl.endsWith("tar.xz") }
+                    .first { asset -> asset.browserDownloadUrl.endsWith(".tar.xz") }
                     .browserDownloadUrl
 
                 // XXX: tar.xz
@@ -772,7 +775,8 @@ internal fun setupChromium(folder: File, version: String): File {
                     .start()
                     .waitFor()
 
-                folder.resolve(xz.nameWithoutExtension).renameTo(setup)
+                val unpack = xz.name.removeSuffix(".tar.xz")
+                check(folder.resolve(unpack).renameTo(setup)) { "重命名 $unpack 失败" }
             }
 
             setup.resolve("chrome")
@@ -780,7 +784,7 @@ internal fun setupChromium(folder: File, version: String): File {
         // https://github.com/macchrome/macstable/releases
         platform.`is`(Platform.MAC) -> {
             val release = release(repo = "macstable")
-            val setup = folder.resolve("Chromium-${release.tagName}.app")
+            val setup = folder.resolve("Chromium-${release.tagName}")
 
             if (setup.exists().not()) {
                 val url = release.assets
@@ -797,7 +801,7 @@ internal fun setupChromium(folder: File, version: String): File {
                     .waitFor()
             }
 
-            setup.resolve("Chromium.app/Contents/MacOS/firefox")
+            setup.resolve("Chromium.app/Contents/MacOS/Chromium")
         }
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
