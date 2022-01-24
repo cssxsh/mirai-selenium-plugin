@@ -20,9 +20,7 @@ mavenCentralPublish {
 
 repositories {
     mavenLocal()
-    maven("https://maven.aliyun.com/repository/central")
     mavenCentral()
-    maven(url = "https://maven.aliyun.com/repository/gradle-plugin")
     gradlePluginPortal()
 }
 

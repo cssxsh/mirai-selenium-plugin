@@ -95,9 +95,14 @@ object MiraiSeleniumPlugin : KotlinPlugin(
             logger.info { "Destroy driver, session: ${driver.sessionId}, process: ${service.getProcess()}" }
 
             try {
+                driver.quit()
+            } catch (cause: Throwable) {
+                logger.warning({ "Driver ${service.getProcess() ?: service.url} stop failure." }, cause)
+            }
+            try {
                 service.stop()
             } catch (cause: Throwable) {
-                logger.warning({ "Service ${service.url} stop failure." }, cause)
+                logger.warning({ "Service ${service.getProcess() ?: service.url} stop failure." }, cause)
             }
 
             true

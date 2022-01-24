@@ -6,6 +6,7 @@ import org.openqa.selenium.*
 import org.openqa.selenium.remote.*
 import xyz.cssxsh.mirai.plugin.data.*
 import java.io.*
+import java.util.concurrent.*
 
 internal class SeleniumToolKtTest {
 
@@ -17,9 +18,6 @@ internal class SeleniumToolKtTest {
 
     private val browsers by lazy {
         val platform = Platform.getCurrent()
-        if (platform.`is`(Platform.MAC)) {
-            System.err.println(queryPreference())
-        }
         when {
             platform.`is`(Platform.WINDOWS) -> listOf("Edge", "Chromium", "Firefox")
             platform.`is`(Platform.LINUX) -> listOf("Chromium", "Firefox")
@@ -31,8 +29,7 @@ internal class SeleniumToolKtTest {
     private val config = object : RemoteWebDriverConfig by MiraiSeleniumConfig {
         override val userAgent: String = UserAgents.IPAD + " MicroMessenger"
         override val headless: Boolean = true
-        override val proxy: String = ""
-        override val browser: String = ""
+        override val log: Boolean = true
         override val factory: String = "netty"
     }
 
@@ -53,7 +50,12 @@ internal class SeleniumToolKtTest {
 
     @AfterEach
     fun destroy() {
-        DriverCache.forEach { (_, service) ->
+        DriverCache.forEach { (driver, service) ->
+            try {
+                driver.quit()
+            } catch (_: Throwable) {
+                //
+            }
             try {
                 service.stop()
             } catch (_: Throwable) {
@@ -64,6 +66,7 @@ internal class SeleniumToolKtTest {
     }
 
     @Test
+    @Timeout(value = 3, unit = TimeUnit.MINUTES)
     fun screenshot(): Unit = testRemoteWebDriver { browser, driver ->
 
         val url = "https://t.bilibili.com/h5/dynamic/detail/450055453856015371"
@@ -76,6 +79,7 @@ internal class SeleniumToolKtTest {
     }
 
     @Test
+    @Timeout(value = 3, unit = TimeUnit.MINUTES)
     fun pdf(): Unit = testRemoteWebDriver { browser, driver ->
 
         driver.get("https://github.com/mamoe/mirai/blob/dev/README.md")
@@ -83,7 +87,9 @@ internal class SeleniumToolKtTest {
         val start = System.currentTimeMillis()
         while (isActive) {
             if (driver.isReady()) break
-            if (System.currentTimeMillis() - start > 180_000) break
+            if (System.currentTimeMillis() - start > 60_000) {
+                System.err.println("$browser pdf ready timeout.")
+            }
             delay(10_000)
         }
 
@@ -92,10 +98,9 @@ internal class SeleniumToolKtTest {
     }
 
     @Test
-    fun browser(): Unit = runBlocking {
-        // chrome: chrome://prefs-internals/
-        // firefox about:config
-        setupFirefox(folder = folder, version = "68.0.1esr")
+    @Timeout(value = 3, unit = TimeUnit.MINUTES)
+    fun firefox(): Unit = runBlocking {
+        setupFirefox(folder = folder, version = "")
         val driver = RemoteWebDriver(config = object : RemoteWebDriverConfig {
             override val browser: String = "firefox"
             override val headless: Boolean = true
@@ -105,6 +110,24 @@ internal class SeleniumToolKtTest {
 
         try {
             driver.get("about:config")
+        } catch (cause: Throwable) {
+            cause.printStackTrace()
+        }
+    }
+
+    @Test
+    @Timeout(value = 3, unit = TimeUnit.MINUTES)
+    fun chromium(): Unit = runBlocking {
+        setupChromium(folder = folder, version = "")
+        val driver = RemoteWebDriver(config = object : RemoteWebDriverConfig {
+            override val browser: String = "chromium"
+            override val headless: Boolean = true
+            override val log: Boolean = true
+            override val factory: String = "netty"
+        })
+
+        try {
+            driver.get("chrome://settings/help")
         } catch (cause: Throwable) {
             cause.printStackTrace()
         }

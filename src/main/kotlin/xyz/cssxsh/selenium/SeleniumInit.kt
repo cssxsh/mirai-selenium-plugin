@@ -1,11 +1,16 @@
 package xyz.cssxsh.selenium
 
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.utils.io.*
+import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.*
+import kotlinx.serialization.builtins.*
 import org.openqa.selenium.*
 import org.openqa.selenium.chrome.*
 import org.openqa.selenium.chromium.*
@@ -18,8 +23,6 @@ import java.util.zip.*
 
 internal const val SELENIUM_FOLDER = "xyz.cssxsh.selenium.folder"
 
-internal const val SELENIUM_DOWNLOAD_ATTEMPT = "xyz.cssxsh.selenium.download.attempt"
-
 internal const val SELENIUM_DOWNLOAD_EXPIRES = "xyz.cssxsh.selenium.download.expires"
 
 internal const val WEBDRIVER_HTTP_FACTORY = "webdriver.http.factory"
@@ -27,6 +30,8 @@ internal const val WEBDRIVER_HTTP_FACTORY = "webdriver.http.factory"
 internal const val CHROME_BROWSER_BINARY = "webdriver.chrome.bin"
 
 internal const val CHROME_DRIVER_MIRRORS = "webdriver.chrome.mirrors"
+
+internal const val FIREFOX_DRIVER_MIRRORS = "webdriver.firefox.mirrors"
 
 internal const val EDGE_BROWSER_BINARY = "webdriver.edge.bin"
 
@@ -44,7 +49,7 @@ internal typealias RemoteWebDriverSupplier = (config: RemoteWebDriverConfig) -> 
  * [Platform.WINDOWS] 查询注册表
  * @see RegisterKeys
  */
-private fun queryRegister(key: String): String {
+internal fun queryRegister(key: String): String {
     val (path, name) = key.split('|')
     return ProcessBuilder("reg", "query", path, "/v", name)
         .start()
@@ -56,10 +61,10 @@ private fun queryRegister(key: String): String {
  * [Platform.WINDOWS] 通过文件夹获取浏览器版本
  * @param folder 二进制文件所在文件夹
  */
-private fun queryVersion(folder: File): String {
+internal fun queryVersion(folder: File): String {
     // XXX: get version by folder
     val regex = """[\d.]+""".toRegex()
-    return folder.list { _, name -> regex matches name }?.lastOrNull()
+    return folder.list()?.reversed()?.firstNotNullOf { regex.find(it)?.value }
         ?: throw UnsupportedOperationException("无法在 ${folder.absolutePath} 找到版本信息")
 }
 
@@ -67,17 +72,32 @@ private fun queryVersion(folder: File): String {
  * [Platform.MAC] 通过 Preferences 获取默认浏览器
  */
 internal fun queryPreference(): String {
-    return ProcessBuilder("plutil", "-p", "~/Library/Preferences/com.apple.LaunchServices/com.apple.LaunchServices.secure.plist")
+    return ProcessBuilder(
+        "plutil",
+        "-p",
+        "~/Library/Preferences/com.apple.LaunchServices/com.apple.LaunchServices.secure.plist"
+    )
         .start()
         .inputStream.use { it.reader().readText() }
+}
+
+internal fun HttpMessage.contentDisposition(): ContentDisposition? {
+    return headers[HttpHeaders.ContentDisposition]?.let { ContentDisposition.parse(it) }
 }
 
 /**
  * 下载文件
  * @param urlString 下载链接
- * @see SELENIUM_DOWNLOAD_ATTEMPT
+ * @param folder 下载目录
+ * @param filename 文件名，为空时从 header 或者 url 获取
  */
-private fun download(urlString: String): ByteArray = runBlocking(SeleniumContext) {
+internal fun download(urlString: String, folder: File, filename: String? = null): File = runBlocking(SeleniumContext) {
+
+    if (filename != null) {
+        val current = folder.resolve(filename)
+        if (current.exists()) return@runBlocking current
+    }
+
     val url = Url(urlString = urlString)
     val token = when (url.host) {
         "api.github.com" -> System.getenv("GITHUB_TOKEN")
@@ -90,17 +110,23 @@ private fun download(urlString: String): ByteArray = runBlocking(SeleniumContext
             }
         }
     }
-    var attempt = System.getProperty(SELENIUM_DOWNLOAD_ATTEMPT, "3").toInt()
-    while (isActive) {
-        try {
-            return@runBlocking client.get(url)
-        } catch (exception: IOException) {
-            if (attempt-- <= 0) {
-                throw exception
+    client.get<HttpStatement>(url).execute { response ->
+        val relative = filename
+            ?: response.contentDisposition()?.parameter(ContentDisposition.Parameters.FileName)
+            ?: response.request.url.encodedPath.substringAfterLast('/').decodeURLPart()
+
+        val file = folder.resolve(relative)
+
+        file.outputStream().use { output ->
+            val channel: ByteReadChannel = response.receive()
+
+            while (!channel.isClosedForRead) {
+                channel.copyTo(output)
             }
         }
+
+        file
     }
-    throw CancellationException("无法下载 $urlString")
 }
 
 /**
@@ -138,7 +164,8 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                 }
                 platform.`is`(Platform.MAC) -> {
                     // XXX: MacOS/Default
-                    File("/Applications").list().orEmpty()
+                    (File("/Applications").list().orEmpty().asList() +
+                        File("${System.getProperty("user.home")}/Applications").list().orEmpty())
                         .filter { it.endsWith(".app") }
                         .firstOrNull { """(?i)Chrome|Chromium|Firefox""".toRegex() in it }
                         ?: throw UnsupportedOperationException("未找到受支持的浏览器")
@@ -164,7 +191,7 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
  * @see EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY
  * @see WEBDRIVER_HTTP_FACTORY
  */
-private fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
+internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
     if (Platform.getCurrent().`is`(Platform.WINDOWS).not()) {
         throw UnsupportedOperationException("Edge only supported Windows/Edge")
     }
@@ -182,38 +209,31 @@ private fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
         throw UnsupportedOperationException("Edge 版本获取失败", cause)
     }
 
-    val xml = folder.resolve("msedgedriver-${version}.xml")
-    if (xml.exists().not()) {
-        xml.writeBytes(
-            try {
-                download(urlString = "https://msedgewebdriverstorage.blob.core.windows.net/edgewebdriver?prefix=${version}&comp=list&timeout=60000")
-            } catch (cause: Throwable) {
-                throw UnsupportedOperationException("无法下载 msedgewebdriver 版本信息", cause)
-            }
-        )
-    }
+
+    val xml = download(
+        urlString = "https://msedgewebdriverstorage.blob.core.windows.net/edgewebdriver?prefix=${version}&comp=list&timeout=60000",
+        folder = folder,
+        filename = "msedgedriver-${version}.xml"
+    )
 
     val url = """(?<=<Url>).{16,256}\.zip""".toRegex()
         .findAll(xml.readText())
         .first { "win32" in it.value }.value
 
-    val file = folder.resolve("msedgedriver-${version}_${url.substringAfterLast('_')}")
-    if (file.exists().not()) {
-        file.writeBytes(
-            try {
-                download(urlString = url)
-            } catch (cause: Throwable) {
-                throw UnsupportedOperationException("无法下载 msedgedriver", cause)
-            }
-        )
-    }
+    val file = download(
+        urlString = url,
+        folder = folder,
+        filename = "msedgedriver-${version}_${url.substringAfterLast('_')}"
+    )
 
     val driver = folder.resolve("${file.nameWithoutExtension}.exe")
     if (driver.exists().not()) {
         val zip = ZipFile(file)
-        zip.getInputStream(zip.getEntry("msedgedriver.exe")).use { input ->
+        val entry = zip.getEntry("msedgedriver.exe")
+        zip.getInputStream(entry).use { input ->
             driver.writeBytes(input.readAllBytes())
         }
+        driver.setLastModified(entry.time)
     }
     driver.setExecutable(true)
 
@@ -248,7 +268,7 @@ private fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
  * @see ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY
  * @see WEBDRIVER_HTTP_FACTORY
  */
-private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverSupplier {
+internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverSupplier {
     // 取版本
     val platform = Platform.getCurrent()
     val binary = System.getProperty(CHROME_BROWSER_BINARY)?.let(::File)
@@ -256,7 +276,7 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
         when {
             platform.`is`(Platform.WINDOWS) -> {
                 if (binary != null) {
-                    queryVersion(folder = folder.parentFile)
+                    queryVersion(folder = binary.parentFile)
                 } else {
                     queryRegister(key = if (chromium) RegisterKeys.CHROMIUM else RegisterKeys.CHROME)
                 }
@@ -283,7 +303,7 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
         throw UnsupportedOperationException("Chrome/Chromium 版本获取失败", cause)
     }
     // MIRRORS "https://npm.taobao.org/mirrors/chromedriver"
-    val base = System.getProperty(CHROME_DRIVER_MIRRORS,"https://chromedriver.storage.googleapis.com")
+    val base = System.getProperty(CHROME_DRIVER_MIRRORS, "https://chromedriver.storage.googleapis.com")
 
     // 映射
     val mapping = folder.resolve("chromedriver-${version0}.mapping")
@@ -294,16 +314,18 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
             "LATEST_RELEASE"
         )
 
-        var bytes: ByteArray? = null
         for (release in list) {
             try {
-                bytes = download(urlString = "${base}/${release}")
+                download(
+                    urlString = "${base}/${release}",
+                    folder = folder,
+                    filename = "chromedriver-${version0}.mapping"
+                )
                 break
             } catch (_: ClientRequestException) {
                 continue
             }
         }
-        mapping.writeBytes(bytes ?: throw UnsupportedOperationException("无法找到 chromedriver $version0 版本信息"))
     }
     val version = mapping.readText()
 
@@ -313,17 +335,11 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
         platform.`is`(Platform.MAC) -> "mac64"
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
-    val url = "${base}/${version}/chromedriver_${suffix}.zip"
-    val file = folder.resolve("chromedriver-${version}_${suffix}.zip")
-    if (file.exists().not()) {
-        file.writeBytes(
-            try {
-                download(urlString = url)
-            } catch (cause: Throwable) {
-                throw UnsupportedOperationException("无法下载 chromedriver ", cause)
-            }
-        )
-    }
+    val file = download(
+        urlString = "${base}/${version}/chromedriver_${suffix}.zip",
+        folder = folder,
+        filename = "chromedriver-${version}_${suffix}.zip"
+    )
 
     val driver = if (platform.`is`(Platform.WINDOWS)) {
         folder.resolve("chromedriver-${version}_${suffix}.exe")
@@ -332,9 +348,11 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
     }
     if (driver.exists().not()) {
         val zip = ZipFile(file)
-        zip.getInputStream(zip.entries().nextElement()).use { input ->
+        val entry = zip.entries().nextElement()
+        zip.getInputStream(entry).use { input ->
             driver.writeBytes(input.readAllBytes())
         }
+        driver.setLastModified(entry.time)
     }
     driver.setExecutable(true)
 
@@ -369,40 +387,31 @@ private fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverS
  * @see FirefoxBinary
  * @see FirefoxDriver.SystemProperty.BROWSER_BINARY
  */
-private fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
+internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     // 取版本
     val platform = Platform.getCurrent()
-    val latest = "https://api.github.com/repos/mozilla/geckodriver/releases/latest"
-    val json = folder.resolve("geckodriver.json")
-    val expires = System.getProperty(SELENIUM_DOWNLOAD_EXPIRES, "7").toLong()
-    if (json.exists().not() || System.currentTimeMillis() - json.lastModified() > 1000L * 60 * 60 * 24 * expires) {
-        json.writeBytes(
-            try {
-                download(urlString = latest)
-            } catch (cause: Throwable) {
-                throw UnsupportedOperationException("无法下载 geckodriver 版本信息", cause)
-            }
-        )
-    }
-    val suffix = when {
-        platform.`is`(Platform.WINDOWS) -> "win32"
-        platform.`is`(Platform.LINUX) -> "linux64"
-        platform.`is`(Platform.MAC) -> "macos"
+    val json = GitHubJson.decodeFromString(
+        deserializer = GitHubRelease.serializer(),
+        string = download(
+            urlString = "https://api.github.com/repos/mozilla/geckodriver/releases/latest",
+            folder = folder,
+            filename = "geckodriver.json"
+        ).readText()
+    )
+    val version = json.tagName
+    val filename = when {
+        platform.`is`(Platform.WINDOWS) -> "geckodriver-$version-win32.zip"
+        platform.`is`(Platform.LINUX) -> "geckodriver-$version-linux64.tar.gz"
+        platform.`is`(Platform.MAC) -> "geckodriver-$version-macos.tar.gz"
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
-    val url = """https://github\.com/mozilla/geckodriver/releases/download/.{16,64}\.(tar\.gz|zip)""".toRegex()
-        .findAll(json.readText())
-        .first { result -> suffix in result.value }.value
-    val file = folder.resolve(url.substringAfterLast('/'))
-    if (file.exists().not()) {
-        file.writeBytes(
-            try {
-                download(urlString = url)
-            } catch (cause: Throwable) {
-                throw UnsupportedOperationException("无法下载 geckodriver", cause)
-            }
-        )
-    }
+    // https://npm.taobao.org/mirrors/geckodriver/
+    val base = System.getProperty(FIREFOX_DRIVER_MIRRORS, "https://github.com/mozilla/geckodriver/releases/download")
+    val file = download(
+        urlString = "$base/$version/$filename",
+        folder = folder,
+        filename = filename
+    )
 
     val driver = if (platform.`is`(Platform.WINDOWS)) {
         folder.resolve("${file.nameWithoutExtension}.exe")
@@ -412,9 +421,11 @@ private fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     if (driver.exists().not()) {
         if (file.extension == "zip") {
             val zip = ZipFile(file)
-            zip.getInputStream(zip.entries().nextElement()).use { input ->
+            val entry = zip.entries().nextElement()
+            zip.getInputStream(entry).use { input ->
                 driver.writeBytes(input.readAllBytes())
             }
+            driver.setLastModified(entry.time)
         } else {
             // XXX: tar.gz
             ProcessBuilder("tar", "-xzf", file.absolutePath)
@@ -422,7 +433,7 @@ private fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
                 .start()
                 .waitFor()
 
-            folder.resolve("geckodriver").renameTo(driver)
+            check(folder.resolve("geckodriver").renameTo(driver)) { "重命名 geckodriver 失败" }
         }
     }
     driver.setExecutable(true)
@@ -539,96 +550,266 @@ internal fun clearWebDriver(): List<File> {
 }
 
 /**
+ * [Platform.WINDOWS] 安装 7za
+ * @param folder 安装目录
+ * @return binary
+ */
+internal fun sevenZA(folder: File): File {
+    return folder.resolve("7za.exe").apply {
+        if (exists().not()) {
+            val pack = download(urlString = "https://www.7-zip.org/a/7za920.zip", folder = folder)
+            ZipFile(pack).use { file ->
+                val entry = file.getEntry("7za.exe")
+                setLastModified(entry.time)
+                writeBytes(file.getInputStream(entry).readAllBytes())
+            }
+            setExecutable(true)
+        }
+    }
+}
+
+/**
  * 安装 Firefox 浏览器
  * @param folder 安装目录
- * @param version 版本
+ * @param version 版本, 为空时下载 release-latest 版
  * @return binary
  * @see FirefoxBinary
  * @see FirefoxDriver.SystemProperty.BROWSER_BINARY
  */
 internal fun setupFirefox(folder: File, version: String): File {
-    val base = "https://archive.mozilla.org/pub/firefox/releases"
-    val setup = folder.resolve("Firefox-${version}")
+    folder.mkdirs()
     val platform = Platform.getCurrent()
-    if (setup.exists().not()) {
-        when {
-            platform.`is`(Platform.WINDOWS) -> {
-                val exe = folder.resolve("Firefox Setup ${version}.exe")
-                if (exe.exists().not()) {
-                    exe.writeBytes(download(urlString = "${base}/${version}/win64/zh-CN/${exe.name}"))
+    val binary = when {
+        platform.`is`(Platform.WINDOWS) -> {
+            val setup: File
+            val exe = if (version.isBlank()) {
+                download(
+                    urlString = "https://download.mozilla.org/?product=firefox-latest-ssl&os=win64&lang=zh-CN",
+                    folder = folder
+                ).apply {
+                    val latest = name.substringAfterLast(' ').removeSuffix(".exe")
+                    setup = folder.resolve("Firefox-${latest}-win")
                 }
-                val sevenZA = folder.resolve("7za.exe")
-                if (sevenZA.exists().not()) {
-                    val url = "https://www.7-zip.org/a/7za920.zip"
-                    val pack = folder.resolve(url.substringAfterLast('/'))
-                    if (pack.exists().not()) {
-                        pack.writeBytes(download(urlString = url))
-                    }
+            } else {
+                setup = folder.resolve("Firefox-${version}-win")
+                download(
+                    urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/win64/zh-CN/Firefox Setup ${version}.exe",
+                    folder = folder,
+                    filename = "Firefox Setup ${version}.exe"
+                )
+            }
 
-                    sevenZA.writeBytes(ZipFile(pack).use { file ->
-                        val entry = file.getEntry("7za.exe")
-                        file.getInputStream(entry).readAllBytes()
-                    })
-                    sevenZA.setExecutable(true)
-                }
-
+            if (setup.exists().not()) {
                 // XXX: bcj2
-                ProcessBuilder(sevenZA.absolutePath, "x", exe.absolutePath, "'-x!setup.exe'", "-y")
+                ProcessBuilder(sevenZA(folder = folder).absolutePath, "x", exe.absolutePath, "-x!setup.exe", "-y")
                     .directory(folder)
                     .start()
+                    // 防止卡顿
+                    .apply { inputStream.transferTo(AllIgnoredOutputStream) }
                     .waitFor()
 
-                folder.resolve("core").renameTo(setup)
+                check(folder.resolve("core").renameTo(setup)) { "重命名 core 失败" }
             }
-            platform.`is`(Platform.LINUX) -> {
-                val bz2 = folder.resolve("firefox-${version}.tar.bz2")
-                if (bz2.exists().not()) {
-                    bz2.writeBytes(download(urlString = "${base}/${version}/linux-x86_64/zh-CN/${bz2.name}"))
-                }
 
+            setup.resolve("firefox.exe")
+        }
+        platform.`is`(Platform.LINUX) -> {
+            val setup: File
+            val bz2 = if (version.isBlank()) {
+                download(
+                    urlString = "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=zh-CN",
+                    folder = folder
+                ).apply {
+                    val latest = name.substringAfterLast('-').removeSuffix(".tar.bz2")
+                    setup = folder.resolve("Firefox-${latest}-linux")
+                }
+            } else {
+                setup = folder.resolve("Firefox-${version}-linux")
+                download(
+                    urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/linux-x86_64/zh-CN/firefox-${version}.tar.bz2",
+                    folder = folder,
+                    filename = "firefox-${version}.tar.bz2"
+                )
+            }
+
+            if (setup.exists().not()) {
                 // XXX: tar.bz2
                 ProcessBuilder("tar", "-xjf", bz2.absolutePath)
                     .directory(folder)
                     .start()
                     .waitFor()
 
-                folder.resolve("firefox").renameTo(setup)
+                check(folder.resolve("firefox").renameTo(setup)) { "重命名 firefox 失败" }
             }
-            platform.`is`(Platform.MAC) -> {
-                val dmg = folder.resolve("Firefox ${version}.dmg")
-                if (dmg.exists().not()) {
-                    dmg.writeBytes(download(urlString = "${base}/${version}/mac/zh-CN/${dmg.name}"))
-                }
 
-                ProcessBuilder("hdiutil", "attach", dmg.absolutePath)
-                    .directory(folder)
-                    .start()
-                    .waitFor()
-
-                System.err.println(File("/Volumes").list()?.toList())
-
-                ProcessBuilder("cp", "-rf", "/Volumes/${dmg.nameWithoutExtension}", setup.absolutePath)
-                    .directory(folder)
-                    .start()
-                    .waitFor()
-
-                ProcessBuilder("hdiutil", "detach", "/Volumes/${dmg.nameWithoutExtension}")
-                    .directory(folder)
-                    .start()
-                    .waitFor()
-            }
-            else -> throw UnsupportedOperationException("不受支持的平台 $platform")
+            setup.resolve("firefox")
         }
-    }
+        platform.`is`(Platform.MAC) -> {
+            val setup: File
+            val dmg = if (version.isBlank()) {
+                download(
+                    urlString = "https://download.mozilla.org/?product=firefox-latest-ssl&os=osx&lang=zh-CN",
+                    folder = folder
+                ).apply {
+                    val latest = name.substringAfterLast(' ').removeSuffix(".dmg")
+                    setup = folder.resolve("Firefox-${latest}-mac")
+                }
+            } else {
+                setup = folder.resolve("Firefox-${version}-mac")
+                download(
+                    urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/mac/zh-CN/Firefox ${version}.dmg",
+                    folder = folder,
+                    filename = "Firefox ${version}.dmg"
+                )
+            }
 
-    val binary = when {
-        platform.`is`(Platform.WINDOWS) -> setup.resolve("firefox.exe")
-        platform.`is`(Platform.LINUX) -> setup.resolve("firefox")
-        platform.`is`(Platform.MAC) -> setup
+            if (setup.exists().not()) {
+                ProcessBuilder("hdiutil", "attach", "-quiet", "-noautofsck", "-noautoopen", dmg.absolutePath)
+                    .directory(folder)
+                    .start()
+                    .waitFor()
+
+                val volume = File("/Volumes/Firefox")
+
+                ProcessBuilder("cp", "-a", volume.absolutePath, setup.absolutePath)
+                    .directory(volume)
+                    .start()
+                    .waitFor()
+
+                ProcessBuilder("hdiutil", "detach", volume.absolutePath)
+                    .directory(folder)
+                    .start()
+                    .waitFor()
+            }
+
+            setup.resolve("Firefox.app/Contents/MacOS/firefox")
+        }
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
 
     System.setProperty(FirefoxDriver.SystemProperty.BROWSER_BINARY, binary.absolutePath)
+
+    return binary
+}
+
+/**
+ * 安装 Chromium 浏览器 [GitHub macchrome](https://github.com/macchrome)
+ * @param folder 安装目录
+ * @param version 版本, 为空时下载 snapshots-latest 版
+ * @return binary
+ * @see CHROME_BROWSER_BINARY
+ */
+internal fun setupChromium(folder: File, version: String): File {
+    folder.mkdirs()
+    val platform = Platform.getCurrent()
+    fun release(repo: String): GitHubRelease {
+        return if (version.isBlank()) {
+            var page = 0
+            val release: GitHubRelease
+            while (true) {
+                val releases = GitHubJson.decodeFromString(
+                    deserializer = ListSerializer(GitHubRelease.serializer()),
+                    string = download(
+                        urlString = "https://api.github.com/repos/macchrome/$repo/releases?page=${page++}",
+                        folder = folder
+                    ).readText()
+                )
+
+                if (releases.isEmpty()) throw IllegalArgumentException("Chromium Version: $version 查找失败")
+
+                release = releases.find { version in it.tagName } ?: continue
+                break
+            }
+            release
+        } else {
+            GitHubJson.decodeFromString(
+                deserializer = GitHubRelease.serializer(),
+                string = download(
+                    urlString = "https://api.github.com/repos/macchrome/$repo/releases/latest",
+                    folder = folder
+                ).readText()
+            )
+        }
+    }
+
+    val binary = when {
+        // https://github.com/macchrome/winchrome/releases
+        platform.`is`(Platform.WINDOWS) -> {
+            val release = release(repo = "winchrome")
+            val setup = folder.resolve("Chromium-${release.tagName}")
+
+            if (setup.exists().not()) {
+                val url = release.assets
+                    .first { asset -> asset.browserDownloadUrl.endsWith(".7z") }
+                    .browserDownloadUrl
+
+                val pack = download(urlString = url, folder = folder, filename = url.substringAfterLast('/'))
+
+                // XXX: 7z
+                ProcessBuilder(sevenZA(folder = folder).absolutePath, "x", pack.absolutePath, "-y")
+                    .directory(folder)
+                    .start()
+                    // 防止卡顿
+                    .apply { inputStream.transferTo(AllIgnoredOutputStream) }
+                    .waitFor()
+
+                check(folder.resolve(pack.nameWithoutExtension).renameTo(setup)) {
+                    "重命名 ${pack.nameWithoutExtension} 失败"
+                }
+            }
+
+            setup.resolve("chrome.exe")
+        }
+        // https://github.com/macchrome/linchrome/releases
+        platform.`is`(Platform.LINUX) -> {
+            val release = release(repo = "linchrome")
+            val setup = folder.resolve("Chromium-${release.tagName}")
+
+            if (setup.exists().not()) {
+                val url = release.assets
+                    .first { asset -> asset.browserDownloadUrl.endsWith(".tar.xz") }
+                    .browserDownloadUrl
+
+                val xz = download(urlString = url, folder = folder, filename = url.substringAfterLast('/'))
+
+                // XXX: tar.xz
+                ProcessBuilder("tar", "-xf", xz.absolutePath)
+                    .directory(folder)
+                    .start()
+                    .waitFor()
+
+                val unpack = xz.name.removeSuffix(".tar.xz")
+                check(folder.resolve(unpack).renameTo(setup)) { "重命名 $unpack 失败" }
+            }
+
+            setup.resolve("chrome")
+        }
+        // https://github.com/macchrome/macstable/releases
+        platform.`is`(Platform.MAC) -> {
+            val release = release(repo = "macstable")
+            val setup = folder.resolve("Chromium-${release.tagName}")
+
+            if (setup.exists().not()) {
+                val url = release.assets
+                    .first { asset -> "Chromium" in asset.browserDownloadUrl }
+                    .browserDownloadUrl
+
+                val zip = download(urlString = url, folder = folder, filename = url.substringAfterLast('/'))
+
+                setup.mkdirs()
+                // XXX: big zip
+                ProcessBuilder("unzip", "-o", "-q", zip.absolutePath)
+                    .directory(setup)
+                    .start()
+                    .waitFor()
+            }
+
+            setup.resolve("Chromium.app/Contents/MacOS/Chromium")
+        }
+        else -> throw UnsupportedOperationException("不受支持的平台 $platform")
+    }
+
+    System.setProperty(CHROME_BROWSER_BINARY, binary.absolutePath)
 
     return binary
 }

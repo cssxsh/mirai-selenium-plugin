@@ -59,7 +59,7 @@ object SeleniumCommand : CompositeCommand(
 
     @SubCommand
     @Description("下载解压 firefox, https://archive.mozilla.org/pub/firefox/releases/")
-    suspend fun CommandSender.firefox(version: String) {
+    suspend fun CommandSender.firefox(version: String = "") {
         sendMessage("下载 firefox 开始, version: $version")
         try {
             val bin = MiraiSeleniumPlugin.firefox(version = version)
