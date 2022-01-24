@@ -87,7 +87,9 @@ internal class SeleniumToolKtTest {
         val start = System.currentTimeMillis()
         while (isActive) {
             if (driver.isReady()) break
-            if (System.currentTimeMillis() - start > 60_000) break
+            if (System.currentTimeMillis() - start > 60_000) {
+                System.err.println("$browser pdf ready timeout.")
+            }
             delay(10_000)
         }
 
