@@ -671,8 +671,7 @@ internal fun setupFirefox(folder: File, version: String): File {
 
                 val volume = File("/Volumes/Firefox")
 
-                setup.mkdirs()
-                ProcessBuilder("cp", "-rf", "*", setup.absolutePath)
+                ProcessBuilder("cp", "-rf", "Firefox.app", setup.absolutePath)
                     .directory(volume)
                     .start()
                     .apply {
