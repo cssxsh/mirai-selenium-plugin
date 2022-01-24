@@ -77,11 +77,19 @@ object MiraiSeleniumPlugin : KotlinPlugin(
      */
     fun firefox(version: String) = setupFirefox(folder = dataFolder, version = version)
 
+    /**
+     * 下载解压 chromium
+     * @param version 浏览器版本
+     * @see dataFolder
+     */
+    fun chromium(version: String) = setupChromium(folder = dataFolder, version = version)
+
     @OptIn(ConsoleExperimentalApi::class)
     override fun PluginComponentStorage.onLoad() {
         SeleniumContext = childScopeContext(name = "Selenium", context = Dispatchers.IO)
         SeleniumLogger.level = Level.OFF
         System.setProperty(CHROME_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/chromedriver")
+        System.setProperty(FIREFOX_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/geckodriver")
     }
 
     /**

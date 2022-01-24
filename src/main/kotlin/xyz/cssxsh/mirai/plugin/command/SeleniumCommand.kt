@@ -60,12 +60,24 @@ object SeleniumCommand : CompositeCommand(
     @SubCommand
     @Description("下载解压 firefox, https://archive.mozilla.org/pub/firefox/releases/")
     suspend fun CommandSender.firefox(version: String = "") {
-        sendMessage("下载 firefox 开始, version: $version")
+        sendMessage("下载 firefox 开始, version: ${version.ifBlank { "latest" }}")
         try {
             val bin = MiraiSeleniumPlugin.firefox(version = version)
             sendMessage("下载结束，path: ${bin.absolutePath}")
         } catch (cause: Throwable) {
             sendMessage("下载 firefox 异常, $cause")
+        }
+    }
+
+    @SubCommand
+    @Description("下载解压 chromium, https://github.com/macchrome")
+    suspend fun CommandSender.chromium(version: String = "") {
+        sendMessage("下载 chromium 开始, version: ${version.ifBlank { "latest" }}")
+        try {
+            val bin = MiraiSeleniumPlugin.chromium(version = version)
+            sendMessage("下载结束，path: ${bin.absolutePath}")
+        } catch (cause: Throwable) {
+            sendMessage("下载 chromium 异常, $cause")
         }
     }
 }
