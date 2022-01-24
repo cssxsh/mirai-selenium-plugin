@@ -670,17 +670,12 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .waitFor()
 
                 val volume = File("/Volumes/Firefox")
+                setup.mkdirs()
 
                 ProcessBuilder("cp", "-rf", "Firefox.app", setup.absolutePath)
                     .directory(volume)
                     .start()
-                    .apply {
-                        inputStream.transferTo(System.out)
-                        errorStream.transferTo(System.err)
-                    }
                     .waitFor()
-
-                println(setup.list()?.asList())
 
                 ProcessBuilder("hdiutil", "detach", volume.absolutePath)
                     .directory(folder)
