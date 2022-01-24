@@ -1,8 +1,8 @@
 plugins {
-    kotlin("jvm") version "1.5.31"
-    kotlin("plugin.serialization") version "1.5.31"
+    kotlin("jvm") version "1.6.0"
+    kotlin("plugin.serialization") version "1.6.0"
 
-    id("net.mamoe.mirai-console") version "2.9.2"
+    id("net.mamoe.mirai-console") version "2.10.0-RC2"
     id("net.mamoe.maven-central-publish") version "0.7.0"
 }
 
@@ -29,9 +29,10 @@ dependencies {
         exclude("org.slf4j")
         exclude("io.netty")
     }
+    compileOnly("net.mamoe:mirai-core-utils:${mirai.coreVersion}")
 
-    testImplementation(kotlin("test", "1.5.31"))
-    testImplementation("org.slf4j:slf4j-simple:2.0.0-alpha6")
+    testImplementation(kotlin("test", "1.6.0"))
+    testImplementation("org.slf4j:slf4j-simple:1.7.32")
 }
 
 mirai {
