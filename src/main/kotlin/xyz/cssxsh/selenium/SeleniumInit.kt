@@ -669,6 +669,7 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .waitFor()
 
                 println(setup.absolutePath)
+                println(setup.list()?.asList())
 
                 ProcessBuilder("cp", "-rf", "/Volumes/Firefox", setup.absolutePath)
                     .directory(folder)
@@ -678,6 +679,8 @@ internal fun setupFirefox(folder: File, version: String): File {
                         errorStream.transferTo(System.err)
                     }
                     .waitFor()
+
+                println(setup.list()?.asList())
 
                 ProcessBuilder("hdiutil", "detach", "/Volumes/Firefox")
                     .directory(folder)
