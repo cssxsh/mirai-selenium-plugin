@@ -37,6 +37,8 @@ internal const val EDGE_BROWSER_BINARY = "webdriver.edge.bin"
 
 internal const val FIREFOX_BROWSER_BINARY = FirefoxDriver.SystemProperty.BROWSER_BINARY
 
+internal const val SEVEN7Z_MIRRORS = "seven7z.mirrors"
+
 private object AllIgnoredOutputStream : OutputStream() {
     override fun close() {}
     override fun write(b: ByteArray, off: Int, len: Int) {}
@@ -559,7 +561,8 @@ internal fun clearWebDriver(): List<File> {
 internal fun sevenZA(folder: File): File {
     return folder.resolve("7za.exe").apply {
         if (exists().not()) {
-            val pack = download(urlString = "https://www.7-zip.org/a/7za920.zip", folder = folder)
+            val base = System.getProperty(SEVEN7Z_MIRRORS, "https://www.7-zip.org/a")
+            val pack = download(urlString = "${base}/7za920.zip", folder = folder)
             ZipFile(pack).use { file ->
                 val entry = file.getEntry("7za.exe")
                 setLastModified(entry.time)
@@ -705,7 +708,7 @@ internal fun setupChromium(folder: File, version: String): File {
     folder.mkdirs()
     val platform = Platform.getCurrent()
     fun release(repo: String): GitHubRelease {
-        return if (version.isBlank()) {
+        return if (version.isNotBlank()) {
             var page = 0
             val release: GitHubRelease
             while (true) {

@@ -90,6 +90,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
         SeleniumLogger.level = Level.OFF
         System.setProperty(CHROME_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/chromedriver")
         System.setProperty(FIREFOX_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/geckodriver")
+        System.setProperty(SEVEN7Z_MIRRORS, "http://downloads.sourceforge.net/sevenzip")
     }
 
     /**
@@ -128,7 +129,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
             if (firefox.isNotBlank()) System.setProperty(FIREFOX_BROWSER_BINARY, firefox)
         }
 
-        launch(SeleniumContext) {
+        launch(coroutineContext) {
             while (isActive) {
                 delay(MiraiSeleniumConfig.destroy * 60_000L)
                 try {
