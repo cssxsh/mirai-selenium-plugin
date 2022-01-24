@@ -21,7 +21,7 @@ internal class SeleniumToolKtTest {
         when {
             platform.`is`(Platform.WINDOWS) -> listOf("Edge", "Chromium", "Firefox")
             platform.`is`(Platform.LINUX) -> listOf("Chromium", "Firefox")
-            platform.`is`(Platform.MAC) -> listOf("Chromium")
+            platform.`is`(Platform.MAC) -> listOf("Chromium", "Firefox")
             else -> throw UnsupportedOperationException("不受支持的平台 $platform")
         }
     }
