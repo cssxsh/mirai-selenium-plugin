@@ -669,11 +669,10 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .start()
                     .waitFor()
 
-                println(setup.absolutePath)
-                println(setup.list()?.asList())
+                val volume = File("/Volumes/Firefox")
 
-                ProcessBuilder("cp", "-rf", "/Volumes/Firefox", setup.absolutePath)
-                    .directory(folder)
+                ProcessBuilder("cp", "-rf", ".", setup.absolutePath)
+                    .directory(volume)
                     .start()
                     .apply {
                         inputStream.transferTo(System.out)
@@ -683,7 +682,7 @@ internal fun setupFirefox(folder: File, version: String): File {
 
                 println(setup.list()?.asList())
 
-                ProcessBuilder("hdiutil", "detach", "/Volumes/Firefox")
+                ProcessBuilder("hdiutil", "detach", volume.absolutePath)
                     .directory(folder)
                     .start()
                     .waitFor()
