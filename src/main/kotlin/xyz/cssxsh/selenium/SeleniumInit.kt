@@ -770,9 +770,9 @@ internal fun setupChromium(folder: File, version: String): File {
                     .first { asset -> asset.browserDownloadUrl.endsWith(".tar.xz") }
                     .browserDownloadUrl
 
-                // XXX: tar.xz
                 val xz = download(urlString = url, folder = folder, filename = url.substringAfterLast('/'))
 
+                // XXX: tar.xz
                 ProcessBuilder("tar", "-xf", xz.absolutePath)
                     .directory(folder)
                     .start()
@@ -791,7 +791,7 @@ internal fun setupChromium(folder: File, version: String): File {
 
             if (setup.exists().not()) {
                 val url = release.assets
-                    .first { asset -> asset.browserDownloadUrl.startsWith("Chromium") }
+                    .first { asset -> "Chromium" in asset.browserDownloadUrl }
                     .browserDownloadUrl
 
                 val zip = download(urlString = url, folder = folder, filename = url.substringAfterLast('/'))
