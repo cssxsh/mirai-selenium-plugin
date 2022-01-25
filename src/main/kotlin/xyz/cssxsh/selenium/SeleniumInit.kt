@@ -68,7 +68,7 @@ internal fun queryRegister(key: String): String {
  */
 internal fun queryVersion(folder: File): String {
     // XXX: get version by folder
-    val regex = """[\d.]+""".toRegex()
+    val regex = """^[\d.]+""".toRegex()
     return folder.list()?.reversed()?.firstNotNullOf { regex.find(it)?.value }
         ?: throw UnsupportedOperationException("无法在 ${folder.absolutePath} 找到版本信息")
 }
@@ -153,6 +153,7 @@ internal fun download(urlString: String, folder: File, filename: String? = null)
 */
 internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
     val folder = File(System.getProperty(SELENIUM_FOLDER, "."))
+    folder.mkdirs()
     return when {
         browser.isBlank() || browser.contains(other = "Default", ignoreCase = true) -> {
             /**
