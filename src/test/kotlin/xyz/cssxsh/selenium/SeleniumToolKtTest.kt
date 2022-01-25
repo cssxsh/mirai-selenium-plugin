@@ -19,7 +19,8 @@ internal class SeleniumToolKtTest {
     private val browsers by lazy {
         val platform = Platform.getCurrent()
         when {
-            platform.`is`(Platform.WINDOWS) -> listOf("Edge", "Chromium", "Firefox")
+            platform.`is`(Platform.WIN10) -> listOf("Edge", "Chromium", "Firefox")
+            platform.`is`(Platform.WINDOWS) -> listOf("Chromium", "Firefox")
             platform.`is`(Platform.LINUX) -> listOf("Chromium", "Firefox")
             platform.`is`(Platform.MAC) -> listOf("Chromium", "Firefox")
             else -> throw UnsupportedOperationException("不受支持的平台 $platform")

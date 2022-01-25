@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          # - windowns-latest
+          - windows-latest
           - macos-latest
           - ubuntu-latest
     steps:
