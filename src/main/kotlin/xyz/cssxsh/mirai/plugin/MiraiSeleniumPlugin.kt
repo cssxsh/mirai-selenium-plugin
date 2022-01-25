@@ -35,9 +35,6 @@ object MiraiSeleniumPlugin : KotlinPlugin(
             logger.info { "额外参数: ${RemoteWebDriverConfig.arguments}" }
         }
         installed = false
-        val folder = dataFolder.resolve("selenium")
-        folder.mkdirs()
-        System.setProperty(SELENIUM_FOLDER, folder.absolutePath)
         try {
             setupWebDriver(browser = RemoteWebDriverConfig.browser)
             installed = true
@@ -89,6 +86,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
         System.setProperty(CHROME_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/chromedriver")
         System.setProperty(FIREFOX_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/geckodriver")
         System.setProperty(SEVEN7Z_MIRRORS, "https://downloads.sourceforge.net/sevenzip")
+        System.setProperty(SELENIUM_FOLDER, dataFolder.resolve("selenium").absolutePath)
     }
 
     /**
