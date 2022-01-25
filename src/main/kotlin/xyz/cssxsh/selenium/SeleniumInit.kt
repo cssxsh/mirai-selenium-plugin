@@ -116,6 +116,7 @@ internal fun download(urlString: String, folder: File, filename: String? = null)
         else -> null
     }
     val client = HttpClient(OkHttp) {
+        CurlUserAgent()
         defaultRequest {
             if (token != null) {
                 header(HttpHeaders.Authorization, "token $token")

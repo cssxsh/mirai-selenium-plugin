@@ -100,7 +100,7 @@ internal class SeleniumToolKtTest {
 
     @Test
     @Timeout(value = 3, unit = TimeUnit.MINUTES)
-    fun firefox(): Unit = runBlocking {
+    fun firefox() {
         setupFirefox(folder = folder, version = "")
         val driver = RemoteWebDriver(config = object : RemoteWebDriverConfig {
             override val browser: String = "firefox"
@@ -118,7 +118,7 @@ internal class SeleniumToolKtTest {
 
     @Test
     @Timeout(value = 3, unit = TimeUnit.MINUTES)
-    fun chromium(): Unit = runBlocking {
+    fun chromium() {
         setupChromium(folder = folder, version = "")
         val driver = RemoteWebDriver(config = object : RemoteWebDriverConfig {
             override val browser: String = "chromium"
