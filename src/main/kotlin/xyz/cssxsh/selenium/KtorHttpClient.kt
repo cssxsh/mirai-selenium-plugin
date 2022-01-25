@@ -16,7 +16,6 @@ import java.net.URI
 
 class KtorHttpClient(private val config: SeleniumHttpClientConfig) : SeleniumHttpClient {
 
-    @OptIn(KtorExperimentalAPI::class)
     private val client = HttpClient(OkHttp) {
         engine {
             proxy = config.proxy()
@@ -33,7 +32,6 @@ class KtorHttpClient(private val config: SeleniumHttpClientConfig) : SeleniumHtt
         }
     }
 
-    @OptIn(InternalAPI::class)
     private fun HttpRequestBuilder.takeFrom(request: SeleniumHttpRequest, base: URI) = apply {
         url {
             takeFrom(base.resolve(request.uri))
@@ -63,22 +61,17 @@ class KtorHttpClient(private val config: SeleniumHttpClientConfig) : SeleniumHtt
         response.status = status.value
         response.content = SeleniumHttpContents.memoize { content.toInputStream() }
         headers.forEach { name, list ->
-            for (value in list) {
-                response.addHeader(name, value)
-            }
+            response.addHeader(name, list.joinToString(separator = ";"))
         }
     }
 
-    override fun execute(request: SeleniumHttpRequest?): SeleniumHttpResponse {
-        requireNotNull(request) { "SeleniumHttpRequest Not Null" }
+    override fun execute(request: SeleniumHttpRequest): SeleniumHttpResponse {
         return runBlocking(SeleniumContext) {
             client.request<HttpResponse> { takeFrom(request, config.baseUri()) }.toSeleniumHttpResponse()
         }
     }
 
-    override fun openSocket(request: SeleniumHttpRequest?, listener: SeleniumWebListener?): KtorWebSocket {
-        requireNotNull(request) { "SeleniumHttpRequest Not Null" }
-        requireNotNull(listener) { "SeleniumWebSocket.Listener Not Null" }
+    override fun openSocket(request: SeleniumHttpRequest, listener: SeleniumWebListener): KtorWebSocket {
         val session = runBlocking(SeleniumContext) {
             client.webSocketSession {
                 takeFrom(request, config.baseUri())
@@ -111,8 +104,7 @@ class KtorHttpClient(private val config: SeleniumHttpClientConfig) : SeleniumHtt
             clients.clear()
         }
 
-        override fun createClient(config: SeleniumHttpClientConfig?): SeleniumHttpClient {
-            requireNotNull(config) { "ClientConfig Not Null" }
+        override fun createClient(config: SeleniumHttpClientConfig): SeleniumHttpClient {
             return KtorHttpClient(config).apply {
                 synchronized(clients) {
                     clients.add(client)

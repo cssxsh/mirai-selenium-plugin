@@ -79,10 +79,3 @@ internal data class GitHubRelease(
         val url: String
     )
 }
-
-internal val GitHubJson = Json {
-    prettyPrint = true
-    ignoreUnknownKeys = true
-    isLenient = true
-    allowStructuredMapKeys = true
-}

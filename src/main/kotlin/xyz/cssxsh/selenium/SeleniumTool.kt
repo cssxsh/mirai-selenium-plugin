@@ -55,15 +55,15 @@ internal const val SELENIUM_TIMEOUT_PAGE = "xyz.cssxsh.selenium.timeout.page"
 internal const val SELENIUM_TIMEOUT_INTERVAL = "xyz.cssxsh.selenium.timeout.interval"
 
 private val Init: Duration by lazy {
-    Duration.ofMillis(System.getProperty(SELENIUM_TIMEOUT_INIT)?.toLongOrNull() ?: 10_000)
+    Duration.ofMillis(System.getProperty(SELENIUM_TIMEOUT_INIT, "10000").toLong())
 }
 
 private val PageLoad: Duration by lazy {
-    Duration.ofMillis(System.getProperty(SELENIUM_TIMEOUT_PAGE)?.toLongOrNull() ?: 180_000)
+    Duration.ofMillis(System.getProperty(SELENIUM_TIMEOUT_PAGE, "180000").toLong())
 }
 
 private val Interval: Duration by lazy {
-    Duration.ofMillis(System.getProperty(SELENIUM_TIMEOUT_INTERVAL)?.toLongOrNull() ?: 10_000)
+    Duration.ofMillis(System.getProperty(SELENIUM_TIMEOUT_INTERVAL, "10000").toLong())
 }
 
 /**

@@ -11,6 +11,7 @@ import io.ktor.utils.io.*
 import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.*
+import kotlinx.serialization.json.*
 import org.openqa.selenium.*
 import org.openqa.selenium.chrome.*
 import org.openqa.selenium.chromium.*
@@ -89,6 +90,13 @@ internal fun HttpMessage.contentDisposition(): ContentDisposition? {
     return headers[HttpHeaders.ContentDisposition]?.let { ContentDisposition.parse(it) }
 }
 
+internal val IgnoreJson = Json {
+    prettyPrint = true
+    ignoreUnknownKeys = true
+    isLenient = true
+    allowStructuredMapKeys = true
+}
+
 /**
  * 下载文件
  * @param urlString 下载链接
@@ -140,7 +148,8 @@ internal fun download(urlString: String, folder: File, filename: String? = null)
  * @see setupEdgeDriver
  * @see setupChromeDriver
  * @see setupFirefoxDriver
- */
+ * @see org.openqa.selenium.remote.http.HttpClient.Factory.createDefault
+*/
 internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
     val folder = File(System.getProperty(SELENIUM_FOLDER, "."))
     return when {
@@ -212,7 +221,6 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
     } catch (cause: Throwable) {
         throw UnsupportedOperationException("Edge 版本获取失败", cause)
     }
-
 
     val xml = download(
         urlString = "https://msedgewebdriverstorage.blob.core.windows.net/edgewebdriver?prefix=${version}&comp=list&timeout=60000",
@@ -385,16 +393,15 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
 /**
  * 安装 FirefoxDriver
  * @param folder 安装目录
- * @see SELENIUM_DOWNLOAD_EXPIRES
  * @see GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY
  * @see WEBDRIVER_HTTP_FACTORY
  * @see FirefoxBinary
- * @see FirefoxDriver.SystemProperty.BROWSER_BINARY
+ * @see FIREFOX_BROWSER_BINARY
  */
 internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     // 取版本
     val platform = Platform.getCurrent()
-    val json = GitHubJson.decodeFromString(
+    val json = IgnoreJson.decodeFromString(
         deserializer = GitHubRelease.serializer(),
         string = download(
             urlString = "https://api.github.com/repos/mozilla/geckodriver/releases/latest",
@@ -593,10 +600,10 @@ internal fun setupFirefox(folder: File, version: String): File {
                     folder = folder
                 ).apply {
                     val latest = name.substringAfterLast(' ').removeSuffix(".exe")
-                    setup = folder.resolve("Firefox-${latest}-win")
+                    setup = folder.resolve("Firefox-v${latest}-win")
                 }
             } else {
-                setup = folder.resolve("Firefox-${version}-win")
+                setup = folder.resolve("Firefox-v${version}-win")
                 download(
                     urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/win64/zh-CN/Firefox Setup ${version}.exe",
                     folder = folder,
@@ -626,10 +633,10 @@ internal fun setupFirefox(folder: File, version: String): File {
                     folder = folder
                 ).apply {
                     val latest = name.substringAfterLast('-').removeSuffix(".tar.bz2")
-                    setup = folder.resolve("Firefox-${latest}-linux")
+                    setup = folder.resolve("Firefox-v${latest}-linux")
                 }
             } else {
-                setup = folder.resolve("Firefox-${version}-linux")
+                setup = folder.resolve("Firefox-v${version}-linux")
                 download(
                     urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/linux-x86_64/zh-CN/firefox-${version}.tar.bz2",
                     folder = folder,
@@ -657,10 +664,10 @@ internal fun setupFirefox(folder: File, version: String): File {
                     folder = folder
                 ).apply {
                     val latest = name.substringAfterLast(' ').removeSuffix(".dmg")
-                    setup = folder.resolve("Firefox-${latest}-mac")
+                    setup = folder.resolve("Firefox-v${latest}-mac")
                 }
             } else {
-                setup = folder.resolve("Firefox-${version}-mac")
+                setup = folder.resolve("Firefox-v${version}-mac")
                 download(
                     urlString = "https://archive.mozilla.org/pub/firefox/releases/${version}/mac/zh-CN/Firefox ${version}.dmg",
                     folder = folder,
@@ -698,7 +705,7 @@ internal fun setupFirefox(folder: File, version: String): File {
 }
 
 /**
- * 安装 Chromium 浏览器 [GitHub macchrome](https://github.com/macchrome)
+ * 安装 Chromium 浏览器 , download by [macchrome](https://github.com/macchrome)
  * @param folder 安装目录
  * @param version 版本, 为空时下载 snapshots-latest 版
  * @return binary
@@ -712,7 +719,7 @@ internal fun setupChromium(folder: File, version: String): File {
             var page = 0
             val release: GitHubRelease
             while (true) {
-                val releases = GitHubJson.decodeFromString(
+                val releases = IgnoreJson.decodeFromString(
                     deserializer = ListSerializer(GitHubRelease.serializer()),
                     string = download(
                         urlString = "https://api.github.com/repos/macchrome/$repo/releases?page=${page++}",
@@ -727,7 +734,7 @@ internal fun setupChromium(folder: File, version: String): File {
             }
             release
         } else {
-            GitHubJson.decodeFromString(
+            IgnoreJson.decodeFromString(
                 deserializer = GitHubRelease.serializer(),
                 string = download(
                     urlString = "https://api.github.com/repos/macchrome/$repo/releases/latest",

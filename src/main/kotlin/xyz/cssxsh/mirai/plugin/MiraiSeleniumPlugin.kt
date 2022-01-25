@@ -5,7 +5,6 @@ import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
 import net.mamoe.mirai.console.extension.*
 import net.mamoe.mirai.console.plugin.jvm.*
-import net.mamoe.mirai.console.util.*
 import net.mamoe.mirai.utils.*
 import xyz.cssxsh.mirai.plugin.command.*
 import xyz.cssxsh.mirai.plugin.data.*
@@ -16,7 +15,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
-        version = "2.0.4-RC3",
+        version = "2.0.4",
     ) {
         author("cssxsh")
     }
@@ -27,7 +26,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     /**
      * 初始化 Selenium
      * @param flush 是否重新安装
-     * @see [setupWebDriver]
+     * @see setupWebDriver
      */
     fun setup(flush: Boolean = false): Boolean = synchronized(this) {
         if (!flush && installed) return@synchronized true
@@ -84,7 +83,6 @@ object MiraiSeleniumPlugin : KotlinPlugin(
      */
     fun chromium(version: String) = setupChromium(folder = dataFolder, version = version)
 
-    @OptIn(ConsoleExperimentalApi::class)
     override fun PluginComponentStorage.onLoad() {
         SeleniumContext = childScopeContext(name = "Selenium", context = Dispatchers.IO)
         SeleniumLogger.level = Level.OFF
