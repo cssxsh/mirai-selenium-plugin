@@ -15,6 +15,9 @@ jobs:
       - name: Setup chrome
         uses: browser-actions/setup-chrome@latest
 
+      - name: Setup edge
+        uses: browser-actions/setup-edge@latest
+
       - name: Checkout
         uses: actions/checkout@v2
 
