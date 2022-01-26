@@ -125,7 +125,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
             if (firefox.isNotBlank()) System.setProperty(FIREFOX_BROWSER_BINARY, firefox)
         }
 
-        launch(coroutineContext) {
+        launch(Dispatchers.IO) {
             while (isActive) {
                 delay(MiraiSeleniumConfig.destroy * 60_000L)
                 try {
