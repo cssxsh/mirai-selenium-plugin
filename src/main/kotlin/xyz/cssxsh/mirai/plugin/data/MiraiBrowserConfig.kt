@@ -3,16 +3,16 @@ package xyz.cssxsh.mirai.plugin.data
 import net.mamoe.mirai.console.data.*
 import net.mamoe.mirai.console.util.*
 
-object MiraiBrowserConfig : AutoSavePluginConfig("MiraiBrowserConfig") {
+public object MiraiBrowserConfig : AutoSavePluginConfig("MiraiBrowserConfig") {
 
     @ValueDescription("Chrome/Chromium 二进制文件路径")
-    var chrome by value("")
+    public var chrome: String by value("")
 
     @ValueDescription("Edge 二进制文件路径")
-    var edge by value("")
+    public var edge: String by value("")
 
     @ValueDescription("Firefox 二进制文件路径")
-    var firefox by value("")
+    public var firefox: String by value("")
 
     @OptIn(ConsoleExperimentalApi::class)
     override fun shouldPerformAutoSaveWheneverChanged(): Boolean = false

@@ -14,7 +14,7 @@ import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.*
 import java.net.URI
 
-class KtorHttpClient(private val config: SeleniumHttpClientConfig) : SeleniumHttpClient {
+internal class KtorHttpClient(private val config: SeleniumHttpClientConfig) : SeleniumHttpClient {
 
     private val client = HttpClient(OkHttp) {
         engine {

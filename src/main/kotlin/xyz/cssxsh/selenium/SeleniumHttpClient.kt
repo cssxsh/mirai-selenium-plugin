@@ -2,20 +2,20 @@ package xyz.cssxsh.selenium
 
 import org.openqa.selenium.remote.http.*
 
-typealias SeleniumHttpClient = HttpClient
+internal typealias SeleniumHttpClient = HttpClient
 
-typealias SeleniumHttpClientConfig = ClientConfig
+internal typealias SeleniumHttpClientConfig = ClientConfig
 
-typealias SeleniumHttpClientFactory = HttpClient.Factory
+internal typealias SeleniumHttpClientFactory = HttpClient.Factory
 
-typealias SeleniumHttpClientName = HttpClientName
+internal typealias SeleniumHttpClientName = HttpClientName
 
-typealias SeleniumHttpRequest = HttpRequest
+internal typealias SeleniumHttpRequest = HttpRequest
 
-typealias SeleniumHttpResponse = HttpResponse
+internal typealias SeleniumHttpResponse = HttpResponse
 
-typealias SeleniumWebListener = WebSocket.Listener
+internal typealias SeleniumWebListener = WebSocket.Listener
 
-typealias SeleniumUserAgent = AddSeleniumUserAgent
+internal typealias SeleniumUserAgent = AddSeleniumUserAgent
 
-typealias SeleniumHttpContents = Contents
+internal typealias SeleniumHttpContents = Contents

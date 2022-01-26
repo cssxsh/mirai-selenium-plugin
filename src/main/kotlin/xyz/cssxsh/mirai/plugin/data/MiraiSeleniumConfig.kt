@@ -3,15 +3,15 @@ package xyz.cssxsh.mirai.plugin.data
 import net.mamoe.mirai.console.data.*
 import xyz.cssxsh.selenium.*
 
-object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"), RemoteWebDriverConfig {
+public object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"), RemoteWebDriverConfig {
 
     @ValueName("expires")
     @ValueDescription("驱动文件过期时间，默认一星期 (单位：天)")
-    val expires by value(7)
+    public val expires: Int by value(7)
 
     @ValueName("destroy")
     @ValueDescription("清理浏览器驱动，默认30 (单位：分钟)")
-    val destroy by value(30)
+    public val destroy: Int by value(30)
 
     @ValueName("user_agent")
     @ValueDescription("截图UA")
@@ -57,5 +57,5 @@ object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"), Remote
     @ValueDescription("自定义 arguments")
     override val arguments: List<String> by value(emptyList())
 
-    internal class DriverConfig : RemoteWebDriverConfig by MiraiSeleniumConfig
+    internal class Service : RemoteWebDriverConfig by MiraiSeleniumConfig
 }

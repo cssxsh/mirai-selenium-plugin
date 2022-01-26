@@ -8,22 +8,22 @@ import java.util.*
  * @see [RemoteWebDriverConfig.toConsumer]
  * @see [RemoteWebDriverSupplier]
  */
-interface RemoteWebDriverConfig {
-    val userAgent: String get() = INSTANCE.userAgent
-    val width: Int get() = INSTANCE.width
-    val height: Int get() = INSTANCE.height
-    val pixelRatio: Int get() = INSTANCE.pixelRatio
-    val headless: Boolean get() = INSTANCE.headless
-    val proxy: String get() = INSTANCE.proxy
-    val preferences: Map<String, String> get() = INSTANCE.preferences
-    val log: Boolean get() = INSTANCE.log
-    val browser: String get() = INSTANCE.browser
-    val factory: String get() = INSTANCE.factory
-    val arguments: List<String> get() = INSTANCE.arguments
+public interface RemoteWebDriverConfig {
+    public val userAgent: String get() = INSTANCE.userAgent
+    public val width: Int get() = INSTANCE.width
+    public val height: Int get() = INSTANCE.height
+    public val pixelRatio: Int get() = INSTANCE.pixelRatio
+    public val headless: Boolean get() = INSTANCE.headless
+    public val proxy: String get() = INSTANCE.proxy
+    public val preferences: Map<String, String> get() = INSTANCE.preferences
+    public val log: Boolean get() = INSTANCE.log
+    public val browser: String get() = INSTANCE.browser
+    public val factory: String get() = INSTANCE.factory
+    public val arguments: List<String> get() = INSTANCE.arguments
 
-    companion object INSTANCE : RemoteWebDriverConfig {
+    public companion object INSTANCE : RemoteWebDriverConfig {
         @JvmStatic
-        val loader: ServiceLoader<RemoteWebDriverConfig> by lazy {
+        public val loader: ServiceLoader<RemoteWebDriverConfig> by lazy {
             ServiceLoader.load(RemoteWebDriverConfig::class.java, RemoteWebDriverConfig::class.java.classLoader)
         }
 

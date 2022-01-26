@@ -6,12 +6,14 @@ import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
 import net.mamoe.mirai.console.extension.*
 import net.mamoe.mirai.console.plugin.jvm.*
 import net.mamoe.mirai.utils.*
+import org.openqa.selenium.remote.*
 import xyz.cssxsh.mirai.plugin.command.*
 import xyz.cssxsh.mirai.plugin.data.*
 import xyz.cssxsh.selenium.*
+import java.io.*
 import java.util.logging.*
 
-object MiraiSeleniumPlugin : KotlinPlugin(
+public object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
@@ -28,7 +30,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
      * @param flush 是否重新安装
      * @see setupWebDriver
      */
-    fun setup(flush: Boolean = false): Boolean = synchronized(this) {
+    public fun setup(flush: Boolean = false): Boolean = synchronized(this) {
         if (!flush && installed) return@synchronized true
 
         if (RemoteWebDriverConfig.arguments.isNotEmpty()) {
@@ -51,13 +53,15 @@ object MiraiSeleniumPlugin : KotlinPlugin(
      * 创建一个 RemoteWebDriver
      * @param config 驱动配置
      */
-    fun driver(config: RemoteWebDriverConfig = RemoteWebDriverConfig.INSTANCE) = RemoteWebDriver(config)
+    public fun driver(config: RemoteWebDriverConfig = RemoteWebDriverConfig.INSTANCE): RemoteWebDriver {
+        return RemoteWebDriver(config)
+    }
 
     /**
      * 清理驱动文件
      * @see clearWebDriver
      */
-    fun clear(): Unit = synchronized(this) {
+    public fun clear(): Unit = synchronized(this) {
         if (!installed) return@synchronized
 
         val deleted = clearWebDriver()
@@ -71,14 +75,14 @@ object MiraiSeleniumPlugin : KotlinPlugin(
      * @param version 浏览器版本
      * @see setupFirefox
      */
-    fun firefox(version: String) = setupFirefox(folder = dataFolder, version = version)
+    public fun firefox(version: String): File = setupFirefox(folder = dataFolder, version = version)
 
     /**
      * 下载解压 chromium
      * @param version 浏览器版本
      * @see setupChromium
      */
-    fun chromium(version: String) = setupChromium(folder = dataFolder, version = version)
+    public fun chromium(version: String): File = setupChromium(folder = dataFolder, version = version)
 
     override fun PluginComponentStorage.onLoad() {
         SeleniumContext = childScopeContext(name = "Selenium", context = Dispatchers.IO)
@@ -92,7 +96,7 @@ object MiraiSeleniumPlugin : KotlinPlugin(
     /**
      * @param enable 判断是否进程是否正常工作，false 时清除所有进程
      */
-    fun destroy(enable: Boolean = true) {
+    public fun destroy(enable: Boolean = true) {
         DriverCache.entries.removeIf { (driver, service) ->
             if (enable && driver.sessionId != null && service.isRunning) return@removeIf false
 

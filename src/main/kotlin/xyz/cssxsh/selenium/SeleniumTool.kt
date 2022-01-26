@@ -70,13 +70,15 @@ private val Interval: Duration by lazy {
  * 创建一个 RemoteWebDriver
  * @param config 配置
  */
-fun RemoteWebDriver(config: RemoteWebDriverConfig) = setupWebDriver(browser = config.browser).invoke(config)
+public fun RemoteWebDriver(config: RemoteWebDriverConfig): RemoteWebDriver {
+    return setupWebDriver(browser = config.browser).invoke(config)
+}
 
 // endregion
 
 // region Screenshot
 
-inline fun <reified T> useRemoteWebDriver(config: RemoteWebDriverConfig, block: (RemoteWebDriver) -> T): T {
+public inline fun <reified T> useRemoteWebDriver(config: RemoteWebDriverConfig, block: (RemoteWebDriver) -> T): T {
     val driver = RemoteWebDriver(config)
     return try {
         block(driver)
@@ -88,7 +90,7 @@ inline fun <reified T> useRemoteWebDriver(config: RemoteWebDriverConfig, block: 
 /**
  * 判断页面是否加载完全
  */
-fun RemoteWebDriver.isReady(): Boolean {
+public fun RemoteWebDriver.isReady(): Boolean {
     return executeScript(
         """
         function imagesComplete() {
@@ -114,7 +116,7 @@ fun RemoteWebDriver.isReady(): Boolean {
  * 隐藏指定 css 过滤器的 WebElement
  * @param css CSS过滤器
  */
-fun RemoteWebDriver.hide(vararg css: String): List<RemoteWebElement> {
+public fun RemoteWebDriver.hide(vararg css: String): List<RemoteWebElement> {
     if (css.isEmpty()) return emptyList()
     @Suppress("UNCHECKED_CAST")
     return executeScript(
@@ -131,7 +133,7 @@ fun RemoteWebDriver.hide(vararg css: String): List<RemoteWebElement> {
  * @param hide CSS过滤器
  * @return 返回的图片文件数据，格式PNG
  */
-suspend fun RemoteWebDriver.getScreenshot(url: String, vararg hide: String): ByteArray {
+public suspend fun RemoteWebDriver.getScreenshot(url: String, vararg hide: String): ByteArray {
     val home = windowHandle
     val tab = switchTo().newWindow(WindowType.TAB) as RemoteWebDriver
 
@@ -159,7 +161,7 @@ suspend fun RemoteWebDriver.getScreenshot(url: String, vararg hide: String): Byt
 /**
  * 将当前页面打印为PDF
  */
-fun RemoteWebDriver.printToPDF(consumer: PrintOptions.() -> Unit = {}): ByteArray {
+public fun RemoteWebDriver.printToPDF(consumer: PrintOptions.() -> Unit = {}): ByteArray {
     val pdf = print(PrintOptions().apply(consumer))
     return Base64.getMimeDecoder().decode(pdf.content)
 }

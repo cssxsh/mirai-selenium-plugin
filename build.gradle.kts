@@ -35,6 +35,10 @@ dependencies {
     testImplementation("org.slf4j:slf4j-simple:1.7.32")
 }
 
+kotlin {
+    explicitApi()
+}
+
 mirai {
     jvmTarget = JavaVersion.VERSION_11
     configureShadow {

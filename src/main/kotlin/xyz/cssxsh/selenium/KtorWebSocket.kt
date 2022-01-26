@@ -1,11 +1,10 @@
 package xyz.cssxsh.selenium
 
-import io.ktor.client.features.websocket.*
 import io.ktor.http.cio.websocket.*
 import kotlinx.coroutines.*
 import org.openqa.selenium.remote.http.*
 
-class KtorWebSocket(private val session: DefaultClientWebSocketSession, private val listener: WebSocket.Listener) :
+internal class KtorWebSocket(private val session: DefaultWebSocketSession, private val listener: WebSocket.Listener) :
     WebSocket {
 
     init {

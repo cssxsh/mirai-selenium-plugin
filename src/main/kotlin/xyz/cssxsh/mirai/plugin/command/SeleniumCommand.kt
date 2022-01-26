@@ -5,7 +5,7 @@ import xyz.cssxsh.mirai.plugin.*
 import xyz.cssxsh.mirai.plugin.data.*
 import xyz.cssxsh.selenium.*
 
-object SeleniumCommand : CompositeCommand(
+public object SeleniumCommand : CompositeCommand(
     owner = MiraiSeleniumPlugin,
     primaryName = "selenium",
     description = "Selenium 驱动相关指令"
@@ -13,7 +13,7 @@ object SeleniumCommand : CompositeCommand(
 
     @SubCommand
     @Description("安装驱动文件")
-    suspend fun CommandSender.setup(flush: Boolean = true) {
+    public suspend fun CommandSender.setup(flush: Boolean = true) {
         sendMessage("安装驱动开始, flush: $flush")
         try {
             if (flush) with(MiraiSeleniumPlugin) { MiraiSeleniumConfig.reload() }
@@ -26,7 +26,7 @@ object SeleniumCommand : CompositeCommand(
 
     @SubCommand
     @Description("清理驱动文件")
-    suspend fun CommandSender.clear() {
+    public suspend fun CommandSender.clear() {
         sendMessage("清理驱动文件")
         try {
             MiraiSeleniumPlugin.clear()
@@ -37,7 +37,7 @@ object SeleniumCommand : CompositeCommand(
 
     @SubCommand
     @Description("清理驱动进程")
-    suspend fun CommandSender.destroy(all: Boolean = true) {
+    public suspend fun CommandSender.destroy(all: Boolean = true) {
         sendMessage(if (all) "清理异常驱动进程" else "清除所有驱动进程")
         try {
             MiraiSeleniumPlugin.destroy(enable = all)
@@ -48,7 +48,7 @@ object SeleniumCommand : CompositeCommand(
 
     @SubCommand
     @Description("驱动进程状态")
-    suspend fun CommandSender.status() {
+    public suspend fun CommandSender.status() {
         try {
             sendMessage(DriverCache.status().joinToString(separator = "\n").ifEmpty { "当前没有驱动进程" })
         } catch (cause: Throwable) {
@@ -58,7 +58,7 @@ object SeleniumCommand : CompositeCommand(
 
     @SubCommand
     @Description("下载解压 firefox, https://archive.mozilla.org/pub/firefox/releases/")
-    suspend fun CommandSender.firefox(version: String = "") {
+    public suspend fun CommandSender.firefox(version: String = "") {
         sendMessage("下载 firefox 开始, version: ${version.ifBlank { "latest" }}")
         try {
             val binary = MiraiSeleniumPlugin.firefox(version = version)
@@ -72,7 +72,7 @@ object SeleniumCommand : CompositeCommand(
 
     @SubCommand
     @Description("下载解压 chromium, https://github.com/macchrome")
-    suspend fun CommandSender.chromium(version: String = "") {
+    public suspend fun CommandSender.chromium(version: String = "") {
         sendMessage("下载 chromium 开始, version: ${version.ifBlank { "latest" }}")
         try {
             val binary = MiraiSeleniumPlugin.chromium(version = version)
