@@ -34,6 +34,7 @@ dependencies {
 ### 示例代码
 
 * [kotlin](src/test/kotlin/xyz/cssxsh/mirai/plugin/MiraiSeleniumPluginTest.kt)
+* [java](src/test/java/xyz/cssxsh/mirai/plugin/MiraiSeleniumPluginJavaTest.java)
 
 ## 使用本前置插件的项目
 
