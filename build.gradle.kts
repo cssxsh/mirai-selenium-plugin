@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "xyz.cssxsh.mirai"
-version = "2.0.5"
+version = "2.0.6"
 
 mavenCentralPublish {
     useCentralS01()
@@ -29,10 +29,10 @@ dependencies {
         exclude("org.slf4j")
         exclude("io.netty")
     }
-    compileOnly("net.mamoe:mirai-core-utils:${mirai.coreVersion}")
+    compileOnly("net.mamoe:mirai-core-utils:2.10.0-RC2")
 
     testImplementation(kotlin("test", "1.6.0"))
-    testImplementation("org.slf4j:slf4j-simple:1.7.32")
+    testImplementation("org.slf4j:slf4j-simple:1.7.33")
 }
 
 kotlin {
@@ -40,7 +40,6 @@ kotlin {
 }
 
 mirai {
-    jvmTarget = JavaVersion.VERSION_11
     configureShadow {
         exclude("module-info.class")
     }
