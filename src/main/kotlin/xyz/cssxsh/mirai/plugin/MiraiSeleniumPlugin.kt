@@ -58,7 +58,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     }
 
     /**
-     * 清理驱动文件
+     * 清理驱动文件，会在插件 [onDisable] 时执行一次，如非必要，无需主动执行
      * @see clearWebDriver
      */
     public fun clear(): Unit = synchronized(this) {
@@ -94,6 +94,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     }
 
     /**
+     * 清理驱动进程，会在 [onEnable] 后定期执行，如非必要，无需主动执
      * @param enable 判断是否进程是否正常工作，false 时清除所有进程
      */
     public fun destroy(enable: Boolean = true) {

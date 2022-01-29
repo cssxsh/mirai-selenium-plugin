@@ -9,16 +9,59 @@ import java.util.*
  * @see [RemoteWebDriverSupplier]
  */
 public interface RemoteWebDriverConfig {
+    /**
+     * Http Header User Agent
+     */
     public val userAgent: String get() = INSTANCE.userAgent
+
+    /**
+     * 浏览器窗口宽度
+     */
     public val width: Int get() = INSTANCE.width
+
+    /**
+     * 浏览器窗口高度
+     */
     public val height: Int get() = INSTANCE.height
+
+    /**
+     * 像素比，(firefox下设置无效)
+     */
     public val pixelRatio: Int get() = INSTANCE.pixelRatio
+
+    /**
+     * 无头模式
+     */
     public val headless: Boolean get() = INSTANCE.headless
+
+    /**
+     * 浏览器代理
+     */
     public val proxy: String get() = INSTANCE.proxy
+
+    /**
+     * User Preferences
+     */
     public val preferences: Map<String, String> get() = INSTANCE.preferences
+
+    /**
+     * 浏览器日志、输出，开启会输出到 文件，关闭则无输出
+     */
     public val log: Boolean get() = INSTANCE.log
+
+    /**
+     * 浏览器类型：`Chrome`,`Chromium`,`Firefox`,`Edge`, 留空会自动获取系统默认浏览器
+     */
     public val browser: String get() = INSTANCE.browser
+
+    /**
+     * Selenium HttpClientFactory，可选值: ktor / netty
+     */
     public val factory: String get() = INSTANCE.factory
+
+    /**
+     * 浏览器启动参数
+     */
     public val arguments: List<String> get() = INSTANCE.arguments
 
     public companion object INSTANCE : RemoteWebDriverConfig {
