@@ -56,10 +56,18 @@ internal typealias RemoteWebDriverSupplier = (config: RemoteWebDriverConfig) -> 
  */
 internal fun queryRegister(key: String): String {
     val (path, name) = key.split('|')
-    return ProcessBuilder("reg", "query", path, "/v", name)
+    val value = ProcessBuilder("reg", "query", path, "/v", name)
         .start()
         .inputStream.use { it.reader().readText() }
         .substringAfter("REG_SZ").trim()
+
+    return value.ifBlank {
+        if (value.startsWith("HKEY_CURRENT_USER")) {
+            queryRegister(key = key.replaceFirst("HKEY_CURRENT_USER", "HKEY_LOCAL_MACHINE"))
+        } else {
+            throw UnsupportedOperationException("注册表 $key 获取失败 \n$value")
+        }
+    }
 }
 
 /**
@@ -150,7 +158,7 @@ internal fun download(urlString: String, folder: File, filename: String? = null)
  * @see setupChromeDriver
  * @see setupFirefoxDriver
  * @see org.openqa.selenium.remote.http.HttpClient.Factory.createDefault
-*/
+ */
 internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
     val folder = File(System.getProperty(SELENIUM_FOLDER, "."))
     folder.mkdirs()
