@@ -23,10 +23,25 @@ public class MiraiSeleniumPluginJavaTest extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        RemoteWebDriver driver = MiraiSeleniumPlugin.INSTANCE.driver(config);
+        Runnable runnable = () -> {
+            RemoteWebDriver driver = MiraiSeleniumPlugin.INSTANCE.driver(config);
 
-        File screenshot = driver.getScreenshotAs(OutputType.FILE);
+            long current = System.currentTimeMillis();
+            while (true) {
+                if (SeleniumToolKt.isReady(driver)) {
+                    break;
+                }
+                if (current - System.currentTimeMillis() > 100_000) {
+                    break;
+                }
+            }
 
-        driver.close();
+            File screenshot = driver.getScreenshotAs(OutputType.FILE);
+
+            driver.close();
+        };
+
+
+        getScheduler().async(runnable);
     }
 }
