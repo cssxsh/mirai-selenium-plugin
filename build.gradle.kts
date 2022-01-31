@@ -28,7 +28,9 @@ dependencies {
     api("org.seleniumhq.selenium:selenium-java:4.1.1") {
         exclude("org.slf4j")
         exclude("io.netty")
+        exclude("com.google.auto.service")
     }
+    compileOnly("com.google.auto.service:auto-service:1.0.1")
     compileOnly("net.mamoe:mirai-core-utils:2.10.0-RC2")
 
     testImplementation(kotlin("test", "1.6.0"))
