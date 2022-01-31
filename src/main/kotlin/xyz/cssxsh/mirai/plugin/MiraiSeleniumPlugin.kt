@@ -30,6 +30,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
      * @param flush 是否重新安装
      * @see setupWebDriver
      */
+    @JvmOverloads
     public fun setup(flush: Boolean = false): Boolean = synchronized(this) {
         if (!flush && installed) return@synchronized true
 
@@ -53,6 +54,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
      * 创建一个 RemoteWebDriver
      * @param config 驱动配置
      */
+    @JvmOverloads
     public fun driver(config: RemoteWebDriverConfig = RemoteWebDriverConfig.INSTANCE): RemoteWebDriver {
         return RemoteWebDriver(config)
     }
@@ -75,14 +77,16 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
      * @param version 浏览器版本
      * @see setupFirefox
      */
-    public fun firefox(version: String): File = setupFirefox(folder = dataFolder, version = version)
+    @JvmOverloads
+    public fun firefox(version: String = ""): File = setupFirefox(folder = dataFolder, version = version)
 
     /**
      * 下载解压 chromium
      * @param version 浏览器版本
      * @see setupChromium
      */
-    public fun chromium(version: String): File = setupChromium(folder = dataFolder, version = version)
+    @JvmOverloads
+    public fun chromium(version: String = ""): File = setupChromium(folder = dataFolder, version = version)
 
     override fun PluginComponentStorage.onLoad() {
         SeleniumContext = childScopeContext(name = "Selenium", context = Dispatchers.IO)
@@ -97,6 +101,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
      * 清理驱动进程，会在 [onEnable] 后定期执行，如非必要，无需主动执
      * @param enable 判断是否进程是否正常工作，false 时清除所有进程
      */
+    @JvmOverloads
     public fun destroy(enable: Boolean = true) {
         DriverCache.entries.removeIf { (driver, service) ->
             if (enable && driver.sessionId != null && service.isRunning) return@removeIf false
