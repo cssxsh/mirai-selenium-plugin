@@ -20,11 +20,14 @@ import org.openqa.selenium.firefox.*
 import org.openqa.selenium.net.*
 import org.openqa.selenium.remote.*
 import java.io.*
+import java.lang.*
 import java.util.zip.*
 
 internal const val SELENIUM_FOLDER = "xyz.cssxsh.selenium.folder"
 
 internal const val SELENIUM_DOWNLOAD_EXPIRES = "xyz.cssxsh.selenium.download.expires"
+
+internal const val SELENIUM_DEFAULT_PORT = 9515
 
 internal const val WEBDRIVER_HTTP_FACTORY = "webdriver.http.factory"
 
@@ -265,7 +268,11 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
         if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
         val options = EdgeOptions().also(config.toConsumer())
         if (binary != null) options.setBinary(binary)
-        val port = PortProber.findFreePort()
+        val port = try {
+            PortProber.findFreePort()
+        } catch (_: RuntimeException) {
+            SELENIUM_DEFAULT_PORT
+        }
         val uuid = "${System.currentTimeMillis()}-${port}"
         val service = EdgeDriverService.Builder()
             .withLogFile(folder.resolve("msedgedriver.${uuid}.log").takeIf { config.log })
@@ -384,7 +391,11 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
         if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
         val options = ChromeOptions().also(config.toConsumer())
         if (binary != null) options.setBinary(binary)
-        val port = PortProber.findFreePort()
+        val port = try {
+            PortProber.findFreePort()
+        } catch (_: RuntimeException) {
+            SELENIUM_DEFAULT_PORT
+        }
         val uuid = "${System.currentTimeMillis()}-${port}"
         val service = ChromeDriverService.Builder()
             .withAppendLog(config.log)
@@ -464,7 +475,11 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     return { config ->
         if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
         val options = FirefoxOptions().also(config.toConsumer())
-        val port = PortProber.findFreePort()
+        val port = try {
+            PortProber.findFreePort()
+        } catch (_: RuntimeException) {
+            SELENIUM_DEFAULT_PORT
+        }
         val uuid = "${System.currentTimeMillis()}-${port}"
         val service = GeckoDriverService.Builder()
             .withLogFile(folder.resolve("geckodriver.${uuid}.log").takeIf { config.log })
