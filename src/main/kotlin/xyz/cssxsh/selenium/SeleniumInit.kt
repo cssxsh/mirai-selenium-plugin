@@ -199,6 +199,8 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                 else -> throw UnsupportedOperationException("不受支持的平台 $platform")
             }
 
+            if (default.isBlank()) throw UnsupportedOperationException("默认浏览器为空")
+
             setupWebDriver(browser = default)
         }
         browser.contains(other = "Edge", ignoreCase = true) -> setupEdgeDriver(folder = folder)
