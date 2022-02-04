@@ -18,6 +18,10 @@ internal class SeleniumToolKtTest {
 
     private val browsers by lazy {
         val platform = Platform.getCurrent()
+        val chromium = File("C:\\hostedtoolcache\\windows\\chromium\\latest\\x64\\chrome.exe")
+        if (chromium.exists()) {
+            System.setProperty(CHROME_BROWSER_BINARY, chromium.absolutePath)
+        }
         when {
             platform.`is`(Platform.WIN10) -> listOf("Edge", "Chromium", "Firefox")
             platform.`is`(Platform.WINDOWS) -> listOf("Chromium", "Firefox")
