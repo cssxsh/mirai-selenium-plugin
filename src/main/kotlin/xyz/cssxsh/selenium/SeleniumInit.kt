@@ -84,19 +84,6 @@ internal fun queryVersion(folder: File): String {
         ?: throw UnsupportedOperationException("无法在 ${folder.absolutePath} 找到版本信息")
 }
 
-/**
- * [Platform.MAC] 通过 Preferences 获取默认浏览器
- */
-internal fun queryPreference(): String {
-    return ProcessBuilder(
-        "plutil",
-        "-p",
-        "~/Library/Preferences/com.apple.LaunchServices/com.apple.LaunchServices.secure.plist"
-    )
-        .start()
-        .inputStream.use { it.reader().readText() }
-}
-
 internal fun HttpMessage.contentDisposition(): ContentDisposition? {
     return headers[HttpHeaders.ContentDisposition]?.let { ContentDisposition.parse(it) }
 }

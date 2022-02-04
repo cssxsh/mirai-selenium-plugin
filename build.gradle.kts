@@ -2,12 +2,12 @@ plugins {
     kotlin("jvm") version "1.6.0"
     kotlin("plugin.serialization") version "1.6.0"
 
-    id("net.mamoe.mirai-console") version "2.10.0-RC2"
-    id("net.mamoe.maven-central-publish") version "0.7.0"
+    id("net.mamoe.mirai-console") version "2.10.0"
+    id("net.mamoe.maven-central-publish") version "0.7.1"
 }
 
 group = "xyz.cssxsh.mirai"
-version = "2.0.6"
+version = "2.0.7"
 
 mavenCentralPublish {
     useCentralS01()
@@ -25,16 +25,16 @@ repositories {
 }
 
 dependencies {
-    api("org.seleniumhq.selenium:selenium-java:4.1.1") {
+    api("org.seleniumhq.selenium:selenium-java:4.1.2") {
         exclude("org.slf4j")
         exclude("io.netty")
         exclude("com.google.auto.service")
     }
     compileOnly("com.google.auto.service:auto-service:1.0.1")
-    compileOnly("net.mamoe:mirai-core-utils:2.10.0-RC2")
+    compileOnly("net.mamoe:mirai-core-utils:2.10.0")
 
     testImplementation(kotlin("test", "1.6.0"))
-    testImplementation("org.slf4j:slf4j-simple:1.7.33")
+    runtimeOnly("org.slf4j:slf4j-simple:1.7.35")
 }
 
 kotlin {

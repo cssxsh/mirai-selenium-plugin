@@ -17,7 +17,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
-        version = "2.0.6",
+        version = "2.0.7",
     ) {
         author("cssxsh")
     }
