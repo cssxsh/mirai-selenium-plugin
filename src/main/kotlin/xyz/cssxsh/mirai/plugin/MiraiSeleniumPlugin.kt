@@ -22,6 +22,9 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
         author("cssxsh")
     }
 ) {
+    init {
+        Class.forName("org.openqa.selenium.remote.http.HttpClient\$Factory", true, this::class.java.classLoader)
+    }
 
     private var installed = false
 
