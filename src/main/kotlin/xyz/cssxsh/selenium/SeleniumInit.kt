@@ -550,7 +550,7 @@ internal fun RemoteWebDriverConfig.toConsumer(): DriverOptionsConsumer = { capab
 }
 
 /**
- *
+ * 初始化时以模拟设备的方式工作
  */
 public fun mobileEmulation(width: Int, height: Int, pixelRatio: Int, userAgent: String): DriverOptionsConsumer = {
     when (val capabilities = it) {
