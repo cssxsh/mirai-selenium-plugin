@@ -39,7 +39,6 @@ dependencies {
 ## 使用本前置插件的项目
 
 * [BiliBili Helper](https://github.com/cssxsh/bilibili-helper)
-* [Web Screenshot Plugin](https://github.com/liuqianpan2008/imageplugin)
 
 ## 管理指令
 
