@@ -25,9 +25,11 @@ public interface RemoteWebDriverConfig {
     public val height: Int get() = INSTANCE.height
 
     /**
-     * 像素比，(firefox下设置无效)
+     * 像素比, 此设置废弃
+     * @see mobileEmulation
      */
-    public val pixelRatio: Int get() = INSTANCE.pixelRatio
+    @Deprecated("此设置废弃", ReplaceWith("0"))
+    public val pixelRatio: Int get() = 0
 
     /**
      * 无头模式
@@ -64,6 +66,11 @@ public interface RemoteWebDriverConfig {
      */
     public val arguments: List<String> get() = INSTANCE.arguments
 
+    /**
+     * 自定义修改 Capabilities
+     */
+    public val custom: DriverOptionsConsumer get() = {}
+
     public companion object INSTANCE : RemoteWebDriverConfig {
         @JvmStatic
         public val loader: ServiceLoader<RemoteWebDriverConfig> by lazy {
@@ -77,7 +84,6 @@ public interface RemoteWebDriverConfig {
         override val userAgent: String get() = instance.userAgent
         override val width: Int get() = instance.width
         override val height: Int get() = instance.height
-        override val pixelRatio: Int get() = instance.pixelRatio
         override val headless: Boolean get() = instance.headless
         override val proxy: String get() = instance.proxy
         override val preferences: Map<String, String> get() = instance.preferences

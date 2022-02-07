@@ -53,6 +53,8 @@ private object AllIgnoredOutputStream : OutputStream() {
 
 internal typealias RemoteWebDriverSupplier = (config: RemoteWebDriverConfig) -> RemoteWebDriver
 
+public typealias DriverOptionsConsumer = (Capabilities) -> Unit
+
 /**
  * [Platform.WINDOWS] 查询注册表
  * @see RegisterKeys
@@ -486,7 +488,7 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
 /**
  * [RemoteWebDriverConfig] 配置浏览器 [Capabilities]
  */
-internal fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capabilities ->
+internal fun RemoteWebDriverConfig.toConsumer(): DriverOptionsConsumer = { capabilities ->
     when (capabilities) {
         is ChromiumOptions<*> -> capabilities.apply {
             setHeadless(headless)
@@ -501,18 +503,9 @@ internal fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capa
             if (proxy.isNotBlank()) {
                 addArguments("--proxy-server=${proxy}")
             }
-            setExperimentalOption(
-                "mobileEmulation",
-                mapOf(
-                    "deviceMetrics" to mapOf(
-                        "width" to width,
-                        "height" to height,
-                        "pixelRatio" to pixelRatio
-                    ),
-                    "userAgent" to userAgent
-                )
-            )
 
+            addArguments("--user-agent='${userAgent}'")
+            addArguments("--window-size=${width},${height}")
             addArguments(arguments)
             setExperimentalOption("prefs", preferences.mapValues { (_, value) ->
                 value.toBooleanStrictOrNull() ?: value.toDoubleOrNull() ?: value
@@ -540,12 +533,6 @@ internal fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capa
                 // XXX: 手动关闭 webgl
                 addPreference("webgl.disabled", true)
             }
-            addPreference("devtools.responsive.touchSimulation.enabled", true)
-            addPreference("devtools.responsive.viewport.width", width)
-            addPreference("devtools.responsive.viewport.height", height)
-            addPreference("devtools.responsive.viewport.pixelRatio", pixelRatio)
-            addPreference("devtools.responsive.userAgent", userAgent)
-            // XXX: responsive 无法调用
             addPreference("general.useragent.override", userAgent)
             addArguments("--width=${width}", "--height=${height}")
 
@@ -555,6 +542,38 @@ internal fun RemoteWebDriverConfig.toConsumer(): (Capabilities) -> Unit = { capa
             for ((key, value) in preferences) {
                 addPreference(key, value.toBooleanStrictOrNull() ?: value.toDoubleOrNull() ?: value)
             }
+        }
+        else -> throw UnsupportedOperationException("不支持设置参数的浏览器 ${capabilities::class}")
+    }
+    // custom
+    capabilities.also(custom)
+}
+
+/**
+ *
+ */
+public fun mobileEmulation(width: Int, height: Int, pixelRatio: Int, userAgent: String): DriverOptionsConsumer = {
+    when (val capabilities = it) {
+        is ChromiumOptions<*> -> capabilities.apply {
+            setExperimentalOption(
+                "mobileEmulation",
+                mapOf(
+                    "deviceMetrics" to mapOf(
+                        "width" to width,
+                        "height" to height,
+                        "pixelRatio" to pixelRatio
+                    ),
+                    "userAgent" to userAgent
+                )
+            )
+        }
+        is FirefoxOptions -> capabilities.apply {
+            // XXX: responsive 无法在配置中启用
+            addPreference("devtools.responsive.touchSimulation.enabled", true)
+            addPreference("devtools.responsive.viewport.width", width)
+            addPreference("devtools.responsive.viewport.height", height)
+            addPreference("devtools.responsive.viewport.pixelRatio", pixelRatio)
+            addPreference("devtools.responsive.userAgent", userAgent)
         }
         else -> throw UnsupportedOperationException("不支持设置参数的浏览器 ${capabilities::class}")
     }
