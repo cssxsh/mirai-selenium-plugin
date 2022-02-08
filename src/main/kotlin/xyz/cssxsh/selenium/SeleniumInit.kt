@@ -550,36 +550,6 @@ internal fun RemoteWebDriverConfig.toConsumer(): DriverOptionsConsumer = { capab
 }
 
 /**
- * 初始化时以模拟设备的方式工作
- */
-public fun mobileEmulation(width: Int, height: Int, pixelRatio: Int, userAgent: String): DriverOptionsConsumer = {
-    when (val capabilities = it) {
-        is ChromiumOptions<*> -> capabilities.apply {
-            setExperimentalOption(
-                "mobileEmulation",
-                mapOf(
-                    "deviceMetrics" to mapOf(
-                        "width" to width,
-                        "height" to height,
-                        "pixelRatio" to pixelRatio
-                    ),
-                    "userAgent" to userAgent
-                )
-            )
-        }
-        is FirefoxOptions -> capabilities.apply {
-            // XXX: responsive 无法在配置中启用
-            addPreference("devtools.responsive.touchSimulation.enabled", true)
-            addPreference("devtools.responsive.viewport.width", width)
-            addPreference("devtools.responsive.viewport.height", height)
-            addPreference("devtools.responsive.viewport.pixelRatio", pixelRatio)
-            addPreference("devtools.responsive.userAgent", userAgent)
-        }
-        else -> throw UnsupportedOperationException("不支持设置参数的浏览器 ${capabilities::class}")
-    }
-}
-
-/**
  * 清理驱动文件
  * @see SELENIUM_FOLDER
  * @see SELENIUM_DOWNLOAD_EXPIRES

@@ -26,7 +26,7 @@ public interface RemoteWebDriverConfig {
 
     /**
      * 像素比, 此设置废弃
-     * @see mobileEmulation
+     * @see setDeviceMetrics
      */
     @Deprecated("此设置废弃", ReplaceWith("0"))
     public val pixelRatio: Int get() = 0
