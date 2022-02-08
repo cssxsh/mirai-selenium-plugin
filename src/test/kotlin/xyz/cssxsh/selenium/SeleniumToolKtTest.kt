@@ -8,15 +8,20 @@ import xyz.cssxsh.mirai.plugin.data.*
 import java.io.*
 import java.util.concurrent.*
 
-internal class SeleniumToolKtTest {
+internal open class SeleniumToolKtTest {
 
-    private val folder = File("run")
+    protected val folder = File("run")
 
     init {
         System.setProperty(SELENIUM_FOLDER, folder.resolve("selenium").apply { mkdirs() }.absolutePath)
+        System.setProperty(CHROME_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/chromedriver")
+        System.setProperty(FIREFOX_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/geckodriver")
+        System.setProperty(SEVEN7Z_MIRRORS, "https://downloads.sourceforge.net/sevenzip")
+        // System.setProperty("selenium.webdriver.verbose", "true")
+        Class.forName("org.openqa.selenium.remote.http.HttpClient\$Factory", true, this::class.java.classLoader)
     }
 
-    private val browsers by lazy {
+    protected val browsers by lazy {
         val platform = Platform.getCurrent()
         when {
             platform.`is`(Platform.WIN10) -> listOf("Edge", "Chromium", "Firefox")
@@ -27,14 +32,15 @@ internal class SeleniumToolKtTest {
         }
     }
 
-    private val config = object : RemoteWebDriverConfig by MiraiSeleniumConfig {
+    protected val config = object : RemoteWebDriverConfig by MiraiSeleniumConfig {
         override val userAgent: String = UserAgents.IPAD + " MicroMessenger"
         override val headless: Boolean = true
         override val log: Boolean = true
         override val factory: String = "netty"
     }
 
-    private fun testRemoteWebDriver(block: suspend CoroutineScope.(String, RemoteWebDriver) -> Unit) {
+    protected fun testRemoteWebDriver(block: suspend CoroutineScope.(String, RemoteWebDriver) -> Unit) {
+        setupChromium(folder = folder, version = "98")
         for (browser in browsers) {
             runBlocking(SeleniumContext) {
                 val driver = setupWebDriver(browser = browser).invoke(config)
@@ -110,8 +116,7 @@ internal class SeleniumToolKtTest {
         })
 
         try {
-            println(driver.devTools.domains)
-            println(driver.getVersion())
+            driver.get("about:config")
         } catch (cause: Throwable) {
             cause.printStackTrace()
         }
@@ -128,8 +133,7 @@ internal class SeleniumToolKtTest {
         }, chromium = true)
 
         try {
-            println(driver.devTools.domains)
-            println(driver.getVersion())
+            driver.get("chrome://settings/help")
         } catch (cause: Throwable) {
             cause.printStackTrace()
         }
