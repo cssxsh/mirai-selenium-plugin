@@ -94,6 +94,7 @@ internal class SeleniumToolKtTest {
             if (driver.isReady()) break
             if (System.currentTimeMillis() - start > 60_000) {
                 System.err.println("$browser pdf ready timeout.")
+                break
             }
             delay(10_000)
         }
@@ -106,15 +107,15 @@ internal class SeleniumToolKtTest {
     @Timeout(value = 3, unit = TimeUnit.MINUTES)
     fun firefox() {
         setupFirefox(folder = folder, version = "")
-        val driver = RemoteWebDriver(config = object : RemoteWebDriverConfig {
-            override val browser: String = "firefox"
+        val driver = FirefoxDriver(config = object : RemoteWebDriverConfig {
             override val headless: Boolean = true
             override val log: Boolean = true
             override val factory: String = "netty"
         })
 
         try {
-            driver.get("about:config")
+            println(driver.devTools.domains)
+            println(driver.getVersion())
         } catch (cause: Throwable) {
             cause.printStackTrace()
         }
@@ -123,16 +124,16 @@ internal class SeleniumToolKtTest {
     @Test
     @Timeout(value = 3, unit = TimeUnit.MINUTES)
     fun chromium() {
-        setupChromium(folder = folder, version = "")
-        val driver = RemoteWebDriver(config = object : RemoteWebDriverConfig {
-            override val browser: String = "chromium"
+        setupChromium(folder = folder, version = "98")
+        val driver = ChromeDriver(config = object : RemoteWebDriverConfig {
             override val headless: Boolean = true
             override val log: Boolean = true
             override val factory: String = "netty"
-        })
+        }, chromium = true)
 
         try {
-            driver.get("chrome://settings/help")
+            println(driver.devTools.domains)
+            println(driver.getVersion())
         } catch (cause: Throwable) {
             cause.printStackTrace()
         }
