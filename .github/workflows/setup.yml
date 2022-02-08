@@ -12,9 +12,6 @@ jobs:
           - macos-latest
           - ubuntu-latest
     steps:
-      - name: Setup chrome
-        uses: browser-actions/setup-chrome@latest
-
       - name: Checkout
         uses: actions/checkout@v2
 
