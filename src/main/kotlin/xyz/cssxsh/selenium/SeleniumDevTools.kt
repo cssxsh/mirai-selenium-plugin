@@ -1,12 +1,57 @@
 package xyz.cssxsh.selenium
 
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import kotlinx.serialization.json.*
 import org.openqa.selenium.devtools.*
-import org.openqa.selenium.devtools.v97.browser.*
+import org.openqa.selenium.devtools.idealized.*
+import org.openqa.selenium.devtools.idealized.log.model.*
+import org.openqa.selenium.devtools.idealized.target.model.*
 import org.openqa.selenium.devtools.v97.emulation.*
-import org.openqa.selenium.devtools.v97.network.*
 import org.openqa.selenium.remote.RemoteWebDriver
 import java.util.*
 
+/**
+ * [devtools-protocol](https://chromedevtools.github.io/devtools-protocol)
+ * @see HasDevTools
+ * @see DevTools.session
+ */
+public inline val RemoteWebDriver.devTools: DevTools get() = (this as HasDevTools).devTools.apply { session() }
+
+/**
+ * @see DevTools.connection
+ */
+internal suspend fun RemoteWebDriver.cdp(): ChromeDevToolsProtocol {
+    devTools
+    val uri = capabilities.getCapability("se:cdp") as String
+    val json = HttpClient(OkHttp).use { http ->
+        http.get<String> {
+            url {
+                takeFrom(uri)
+                protocol = URLProtocol.HTTP
+                encodedPath = "/json/protocol"
+            }
+        }
+    }
+    return Json.decodeFromString(ChromeDevToolsProtocol.serializer(), json)
+}
+
+/**
+ * firefox unsupported [Log.clear](https://chromedevtools.github.io/devtools-protocol/tot/Log/#method-clear)
+ * @see DevTools.createSessionIfThereIsNotOne
+ */
+public fun DevTools.session(): SessionID {
+    try {
+        createSessionIfThereIsNotOne()
+    } catch (ignore: DevToolsException) {
+        if ("Log.clear" !in ignore.message.orEmpty()) {
+            throw ignore
+        }
+    }
+    return cdpSession
+}
 
 // region Browser
 
@@ -14,25 +59,35 @@ import java.util.*
  * [Browser.getVersion](https://chromedevtools.github.io/devtools-protocol/tot/Browser/#method-getVersion)
  * @see HasDevTools
  */
-public fun RemoteWebDriver.getVersion(): Browser.GetVersionResponse {
-    this as HasDevTools
-    devTools.createSessionIfThereIsNotOne()
-    return devTools.send(Browser.getVersion())
-}
+public fun RemoteWebDriver.browser(): Map<String, String> = devTools.send(Command("Browser.getVersion", emptyMap()))
 
 // endregion
 
-// region Network
+// region Domains
 
 /**
- * [Network.setUserAgentOverride](https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setUserAgentOverride)
- * @see HasDevTools
+ * Events
+ * @see Domains
  */
-public fun RemoteWebDriver.setUserAgent(userAgent: String) {
-    this as HasDevTools
-    devTools.createSessionIfThereIsNotOne()
-    devTools.send(Network.setUserAgentOverride(userAgent, Optional.empty(), Optional.empty(), Optional.empty()))
-}
+public fun RemoteWebDriver.events(): Events<*, *> = devTools.domains.events()
+
+/**
+ * Javascript
+ * @see Domains
+ */
+public fun RemoteWebDriver.javascript(): Javascript<*, *> = devTools.domains.javascript()
+
+/**
+ * [Network](https://chromedevtools.github.io/devtools-protocol/tot/Network)
+ * @see Domains
+ */
+public fun RemoteWebDriver.network(): Network<*, *> = devTools.domains.network()
+
+/**
+ * [Log.entryAdded](https://chromedevtools.github.io/devtools-protocol/tot/Log/#event-entryAdded)
+ * @see Domains
+ */
+public fun DevTools.addLogListener(handler: (LogEntry) -> Unit): Unit = addListener(domains.log().entryAdded(), handler)
 
 // endregion
 
@@ -43,20 +98,20 @@ public fun RemoteWebDriver.setUserAgent(userAgent: String) {
  * @see HasDevTools
  */
 public fun RemoteWebDriver.setDeviceMetrics(width: Int, height: Int, deviceScaleFactor: Number, mobile: Boolean) {
-    this as HasDevTools
-    devTools.createSessionIfThereIsNotOne()
-    devTools.send(Emulation.setDeviceMetricsOverride(
-        width, height, deviceScaleFactor, mobile,
-        Optional.empty(),
-        Optional.empty(),
-        Optional.empty(),
-        Optional.empty(),
-        Optional.empty(),
-        Optional.empty(),
-        Optional.empty(),
-        Optional.empty(),
-        Optional.empty(),
-    ))
+    devTools.send(
+        Emulation.setDeviceMetricsOverride(
+            width, height, deviceScaleFactor, mobile,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+        )
+    )
 }
 
 /**
@@ -64,8 +119,6 @@ public fun RemoteWebDriver.setDeviceMetrics(width: Int, height: Int, deviceScale
  * @see HasDevTools
  */
 public fun RemoteWebDriver.setScrollbarsHidden(hidden: Boolean = true) {
-    this as HasDevTools
-    devTools.createSessionIfThereIsNotOne()
     devTools.send(Emulation.setScrollbarsHidden(hidden))
 }
 
