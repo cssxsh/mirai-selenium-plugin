@@ -2,6 +2,10 @@ package xyz.cssxsh.selenium
 
 import kotlinx.coroutines.*
 import org.openqa.selenium.*
+import org.openqa.selenium.chrome.*
+import org.openqa.selenium.devtools.*
+import org.openqa.selenium.edge.*
+import org.openqa.selenium.firefox.*
 import org.openqa.selenium.print.*
 import org.openqa.selenium.remote.*
 import org.openqa.selenium.remote.service.*
@@ -72,6 +76,30 @@ private val Interval: Duration by lazy {
  */
 public fun RemoteWebDriver(config: RemoteWebDriverConfig): RemoteWebDriver {
     return setupWebDriver(browser = config.browser).invoke(config)
+}
+
+/**
+ * 创建一个 EdgeDriver
+ * @param config 配置
+ */
+public fun EdgeDriver(config: RemoteWebDriverConfig): EdgeDriver {
+    return setupWebDriver(browser = "edge").invoke(config) as EdgeDriver
+}
+
+/**
+ * 创建一个 ChromeDriver
+ * @param config 配置
+ */
+public fun ChromeDriver(config: RemoteWebDriverConfig, chromium: Boolean): ChromeDriver {
+    return setupWebDriver(browser = if (chromium) "chromium" else "chrome").invoke(config) as ChromeDriver
+}
+
+/**
+ * 创建一个 FirefoxDriver
+ * @param config 配置
+ */
+public fun FirefoxDriver(config: RemoteWebDriverConfig): FirefoxDriver {
+    return setupWebDriver(browser = "firefox").invoke(config) as FirefoxDriver
 }
 
 // endregion
