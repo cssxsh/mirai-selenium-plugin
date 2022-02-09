@@ -2,7 +2,6 @@ package xyz.cssxsh.selenium
 
 import io.ktor.http.cio.websocket.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.*
 import org.openqa.selenium.remote.http.*
 
 internal class KtorWebSocket(private val session: DefaultWebSocketSession, private val listener: WebSocket.Listener) :
@@ -26,12 +25,13 @@ internal class KtorWebSocket(private val session: DefaultWebSocketSession, priva
                         }
                         else -> Unit
                     }
-                } catch (exception: ClosedReceiveChannelException) {
-                    val (code, reason) = requireNotNull(session.closeReason.await()) { "CloseReason Not Null" }
-                    listener.onClose(code.toInt(), reason)
-                    return@launch
                 } catch (cause: Throwable) {
-                    listener.onError(cause)
+                    if (session.closeReason.isCompleted) {
+                        val (code, reason) = requireNotNull(session.closeReason.await()) { "CloseReason Not Null" }
+                        listener.onClose(code.toInt(), reason)
+                    } else {
+                        listener.onError(cause)
+                    }
                     return@launch
                 }
             }
