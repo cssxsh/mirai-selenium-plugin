@@ -94,7 +94,6 @@ internal val IgnoreJson = Json {
     prettyPrint = true
     ignoreUnknownKeys = true
     isLenient = true
-    allowStructuredMapKeys = true
 }
 
 /**
@@ -504,7 +503,7 @@ internal fun RemoteWebDriverConfig.toConsumer(): DriverOptionsConsumer = { capab
                 addArguments("--proxy-server=${proxy}")
             }
 
-            addArguments("--user-agent='${userAgent}'")
+            addArguments("--user-agent=${userAgent}")
             addArguments("--window-size=${width},${height}")
             addArguments(arguments)
             setExperimentalOption("prefs", preferences.mapValues { (_, value) ->
@@ -533,6 +532,11 @@ internal fun RemoteWebDriverConfig.toConsumer(): DriverOptionsConsumer = { capab
                 // XXX: 手动关闭 webgl
                 addPreference("webgl.disabled", true)
             }
+            // https://firefox-source-docs.mozilla.org/remote/cdp/RequiredPreferences.html
+            addPreference("fission.bfcacheInParent", true)
+            addPreference("fission.webContentIsolationStrategy", 0)
+            addPreference("devtools.debugger.chrome-debugging-websocket", true)
+            addPreference("devtools.debugger.remote-websocket", true)
             addPreference("general.useragent.override", userAgent)
             addArguments("--width=${width}", "--height=${height}")
 

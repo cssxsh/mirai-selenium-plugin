@@ -7,6 +7,7 @@ import org.openqa.selenium.remote.*
 import xyz.cssxsh.mirai.plugin.data.*
 import java.io.*
 import java.util.concurrent.*
+import java.util.logging.*
 
 internal open class SeleniumToolKtTest {
 
@@ -18,6 +19,7 @@ internal open class SeleniumToolKtTest {
         System.setProperty(FIREFOX_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/geckodriver")
         System.setProperty(SEVEN7Z_MIRRORS, "https://downloads.sourceforge.net/sevenzip")
         // System.setProperty("selenium.webdriver.verbose", "true")
+        SeleniumLogger.level = Level.WARNING
         Class.forName("org.openqa.selenium.remote.http.HttpClient\$Factory", true, this::class.java.classLoader)
     }
 
@@ -112,11 +114,12 @@ internal open class SeleniumToolKtTest {
         val driver = FirefoxDriver(config = object : RemoteWebDriverConfig {
             override val headless: Boolean = true
             override val log: Boolean = true
-            override val factory: String = "netty"
+            override val factory: String = "ktor"
         })
 
         try {
             driver.get("about:config")
+            println(driver.devTools.session())
         } catch (cause: Throwable) {
             cause.printStackTrace()
         }
