@@ -174,7 +174,6 @@ public suspend fun RemoteWebDriver.getScreenshot(url: String, vararg hide: Strin
                 delay(Interval.toMillis())
             }
         }
-        setScrollbarsHidden()
     } catch (_: TimeoutCancellationException) {
         // ignore
     } catch (_: DevToolsException) {

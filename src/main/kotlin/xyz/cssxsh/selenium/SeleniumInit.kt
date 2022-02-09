@@ -535,10 +535,9 @@ internal fun RemoteWebDriverConfig.toConsumer(): DriverOptionsConsumer = { capab
             // https://firefox-source-docs.mozilla.org/remote/cdp/RequiredPreferences.html
             addPreference("fission.bfcacheInParent", true)
             addPreference("fission.webContentIsolationStrategy", 0)
-            addPreference("devtools.debugger.chrome-debugging-websocket", true)
-            addPreference("devtools.debugger.remote-websocket", true)
             addPreference("general.useragent.override", userAgent)
             addArguments("--width=${width}", "--height=${height}")
+            addArguments("--hide-scrollbars")
 
             addArguments(arguments)
             addPreference("browser.aboutConfig.showWarning", false)
