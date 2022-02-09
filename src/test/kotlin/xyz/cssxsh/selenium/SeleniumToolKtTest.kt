@@ -38,7 +38,7 @@ internal open class SeleniumToolKtTest {
         override val userAgent: String = UserAgents.IPAD + " MicroMessenger"
         override val headless: Boolean = true
         override val log: Boolean = true
-        override val factory: String = "netty"
+        override val factory: String = "ktor"
     }
 
     protected fun testRemoteWebDriver(block: suspend CoroutineScope.(String, RemoteWebDriver) -> Unit) {

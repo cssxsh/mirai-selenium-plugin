@@ -24,7 +24,6 @@ public inline val RemoteWebDriver.devTools: DevTools get() = (this as HasDevTool
  * @see DevTools.connection
  */
 internal suspend fun RemoteWebDriver.cdp(): ChromeDevToolsProtocol {
-    devTools
     val uri = capabilities.getCapability("se:cdp") as String
     val json = HttpClient(OkHttp).use { http ->
         http.get<String> {
