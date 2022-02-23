@@ -35,7 +35,7 @@ public object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"),
 
     @ValueName("preferences")
     @ValueDescription("User Preferences")
-    override val preferences: Map<String, String> by value(emptyMap())
+    override val preferences: Map<String, String> by value()
 
     @ValueName("log")
     @ValueDescription("启用日志文件")
@@ -51,7 +51,7 @@ public object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"),
 
     @ValueName("arguments")
     @ValueDescription("自定义 arguments")
-    override val arguments: List<String> by value(emptyList())
+    override val arguments: List<String> by value()
 
     internal class Service : RemoteWebDriverConfig by MiraiSeleniumConfig
 }

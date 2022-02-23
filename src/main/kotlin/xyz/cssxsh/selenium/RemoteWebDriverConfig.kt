@@ -12,17 +12,17 @@ public interface RemoteWebDriverConfig {
     /**
      * Http Header User Agent
      */
-    public val userAgent: String get() = INSTANCE.userAgent
+    public val userAgent: String
 
     /**
      * 浏览器窗口宽度
      */
-    public val width: Int get() = INSTANCE.width
+    public val width: Int
 
     /**
      * 浏览器窗口高度
      */
-    public val height: Int get() = INSTANCE.height
+    public val height: Int
 
     /**
      * 像素比, 此设置废弃
@@ -34,37 +34,37 @@ public interface RemoteWebDriverConfig {
     /**
      * 无头模式
      */
-    public val headless: Boolean get() = INSTANCE.headless
+    public val headless: Boolean
 
     /**
      * 浏览器代理
      */
-    public val proxy: String get() = INSTANCE.proxy
+    public val proxy: String get() = ""
 
     /**
      * User Preferences
      */
-    public val preferences: Map<String, String> get() = INSTANCE.preferences
+    public val preferences: Map<String, String> get() = emptyMap()
 
     /**
      * 浏览器日志、输出，开启会输出到 文件，关闭则无输出
      */
-    public val log: Boolean get() = INSTANCE.log
+    public val log: Boolean get() = false
 
     /**
      * 浏览器类型：`Chrome`,`Chromium`,`Firefox`,`Edge`, 留空会自动获取系统默认浏览器
      */
-    public val browser: String get() = INSTANCE.browser
+    public val browser: String get() = ""
 
     /**
      * Selenium HttpClientFactory，可选值: ktor / netty
      */
-    public val factory: String get() = INSTANCE.factory
+    public val factory: String get() = "netty"
 
     /**
      * 浏览器启动参数
      */
-    public val arguments: List<String> get() = INSTANCE.arguments
+    public val arguments: List<String> get() = emptyList()
 
     /**
      * 自定义修改 Capabilities
@@ -78,7 +78,7 @@ public interface RemoteWebDriverConfig {
         }
 
         private val instance: RemoteWebDriverConfig by lazy {
-            loader.iterator().next()
+            loader.first()
         }
 
         override val userAgent: String get() = instance.userAgent
@@ -91,5 +91,6 @@ public interface RemoteWebDriverConfig {
         override val browser: String get() = instance.browser
         override val factory: String get() = instance.factory
         override val arguments: List<String> get() = instance.arguments
+        override val custom: DriverOptionsConsumer get() = instance.custom
     }
 }
