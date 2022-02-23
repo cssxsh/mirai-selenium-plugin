@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "xyz.cssxsh.mirai"
-version = "2.0.8"
+version = "2.0.9"
 
 mavenCentralPublish {
     useCentralS01()
@@ -32,9 +32,10 @@ dependencies {
     }
     compileOnly("com.google.auto.service:auto-service:1.0.1")
     compileOnly("net.mamoe:mirai-core-utils:2.10.0")
+    compileOnly("me.him188:kotlin-jvm-blocking-bridge-runtime-jvm:2.0.0-160.3")
 
     testImplementation(kotlin("test", "1.6.0"))
-    runtimeOnly("org.slf4j:slf4j-simple:1.7.35")
+    runtimeOnly("org.slf4j:slf4j-simple:1.7.36")
 }
 
 kotlin {
