@@ -1,6 +1,7 @@
 package xyz.cssxsh.selenium
 
 import kotlinx.coroutines.*
+import me.him188.kotlin.jvm.blocking.bridge.*
 import org.openqa.selenium.*
 import org.openqa.selenium.chrome.*
 import org.openqa.selenium.devtools.*
@@ -161,7 +162,7 @@ public fun RemoteWebDriver.hide(vararg css: String): List<RemoteWebElement> {
  * @param hide CSS过滤器
  * @return 返回的图片文件数据，格式PNG
  */
-@JvmSynthetic
+@JvmBlockingBridge
 public suspend fun RemoteWebDriver.getScreenshot(url: String, vararg hide: String): ByteArray {
     val home = windowHandle
     val tab = switchTo().newWindow(WindowType.TAB) as RemoteWebDriver
