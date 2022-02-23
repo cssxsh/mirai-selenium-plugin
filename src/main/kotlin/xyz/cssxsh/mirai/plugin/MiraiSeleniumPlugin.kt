@@ -108,18 +108,19 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     public fun destroy(enable: Boolean = true) {
         DriverCache.entries.removeIf { (driver, service) ->
             if (enable && driver.sessionId != null && service.isRunning) return@removeIf false
+            val process = service.getProcess()
 
-            logger.info { "Destroy driver, session: ${driver.sessionId}, process: ${service.getProcess()}" }
+            logger.info { "Destroy driver, session: ${driver.sessionId}, process: $process" }
 
             try {
                 driver.quit()
             } catch (cause: Throwable) {
-                logger.warning({ "Driver ${service.getProcess() ?: service.url} stop failure." }, cause)
+                logger.warning({ "Driver ${process ?: service.url} stop failure." }, cause)
             }
             try {
                 service.stop()
             } catch (cause: Throwable) {
-                logger.warning({ "Service ${service.getProcess() ?: service.url} stop failure." }, cause)
+                logger.warning({ "Service ${process ?: service.url} stop failure." }, cause)
             }
 
             true
@@ -142,9 +143,9 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
             while (isActive) {
                 delay(MiraiSeleniumConfig.destroy * 60_000L)
                 try {
-                    logger.info { "DriverCache: ${DriverCache.status()}" }
+                    logger.info { "DriverCache: \n${DriverCache.status().joinToString(separator = "\n")}" }
                 } catch (cause: Throwable) {
-                    logger.warning { "DriverCache: $cause" }
+                    logger.warning({ "DriverCache get status failure." }, cause)
                 }
                 destroy()
             }

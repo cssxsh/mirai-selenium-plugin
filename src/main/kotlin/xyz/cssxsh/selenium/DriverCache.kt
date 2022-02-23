@@ -7,6 +7,6 @@ import java.util.*
 internal object DriverCache : MutableMap<RemoteWebDriver, DriverService> by HashMap() {
 
     fun status() = entries.map { (driver, service) ->
-        "${driver::class.java.simpleName}(session=${driver.sessionId}, url=${service.url}, process=${service.getProcess()})"
+        "${driver::class.simpleName}(session=${driver.sessionId}, url=${service.url}, process=${service.getProcess()})"
     }
 }
