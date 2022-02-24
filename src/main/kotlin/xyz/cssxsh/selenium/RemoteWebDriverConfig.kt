@@ -12,17 +12,17 @@ public interface RemoteWebDriverConfig {
     /**
      * Http Header User Agent
      */
-    public val userAgent: String
+    public val userAgent: String get() = UserAgents.IPAD
 
     /**
      * 浏览器窗口宽度
      */
-    public val width: Int
+    public val width: Int get() = 768
 
     /**
      * 浏览器窗口高度
      */
-    public val height: Int
+    public val height: Int get() = 1024
 
     /**
      * 像素比, 此设置废弃
@@ -34,7 +34,7 @@ public interface RemoteWebDriverConfig {
     /**
      * 无头模式
      */
-    public val headless: Boolean
+    public val headless: Boolean get() = true
 
     /**
      * 浏览器代理
