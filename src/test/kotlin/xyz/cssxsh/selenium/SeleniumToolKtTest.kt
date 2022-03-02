@@ -22,7 +22,7 @@ internal open class SeleniumToolKtTest {
         SeleniumLogger.level = Level.WARNING
         val platform = Platform.getCurrent()
         if (platform.`is`(Platform.LINUX)) {
-            val xvfb = ProcessBuilder("Xvfb", "").start().inputStream.reader().readText()
+            val xvfb = ProcessBuilder("xvfb-run", "-h").start().inputStream.reader().readText()
             println(xvfb)
         }
     }
