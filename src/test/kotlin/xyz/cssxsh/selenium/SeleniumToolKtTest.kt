@@ -20,7 +20,11 @@ internal open class SeleniumToolKtTest {
         System.setProperty(SEVEN7Z_MIRRORS, "https://downloads.sourceforge.net/sevenzip")
         // System.setProperty("selenium.webdriver.verbose", "true")
         SeleniumLogger.level = Level.WARNING
-        Class.forName("org.openqa.selenium.remote.http.HttpClient\$Factory", true, this::class.java.classLoader)
+        val platform = Platform.getCurrent()
+        if (platform.`is`(Platform.LINUX)) {
+            val xvfb = ProcessBuilder("Xvfb", "").start().inputStream.reader().readText()
+            println(xvfb)
+        }
     }
 
     protected val browsers by lazy {
@@ -119,7 +123,6 @@ internal open class SeleniumToolKtTest {
 
         try {
             driver.get("about:config")
-            println(driver.devTools.session())
         } catch (cause: Throwable) {
             cause.printStackTrace()
         }
