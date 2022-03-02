@@ -19,6 +19,9 @@ Mirai-Console的前置插件，用于使用Selenium调用浏览器进行截图�
 |  MacOS  | Chrome  |  Yes   |  Yes  |
 |  MacOS  | Firefox |  Yes   |  Yes  |
 
+在 `Linux` 下以 `headless` 模式运行时, 请安装 `Xvfb` 或其他虚拟窗口服务 [#8](https://github.com/cssxsh/mirai-selenium-plugin/issues/8)  
+可以通过 `xvfb-run -h` 测试是否已经安装
+
 ## 在插件项目中引用
 
 ```
