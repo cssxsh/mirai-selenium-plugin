@@ -143,7 +143,10 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
             while (isActive) {
                 delay(MiraiSeleniumConfig.destroy * 60_000L)
                 try {
-                    logger.info { "DriverCache: \n${DriverCache.status().joinToString(separator = "\n")}" }
+                    val status = DriverCache.status()
+                    if (status.isNotEmpty()) {
+                        logger.info { "DriverCache: \n${status.joinToString(separator = "\n")}" }
+                    }
                 } catch (cause: Throwable) {
                     logger.warning({ "DriverCache get status failure." }, cause)
                 }
