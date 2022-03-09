@@ -23,7 +23,7 @@ internal class KtorWebSocket(private val session: DefaultWebSocketSession, priva
                             listener.onClose(code.toInt(), reason)
                             return@launch
                         }
-                        else -> Unit
+                        else -> throw UnsupportedOperationException("Frame: ${frame::class.qualifiedName}")
                     }
                 } catch (cause: Throwable) {
                     if (session.closeReason.isCompleted) {
@@ -38,10 +38,14 @@ internal class KtorWebSocket(private val session: DefaultWebSocketSession, priva
         }
     }
 
-    override fun close(): Unit = runBlocking(SeleniumContext) { session.close() }
+    override fun close() {
+        session.launch(SeleniumContext) {
+            session.close()
+        }
+    }
 
     override fun send(message: Message): KtorWebSocket {
-        runBlocking(SeleniumContext) {
+        session.launch(SeleniumContext) {
             when (message) {
                 is BinaryMessage -> session.send(message.data())
                 is TextMessage -> session.send(message.text())
@@ -53,14 +57,14 @@ internal class KtorWebSocket(private val session: DefaultWebSocketSession, priva
     }
 
     override fun sendBinary(data: ByteArray): KtorWebSocket {
-        runBlocking(SeleniumContext) {
+        session.launch(SeleniumContext) {
             session.send(data)
         }
         return this
     }
 
     override fun sendText(data: CharSequence): KtorWebSocket {
-        runBlocking(SeleniumContext) {
+        session.launch(SeleniumContext) {
             session.send(StringBuilder(data).toString())
         }
         return this
