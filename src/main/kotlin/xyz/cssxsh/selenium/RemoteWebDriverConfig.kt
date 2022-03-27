@@ -29,7 +29,8 @@ public interface RemoteWebDriverConfig {
      * @see setDeviceMetrics
      */
     @Deprecated("此设置废弃", ReplaceWith("0"))
-    public val pixelRatio: Int get() = 0
+    public val pixelRatio: Int
+        get() = 0
 
     /**
      * 无头模式
@@ -73,24 +74,22 @@ public interface RemoteWebDriverConfig {
 
     public companion object INSTANCE : RemoteWebDriverConfig {
         @JvmStatic
-        public val loader: ServiceLoader<RemoteWebDriverConfig> by lazy {
-            ServiceLoader.load(RemoteWebDriverConfig::class.java, RemoteWebDriverConfig::class.java.classLoader)
+        public val instances: Sequence<RemoteWebDriverConfig> = sequence {
+            val clazz = RemoteWebDriverConfig::class.java
+            yieldAll(ServiceLoader.load(clazz))
+            yieldAll(ServiceLoader.load(clazz, clazz.classLoader))
         }
 
-        private val instance: RemoteWebDriverConfig by lazy {
-            loader.first()
-        }
-
-        override val userAgent: String get() = instance.userAgent
-        override val width: Int get() = instance.width
-        override val height: Int get() = instance.height
-        override val headless: Boolean get() = instance.headless
-        override val proxy: String get() = instance.proxy
-        override val preferences: Map<String, String> get() = instance.preferences
-        override val log: Boolean get() = instance.log
-        override val browser: String get() = instance.browser
-        override val factory: String get() = instance.factory
-        override val arguments: List<String> get() = instance.arguments
-        override val custom: DriverOptionsConsumer get() = instance.custom
+        override val userAgent: String get() = instances.first().userAgent
+        override val width: Int get() = instances.first().width
+        override val height: Int get() = instances.first().height
+        override val headless: Boolean get() = instances.first().headless
+        override val proxy: String get() = instances.first().proxy
+        override val preferences: Map<String, String> get() = instances.first().preferences
+        override val log: Boolean get() = instances.first().log
+        override val browser: String get() = instances.first().browser
+        override val factory: String get() = instances.first().factory
+        override val arguments: List<String> get() = instances.first().arguments
+        override val custom: DriverOptionsConsumer get() = instances.first().custom
     }
 }
