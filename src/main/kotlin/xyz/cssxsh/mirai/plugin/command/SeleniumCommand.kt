@@ -11,6 +11,8 @@ public object SeleniumCommand : CompositeCommand(
     description = "Selenium 驱动相关指令"
 ) {
 
+    private val logger get() = MiraiSeleniumPlugin.logger
+
     @SubCommand
     @Description("安装驱动文件")
     public suspend fun CommandSender.setup(flush: Boolean = true) {
@@ -20,7 +22,8 @@ public object SeleniumCommand : CompositeCommand(
             val result = MiraiSeleniumPlugin.setup(flush = flush)
             sendMessage("安装驱动${if (result) "成功" else "失败"}")
         } catch (cause: Throwable) {
-            sendMessage("安装驱动异常, $cause")
+            logger.warning("安装驱动异常", cause)
+            sendMessage("安装驱动异常")
         }
     }
 
@@ -31,7 +34,8 @@ public object SeleniumCommand : CompositeCommand(
         try {
             MiraiSeleniumPlugin.clear()
         } catch (cause: Throwable) {
-            sendMessage("清理驱动文件异常, $cause")
+            logger.warning("清理驱动文件异常", cause)
+            sendMessage("清理驱动文件异常")
         }
     }
 
@@ -42,7 +46,8 @@ public object SeleniumCommand : CompositeCommand(
         try {
             MiraiSeleniumPlugin.destroy(enable = all)
         } catch (cause: Throwable) {
-            sendMessage("清理驱动进程异常, $cause")
+            logger.warning("清理驱动进程异常", cause)
+            sendMessage("清理驱动进程异常")
         }
     }
 
@@ -52,7 +57,8 @@ public object SeleniumCommand : CompositeCommand(
         try {
             sendMessage(DriverCache.status().joinToString(separator = "\n").ifEmpty { "当前没有驱动进程" })
         } catch (cause: Throwable) {
-            sendMessage("驱动进程状态异常, $cause")
+            logger.warning("驱动进程状态异常", cause)
+            sendMessage("驱动进程状态异常")
         }
     }
 
@@ -64,7 +70,8 @@ public object SeleniumCommand : CompositeCommand(
             val binary = MiraiSeleniumPlugin.firefox(version = version)
             sendMessage("下载结束，binary: ${binary.absolutePath}")
         } catch (cause: Throwable) {
-            sendMessage("下载 firefox 异常, $cause")
+            logger.warning("下载 firefox 异常", cause)
+            sendMessage("下载 firefox 异常")
         } finally {
             MiraiBrowserConfig.firefox = System.getProperty(FIREFOX_BROWSER_BINARY).orEmpty()
         }
@@ -78,7 +85,8 @@ public object SeleniumCommand : CompositeCommand(
             val binary = MiraiSeleniumPlugin.chromium(version = version)
             sendMessage("下载结束，binary: ${binary.absolutePath}")
         } catch (cause: Throwable) {
-            sendMessage("下载 chromium 异常, $cause")
+            logger.warning("下载 chromium 异常", cause)
+            sendMessage("下载 chromium 异常")
         } finally {
             MiraiBrowserConfig.chrome = System.getProperty(CHROME_BROWSER_BINARY).orEmpty()
         }
