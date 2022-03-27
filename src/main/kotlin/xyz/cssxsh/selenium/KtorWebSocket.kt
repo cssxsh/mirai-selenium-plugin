@@ -29,10 +29,10 @@ internal class KtorWebSocket(private val session: DefaultWebSocketSession, priva
                     if (session.closeReason.isCompleted) {
                         val (code, reason) = requireNotNull(session.closeReason.await()) { "CloseReason Not Null" }
                         listener.onClose(code.toInt(), reason)
+                        return@launch
                     } else {
                         listener.onError(cause)
                     }
-                    return@launch
                 }
             }
         }
@@ -40,17 +40,25 @@ internal class KtorWebSocket(private val session: DefaultWebSocketSession, priva
 
     override fun close() {
         session.launch(SeleniumContext) {
-            session.close()
+            try {
+                session.close()
+            } catch (cause: Throwable) {
+                listener.onError(cause)
+            }
         }
     }
 
     override fun send(message: Message): KtorWebSocket {
         session.launch(SeleniumContext) {
-            when (message) {
-                is BinaryMessage -> session.send(message.data())
-                is TextMessage -> session.send(message.text())
-                is CloseMessage -> session.close()
-                else -> throw UnsupportedOperationException("Message: ${message::class.qualifiedName}")
+            try {
+                when (message) {
+                    is BinaryMessage -> session.send(message.data())
+                    is TextMessage -> session.send(message.text())
+                    is CloseMessage -> session.close(CloseReason(message.code().toShort(), message.reason()))
+                    else -> throw UnsupportedOperationException("Message: ${message::class.qualifiedName}")
+                }
+            } catch (cause: Throwable) {
+                listener.onError(cause)
             }
         }
         return this
@@ -58,14 +66,22 @@ internal class KtorWebSocket(private val session: DefaultWebSocketSession, priva
 
     override fun sendBinary(data: ByteArray): KtorWebSocket {
         session.launch(SeleniumContext) {
-            session.send(data)
+            try {
+                session.send(data)
+            } catch (cause: Throwable) {
+                listener.onError(cause)
+            }
         }
         return this
     }
 
     override fun sendText(data: CharSequence): KtorWebSocket {
         session.launch(SeleniumContext) {
-            session.send(StringBuilder(data).toString())
+            try {
+                session.send(data.toString())
+            } catch (cause: Throwable) {
+                listener.onError(cause)
+            }
         }
         return this
     }
