@@ -13,7 +13,6 @@ import org.openqa.selenium.remote.service.*
 import java.time.*
 import java.util.*
 import java.util.logging.*
-import kotlin.coroutines.*
 
 // region Selenium
 
@@ -36,7 +35,9 @@ import kotlin.coroutines.*
  */
 internal val SeleniumLogger: Logger = Logger.getLogger("org.openqa.selenium")
 
-internal var SeleniumContext: CoroutineContext = Dispatchers.IO + SupervisorJob()
+internal var SeleniumContext = Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { context, cause ->
+    SeleniumLogger.log(Level.WARNING, "Exception in coroutine ${context[CoroutineName]?.name ?: "Selenium"}", cause)
+}
 
 // endregion
 
