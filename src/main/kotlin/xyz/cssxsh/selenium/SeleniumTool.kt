@@ -44,7 +44,7 @@ internal var SeleniumContext = Dispatchers.IO + SupervisorJob() + CoroutineExcep
 // region RemoteWebDriver
 
 internal fun DriverService.getProcess(): Process? {
-    val process = DriverService::class.java.getDeclaredField("process")
+    val process = this::class.java.getDeclaredField("process")
         .apply { isAccessible = true }.get(this) ?: return null
     val osProcess = process::class.java.getDeclaredField("process")
         .apply { isAccessible = true }.get(process) ?: return null
@@ -52,6 +52,13 @@ internal fun DriverService.getProcess(): Process? {
         .apply { isAccessible = true }.get(osProcess) ?: return null
     return watchdog::class.java.getDeclaredField("process")
         .apply { isAccessible = true }.get(watchdog) as Process?
+}
+
+internal fun RemoteWebDriver.getHttpClientFactory(): SeleniumHttpClientFactory? {
+    val executor = this::class.java.getDeclaredField("executor")
+        .apply { isAccessible = true }.get(this) ?: return null
+    return executor::class.java.getDeclaredField("httpClientFactory")
+        .apply { isAccessible = true }.get(executor) as SeleniumHttpClientFactory?
 }
 
 internal const val SELENIUM_TIMEOUT_INIT = "xyz.cssxsh.selenium.timeout.init"

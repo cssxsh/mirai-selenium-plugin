@@ -12,6 +12,7 @@ import xyz.cssxsh.mirai.plugin.data.*
 import xyz.cssxsh.selenium.*
 import java.io.*
 import java.util.logging.*
+import kotlin.reflect.full.*
 
 public object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
@@ -109,8 +110,9 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
         DriverCache.entries.removeIf { (driver, service) ->
             if (enable && driver.sessionId != null && service.isRunning) return@removeIf false
             val process = service.getProcess()
+            val factory = (driver.getHttpClientFactory() ?: Unit)::class.findAnnotation<SeleniumHttpClientName>()?.value
 
-            logger.info { "Destroy driver, session: ${driver.sessionId}, process: $process" }
+            logger.info { "Destroy driver, session: ${driver.sessionId}, process: $process, factory: $factory" }
 
             try {
                 driver.quit()

@@ -21,7 +21,6 @@ mavenCentralPublish {
 repositories {
     mavenLocal()
     mavenCentral()
-    gradlePluginPortal()
 }
 
 dependencies {
@@ -40,12 +39,6 @@ dependencies {
 
 kotlin {
     explicitApi()
-}
-
-mirai {
-    configureShadow {
-        exclude("module-info.class")
-    }
 }
 
 tasks {
