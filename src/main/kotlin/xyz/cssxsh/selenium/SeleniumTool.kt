@@ -22,7 +22,7 @@ import java.util.logging.*
  * @see org.openqa.selenium.devtools.CdpEndpointFinder
  * @see org.openqa.selenium.devtools.Connection
  * @see org.openqa.selenium.devtools.idealized.Network
- * @see org.openqa.selenium.devtools.v95.V95Network
+ * @see org.openqa.selenium.devtools.v99.V99Network
  * @see org.openqa.selenium.remote.ErrorCodes
  * @see org.openqa.selenium.remote.ProtocolHandshake
  * @see org.openqa.selenium.remote.RemoteLogs
@@ -44,19 +44,41 @@ internal var SeleniumContext = Dispatchers.IO + SupervisorJob() + CoroutineExcep
 // region RemoteWebDriver
 
 internal fun DriverService.getProcess(): Process? {
+    /**
+     * @see org.openqa.selenium.remote.service.DriverService.process
+     */
     val process = this::class.java.getDeclaredField("process")
         .apply { isAccessible = true }.get(this) ?: return null
+
+    /**
+     * @see org.openqa.selenium.os.CommandLine.process
+     */
     val osProcess = process::class.java.getDeclaredField("process")
         .apply { isAccessible = true }.get(process) ?: return null
+
+    /**
+     * @see org.openqa.selenium.os.OsProcess.executeWatchdog
+     */
     val watchdog = osProcess::class.java.getDeclaredField("executeWatchdog")
         .apply { isAccessible = true }.get(osProcess) ?: return null
+
+    /**
+     * @see org.openqa.selenium.os.OsProcess.SeleniumWatchDog.process
+     */
     return watchdog::class.java.getDeclaredField("process")
-        .apply { isAccessible = true }.get(watchdog) as Process?
+        .apply { isAccessible = true }.get(watchdog) as? Process
 }
 
 internal fun RemoteWebDriver.getHttpClientFactory(): SeleniumHttpClientFactory? {
-    val executor = this::class.java.getDeclaredField("executor")
+    /**
+     * @see org.openqa.selenium.remote.RemoteWebDriver.executor
+     */
+    val executor = RemoteWebDriver::class.java.getDeclaredField("executor")
         .apply { isAccessible = true }.get(this) ?: return null
+
+    /**
+     * @see org.openqa.selenium.remote.HttpCommandExecutor.httpClientFactory
+     */
     return executor::class.java.getDeclaredField("httpClientFactory")
         .apply { isAccessible = true }.get(executor) as SeleniumHttpClientFactory?
 }
