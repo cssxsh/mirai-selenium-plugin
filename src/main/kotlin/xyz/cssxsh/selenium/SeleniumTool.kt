@@ -47,7 +47,7 @@ internal fun DriverService.getProcess(): Process? {
     /**
      * @see org.openqa.selenium.remote.service.DriverService.process
      */
-    val process = this::class.java.getDeclaredField("process")
+    val process = DriverService::class.java.getDeclaredField("process")
         .apply { isAccessible = true }.get(this) ?: return null
 
     /**
