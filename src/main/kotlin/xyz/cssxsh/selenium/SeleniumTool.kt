@@ -43,18 +43,19 @@ internal var SeleniumContext = Dispatchers.IO + SupervisorJob() + CoroutineExcep
 
 // region RemoteWebDriver
 
+@Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
 internal fun DriverService.getProcess(): Process? {
     /**
      * @see org.openqa.selenium.remote.service.DriverService.process
      */
-    val process = DriverService::class.java.getDeclaredField("process")
+    val commandline = DriverService::class.java.getDeclaredField("process")
         .apply { isAccessible = true }.get(this) ?: return null
 
     /**
      * @see org.openqa.selenium.os.CommandLine.process
      */
-    val osProcess = process::class.java.getDeclaredField("process")
-        .apply { isAccessible = true }.get(process) ?: return null
+    val osProcess = commandline::class.java.getDeclaredField("process")
+        .apply { isAccessible = true }.get(commandline) ?: return null
 
     /**
      * @see org.openqa.selenium.os.OsProcess.executeWatchdog
@@ -79,7 +80,7 @@ internal fun RemoteWebDriver.getHttpClientFactory(): SeleniumHttpClientFactory? 
     /**
      * @see org.openqa.selenium.remote.HttpCommandExecutor.httpClientFactory
      */
-    return executor::class.java.getDeclaredField("httpClientFactory")
+    return HttpCommandExecutor::class.java.getDeclaredField("httpClientFactory")
         .apply { isAccessible = true }.get(executor) as SeleniumHttpClientFactory?
 }
 

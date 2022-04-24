@@ -59,6 +59,7 @@ internal open class SeleniumToolKtTest {
 
     @AfterEach
     fun destroy() {
+        println(DriverCache.status())
         DriverCache.forEach { (driver, service) ->
             try {
                 driver.quit()
