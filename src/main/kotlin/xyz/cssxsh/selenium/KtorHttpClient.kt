@@ -1,13 +1,12 @@
 package xyz.cssxsh.selenium
 
-import io.ktor.client.HttpClient
+import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.websocket.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.http.HttpMethod
 import io.ktor.http.content.*
 import io.ktor.util.*
 import io.ktor.utils.io.jvm.javaio.*

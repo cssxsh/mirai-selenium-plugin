@@ -2,12 +2,12 @@ plugins {
     kotlin("jvm") version "1.6.0"
     kotlin("plugin.serialization") version "1.6.0"
 
-    id("net.mamoe.mirai-console") version "2.10.0"
+    id("net.mamoe.mirai-console") version "2.10.1"
     id("net.mamoe.maven-central-publish") version "0.7.1"
 }
 
 group = "xyz.cssxsh.mirai"
-version = "2.0.9"
+version = "2.0.10"
 
 mavenCentralPublish {
     useCentralS01()
@@ -30,7 +30,7 @@ dependencies {
         exclude("com.google.auto.service")
     }
     compileOnly("com.google.auto.service:auto-service:1.0.1")
-    compileOnly("net.mamoe:mirai-core-utils:2.10.0")
+    compileOnly("net.mamoe:mirai-core-utils:2.10.1")
     compileOnly("me.him188:kotlin-jvm-blocking-bridge-runtime-jvm:2.0.0-160.3")
 
     testImplementation(kotlin("test", "1.6.0"))
