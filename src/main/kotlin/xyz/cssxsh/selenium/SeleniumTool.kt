@@ -22,7 +22,6 @@ import java.util.logging.*
  * @see org.openqa.selenium.devtools.CdpEndpointFinder
  * @see org.openqa.selenium.devtools.Connection
  * @see org.openqa.selenium.devtools.idealized.Network
- * @see org.openqa.selenium.devtools.v99.V99Network
  * @see org.openqa.selenium.remote.ErrorCodes
  * @see org.openqa.selenium.remote.ProtocolHandshake
  * @see org.openqa.selenium.remote.RemoteLogs

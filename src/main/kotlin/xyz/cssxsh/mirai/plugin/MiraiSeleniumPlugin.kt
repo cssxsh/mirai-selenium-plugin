@@ -18,7 +18,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
-        version = "2.0.9",
+        version = "2.1.0",
     ) {
         author("cssxsh")
     }
@@ -100,7 +100,9 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
         System.setProperty(SEVEN7Z_MIRRORS, "https://downloads.sourceforge.net/sevenzip")
         System.setProperty(SELENIUM_FOLDER, dataFolder.resolve("selenium").absolutePath)
 
-        contributeBotConfigurationAlterer(instance = MiraiSeleniumLoginSolver)
+        if (System.getProperty("mirai.slider.captcha.supported").toBoolean()) {
+            contributeBotConfigurationAlterer(instance = MiraiSeleniumLoginSolver)
+        }
     }
 
     /**

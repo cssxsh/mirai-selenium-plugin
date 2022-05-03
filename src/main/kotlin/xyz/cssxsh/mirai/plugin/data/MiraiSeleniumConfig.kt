@@ -47,7 +47,7 @@ public object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"),
 
     @ValueName("factory")
     @ValueDescription("指定使用的Factory")
-    override val factory: String by value("ktor")
+    override val factory: String by value("netty")
 
     @ValueName("arguments")
     @ValueDescription("自定义 arguments")
