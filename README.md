@@ -75,6 +75,11 @@ dependencies {
 * `edge` Edge 二进制文件路径
 * `firefox` Firefox 二进制文件路径
 
+## LoginSolver
+
+本插件提供了 [MiraiSeleniumLoginSolver](src/main/kotlin/xyz/cssxsh/mirai/plugin/MiraiSeleniumLoginSolver.kt)  
+需要在 mirai 运行时中添加 JVM 属性 mirai.slider.captcha.supported (添加参数 -Dmirai.slider.captcha.supported) 启用
+
 ## 安装
 
 ### MCL 指令安装
