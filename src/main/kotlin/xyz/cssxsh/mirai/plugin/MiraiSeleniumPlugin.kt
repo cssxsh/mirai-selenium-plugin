@@ -99,6 +99,8 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
         System.setProperty(FIREFOX_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/geckodriver")
         System.setProperty(SEVEN7Z_MIRRORS, "https://downloads.sourceforge.net/sevenzip")
         System.setProperty(SELENIUM_FOLDER, dataFolder.resolve("selenium").absolutePath)
+
+        contributeBotConfigurationAlterer(instance = MiraiSeleniumLoginSolver)
     }
 
     /**
