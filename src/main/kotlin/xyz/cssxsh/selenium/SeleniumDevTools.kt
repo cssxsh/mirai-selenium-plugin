@@ -9,9 +9,7 @@ import org.openqa.selenium.devtools.*
 import org.openqa.selenium.devtools.idealized.*
 import org.openqa.selenium.devtools.idealized.log.model.*
 import org.openqa.selenium.devtools.idealized.target.model.*
-import org.openqa.selenium.devtools.v97.emulation.*
 import org.openqa.selenium.remote.RemoteWebDriver
-import java.util.*
 
 /**
  * [devtools-protocol](https://chromedevtools.github.io/devtools-protocol)
@@ -86,7 +84,10 @@ public fun RemoteWebDriver.network(): Network<*, *> = devTools.domains.network()
  * [Log.entryAdded](https://chromedevtools.github.io/devtools-protocol/tot/Log/#event-entryAdded)
  * @see Domains
  */
-public fun DevTools.addLogListener(handler: (LogEntry) -> Unit): Unit = addListener(domains.log().entryAdded(), handler)
+public fun DevTools.addLogListener(handler: (LogEntry) -> Unit): Unit = with(domains.log()) {
+    send(enable())
+    addListener(entryAdded(), handler)
+}
 
 // endregion
 
@@ -98,17 +99,9 @@ public fun DevTools.addLogListener(handler: (LogEntry) -> Unit): Unit = addListe
  */
 public fun RemoteWebDriver.setDeviceMetrics(width: Int, height: Int, deviceScaleFactor: Number, mobile: Boolean) {
     devTools.send(
-        Emulation.setDeviceMetricsOverride(
-            width, height, deviceScaleFactor, mobile,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
+        Command<Void>(
+            "Emulation.setDeviceMetricsOverride",
+            mapOf("width" to width, "height" to height, "deviceScaleFactor" to deviceScaleFactor, "mobile" to mobile)
         )
     )
 }
@@ -118,7 +111,7 @@ public fun RemoteWebDriver.setDeviceMetrics(width: Int, height: Int, deviceScale
  * @see HasDevTools
  */
 public fun RemoteWebDriver.setScrollbarsHidden(hidden: Boolean = true) {
-    devTools.send(Emulation.setScrollbarsHidden(hidden))
+    devTools.send(Command<Void>("Emulation.setScrollbarsHidden", mapOf("hidden" to hidden)))
 }
 
 // endregion
