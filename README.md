@@ -36,8 +36,8 @@ dependencies {
 
 ### 示例代码
 
-* [kotlin](src/test/kotlin/xyz/cssxsh/mirai/plugin/MiraiSeleniumPluginTest.kt)
-* [java](src/test/java/xyz/cssxsh/mirai/plugin/MiraiSeleniumPluginJavaTest.java)
+* [kotlin](src/test/kotlin/xyz/cssxsh/mirai/selenium/MiraiSeleniumPluginTest.kt)
+* [java](src/test/java/xyz/cssxsh/mirai/selenium/MiraiSeleniumPluginJavaTest.java)
 
 ## 使用本前置插件的项目
 
@@ -54,7 +54,7 @@ dependencies {
 
 ## 配置
 
-### [MiraiSeleniumConfig.yml](src/main/kotlin/xyz/cssxsh/mirai/plugin/data/MiraiSeleniumConfig.kt)
+### [MiraiSeleniumConfig.yml](src/main/kotlin/xyz/cssxsh/mirai/selenium/data/MiraiSeleniumConfig.kt)
 
 * `expires` 驱动文件过期时间，默认一星期 (单位：天)
 * `user_agent` 浏览器 UA
@@ -69,7 +69,7 @@ dependencies {
 * `arguments` 自定义 arguments, 可以尝试加入 `--no-sandbox`, `--disable-dev-shm-usage`, 解决兼容性问题
 * `preferences` 自定义 preferences，浏览器配置
 
-### [MiraiBrowserConfig.yml](src/main/kotlin/xyz/cssxsh/mirai/plugin/data/MiraiBrowserConfig.kt)
+### [MiraiBrowserConfig.yml](src/main/kotlin/xyz/cssxsh/mirai/selenium/data/MiraiBrowserConfig.kt)
 
 * `chrome` Chrome/Chromium 二进制文件路径
 * `edge` Edge 二进制文件路径
@@ -77,7 +77,7 @@ dependencies {
 
 ## LoginSolver
 
-本插件提供了 [MiraiSeleniumLoginSolver](src/main/kotlin/xyz/cssxsh/mirai/plugin/MiraiSeleniumLoginSolver.kt)  
+本插件提供了 [MiraiSeleniumLoginSolver](src/main/kotlin/xyz/cssxsh/mirai/selenium/MiraiSeleniumLoginSolver.kt)  
 需要在 mirai 运行时中添加 JVM 属性 mirai.slider.captcha.supported (添加参数 -Dmirai.slider.captcha.supported) 启用
 
 ## 安装

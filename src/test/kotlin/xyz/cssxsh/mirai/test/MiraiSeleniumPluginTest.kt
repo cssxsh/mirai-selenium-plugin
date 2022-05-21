@@ -1,10 +1,11 @@
-package xyz.cssxsh.mirai.plugin
+package xyz.cssxsh.mirai.test
 
 import kotlinx.coroutines.runBlocking
 import net.mamoe.mirai.console.plugin.jvm.*
 import net.mamoe.mirai.utils.warning
 import org.openqa.selenium.remote.*
-import xyz.cssxsh.mirai.plugin.data.*
+import xyz.cssxsh.mirai.selenium.MiraiSeleniumPlugin
+import xyz.cssxsh.mirai.selenium.data.*
 import xyz.cssxsh.selenium.*
 
 internal class MiraiSeleniumPluginTest :

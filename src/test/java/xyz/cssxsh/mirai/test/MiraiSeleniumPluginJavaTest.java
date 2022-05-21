@@ -1,9 +1,10 @@
-package xyz.cssxsh.mirai.plugin;
+package xyz.cssxsh.mirai.test;
 
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import xyz.cssxsh.mirai.selenium.MiraiSeleniumPlugin;
 import xyz.cssxsh.selenium.RemoteWebDriverConfig;
 import xyz.cssxsh.selenium.SeleniumToolKt;
 

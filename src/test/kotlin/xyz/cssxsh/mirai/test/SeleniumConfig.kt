@@ -1,4 +1,4 @@
-package xyz.cssxsh.mirai.plugin
+package xyz.cssxsh.mirai.test
 
 import net.mamoe.mirai.console.data.*
 import xyz.cssxsh.selenium.*
@@ -16,10 +16,6 @@ object SeleniumConfig : ReadOnlyPluginConfig("SeleniumConfig"), RemoteWebDriverC
     @ValueDescription("截图高度")
     override val height: Int by value(1024)
 
-    @ValueName("pixel_ratio")
-    @ValueDescription("截图像素比")
-    override val pixelRatio: Int by value(3)
-
     @ValueName("headless")
     @ValueDescription("无头模式（后台模式）")
     override val headless: Boolean by value(true)
@@ -27,8 +23,4 @@ object SeleniumConfig : ReadOnlyPluginConfig("SeleniumConfig"), RemoteWebDriverC
     @ValueName("browser")
     @ValueDescription("指定使用的浏览器，Chrome/Firefox")
     override val browser: String by value("")
-
-    @ValueName("factory")
-    @ValueDescription("指定使用的Factory")
-    override val factory: String by value("ktor")
 }

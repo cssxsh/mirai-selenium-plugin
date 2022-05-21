@@ -1,8 +1,8 @@
-package xyz.cssxsh.mirai.plugin.command
+package xyz.cssxsh.mirai.selenium.command
 
 import net.mamoe.mirai.console.command.*
-import xyz.cssxsh.mirai.plugin.*
-import xyz.cssxsh.mirai.plugin.data.*
+import xyz.cssxsh.mirai.selenium.*
+import xyz.cssxsh.mirai.selenium.data.*
 import xyz.cssxsh.selenium.*
 
 public object SeleniumCommand : CompositeCommand(

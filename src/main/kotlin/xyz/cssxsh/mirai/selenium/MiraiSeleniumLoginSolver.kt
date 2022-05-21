@@ -1,4 +1,4 @@
-package xyz.cssxsh.mirai.plugin
+package xyz.cssxsh.mirai.selenium
 
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.*

@@ -1,4 +1,4 @@
-package xyz.cssxsh.mirai.plugin
+package xyz.cssxsh.mirai.test
 
 import org.openqa.selenium.remote.*
 

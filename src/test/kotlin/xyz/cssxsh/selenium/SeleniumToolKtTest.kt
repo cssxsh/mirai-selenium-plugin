@@ -4,7 +4,7 @@ import kotlinx.coroutines.*
 import org.junit.jupiter.api.*
 import org.openqa.selenium.*
 import org.openqa.selenium.remote.*
-import xyz.cssxsh.mirai.plugin.data.*
+import xyz.cssxsh.mirai.selenium.data.*
 import java.io.*
 import java.util.concurrent.*
 import java.util.logging.*

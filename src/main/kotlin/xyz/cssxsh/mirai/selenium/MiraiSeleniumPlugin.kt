@@ -1,4 +1,4 @@
-package xyz.cssxsh.mirai.plugin
+package xyz.cssxsh.mirai.selenium
 
 import kotlinx.coroutines.*
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
@@ -7,8 +7,8 @@ import net.mamoe.mirai.console.extension.*
 import net.mamoe.mirai.console.plugin.jvm.*
 import net.mamoe.mirai.utils.*
 import org.openqa.selenium.remote.*
-import xyz.cssxsh.mirai.plugin.command.*
-import xyz.cssxsh.mirai.plugin.data.*
+import xyz.cssxsh.mirai.selenium.command.*
+import xyz.cssxsh.mirai.selenium.data.*
 import xyz.cssxsh.selenium.*
 import java.io.*
 import java.util.logging.*

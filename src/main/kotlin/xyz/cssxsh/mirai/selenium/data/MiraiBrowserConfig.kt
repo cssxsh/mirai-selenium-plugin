@@ -1,4 +1,4 @@
-package xyz.cssxsh.mirai.plugin.data
+package xyz.cssxsh.mirai.selenium.data
 
 import net.mamoe.mirai.console.data.*
 import net.mamoe.mirai.console.util.*
