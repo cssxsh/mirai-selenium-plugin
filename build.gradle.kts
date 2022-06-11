@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "1.6.21"
     kotlin("plugin.serialization") version "1.6.21"
 
-    id("net.mamoe.mirai-console") version "2.11.0"
+    id("net.mamoe.mirai-console") version "2.11.1"
     id("net.mamoe.maven-central-publish") version "0.7.1"
 }
 
@@ -25,13 +25,13 @@ repositories {
 }
 
 dependencies {
-    api("org.seleniumhq.selenium:selenium-java:4.1.4") {
+    api("org.seleniumhq.selenium:selenium-java:4.2.2") {
         exclude("org.slf4j")
         exclude("io.netty")
         exclude("com.google.auto.service")
     }
     compileOnly("com.google.auto.service:auto-service:1.0.1")
-    compileOnly("net.mamoe:mirai-core-utils:2.11.0")
+    compileOnly("net.mamoe:mirai-core-utils:2.11.1")
     compileOnly("me.him188:kotlin-jvm-blocking-bridge-runtime-jvm:2.0.0-162.1")
 
     testImplementation(kotlin("test", "1.6.21"))
