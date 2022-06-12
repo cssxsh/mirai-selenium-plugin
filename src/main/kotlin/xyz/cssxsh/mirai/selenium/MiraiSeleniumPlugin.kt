@@ -111,8 +111,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
      */
     @JvmOverloads
     public fun destroy(enable: Boolean = true) {
-        DriverCache.entries.removeIf { (driver, service) ->
-            if (enable && driver.sessionId != null && service.isRunning) return@removeIf false
+        DriverCache.destroy(enable) { driver, service ->
             val process = service.getProcess()
             val factory = (driver.getHttpClientFactory() ?: Unit)::class.findAnnotation<SeleniumHttpClientName>()?.value
 
@@ -128,8 +127,6 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
             } catch (cause: Throwable) {
                 logger.warning({ "Service ${process ?: service.url} stop failure." }, cause)
             }
-
-            true
         }
     }
 
