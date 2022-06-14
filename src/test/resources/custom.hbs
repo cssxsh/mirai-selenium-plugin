@@ -1,0 +1,26 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ECharts Custom</title>
+    <script src="{{{ cdn }}}" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        #{{{ id }}} {
+            width: {{ width }};
+            height: {{ height }};
+        }
+    </style>
+</head>
+
+<body>
+    <div id="display-container">
+    </div>
+    <script type="text/javascript">
+        let chart = echarts.init(document.getElementById("{{{ id }}}"), null, { renderer: "{{{ renderer }}}" });
+        let option = {{{ option }}}
+        chart.setOption(option);
+    </script>
+</body>
+
+</html>
