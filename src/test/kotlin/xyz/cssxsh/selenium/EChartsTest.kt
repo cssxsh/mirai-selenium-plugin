@@ -23,7 +23,9 @@ internal class EChartsTest : SeleniumTest() {
         val html = engine.renderHtml(bar)
         val file = folder.resolve("index.html")
 
-        file.writeText(html.replace("https://cdnjs.cloudflare.com/ajax/libs", "https://cdn.bootcss.com"))
+        if (isPC) {
+            file.writeText(html.replace("https://cdnjs.cloudflare.com/ajax/libs", "https://cdn.bootcss.com"))
+        }
 
         testRemoteWebDriver { browser, driver ->
             println(browser)
