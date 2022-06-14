@@ -1,8 +1,10 @@
 package xyz.cssxsh.selenium
 
+import com.github.jknack.handlebars.*
 import kotlinx.coroutines.delay
 import org.icepear.echarts.*
 import org.icepear.echarts.render.*
+import org.icepear.echarts.serializer.*
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -18,9 +20,10 @@ internal class EChartsTest : SeleniumTest() {
             .addSeries("2015", arrayOf(43.3, 83.1, 86.4, 72.4))
             .addSeries("2016", arrayOf(85.8, 73.4, 65.2, 53.9))
             .addSeries("2017", arrayOf(93.7, 55.1, 82.5, 39.1))
-        val engine = Engine()
+        val template = Handlebars().compile("base")
+        val meta = ChartMeta("100%", "100%", EChartsSerializer.toJson(bar.option))
 
-        val html = engine.renderHtml(bar)
+        val html = template.apply(meta)
         val file = folder.resolve("index.html")
 
         if (isPC) {

@@ -63,7 +63,7 @@ internal abstract class SeleniumTest {
     @AfterEach
     fun destroy() {
         println(DriverCache.status())
-        DriverCache.forEach { (driver, service) ->
+        DriverCache.destroy(enable = true) { driver, service ->
             try {
                 driver.quit()
             } catch (cause: Throwable) {
@@ -75,6 +75,5 @@ internal abstract class SeleniumTest {
                 cause.printStackTrace()
             }
         }
-        DriverCache.clear()
     }
 }
