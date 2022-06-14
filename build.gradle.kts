@@ -32,9 +32,13 @@ dependencies {
     }
     compileOnly("com.google.auto.service:auto-service:1.0.1")
     compileOnly("net.mamoe:mirai-core-utils:2.11.1")
-    compileOnly("me.him188:kotlin-jvm-blocking-bridge-runtime-jvm:2.0.0-162.1")
-
+    compileOnly("me.him188:kotlin-jvm-blocking-bridge-runtime-jvm:2.1.0-162.1")
+    // test
     testImplementation(kotlin("test", "1.6.21"))
+    testImplementation("org.icepear.echarts:echarts-java:1.0.3") {
+        exclude(group = "org.slf4j")
+    }
+    testCompileOnly("org.projectlombok:lombok:1.18.24")
     testRuntimeOnly("org.slf4j:slf4j-simple:1.7.36")
 }
 

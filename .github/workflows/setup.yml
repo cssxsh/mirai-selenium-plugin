@@ -34,3 +34,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: ./gradlew test --tests "xyz.cssxsh.selenium.SeleniumToolKtTest" --scan --info
+
+      - name: SeleniumDevToolsKtTest
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./gradlew test --tests "xyz.cssxsh.selenium.SeleniumDevToolsKtTest" --scan --info
+
+      - name: EChartsTest
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./gradlew test --tests "xyz.cssxsh.selenium.EChartsTest" --scan --info
