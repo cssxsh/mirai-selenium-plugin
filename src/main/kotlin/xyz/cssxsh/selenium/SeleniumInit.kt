@@ -720,7 +720,7 @@ internal fun setupFirefox(folder: File, version: String): File {
 internal fun setupChromium(folder: File, version: String): File {
     folder.mkdirs()
     val platform = Platform.getCurrent()
-    fun release(repo: String): GitHubRelease {
+    fun release(owner: String, repo: String): GitHubRelease {
         return if (version.isNotBlank()) {
             var page = 0
             val release: GitHubRelease
@@ -728,7 +728,7 @@ internal fun setupChromium(folder: File, version: String): File {
                 val releases = IgnoreJson.decodeFromString(
                     deserializer = ListSerializer(GitHubRelease.serializer()),
                     string = download(
-                        urlString = "https://api.github.com/repos/macchrome/$repo/releases?page=${page++}",
+                        urlString = "https://api.github.com/repos/$owner/$repo/releases?page=${page++}",
                         folder = folder
                     ).readText()
                 )
@@ -743,7 +743,7 @@ internal fun setupChromium(folder: File, version: String): File {
             IgnoreJson.decodeFromString(
                 deserializer = GitHubRelease.serializer(),
                 string = download(
-                    urlString = "https://api.github.com/repos/macchrome/$repo/releases/latest",
+                    urlString = "https://api.github.com/repos/$owner/$repo/releases/latest",
                     folder = folder
                 ).readText()
             )
@@ -753,7 +753,7 @@ internal fun setupChromium(folder: File, version: String): File {
     val binary = when {
         // https://github.com/macchrome/winchrome/releases
         platform.`is`(Platform.WINDOWS) -> {
-            val release = release(repo = "winchrome")
+            val release = release(owner = "macchrome", repo = "winchrome")
             val setup = folder.resolve("Chromium-${release.tagName}")
 
             if (setup.exists().not()) {
@@ -780,7 +780,7 @@ internal fun setupChromium(folder: File, version: String): File {
         }
         // https://github.com/macchrome/linchrome/releases
         platform.`is`(Platform.LINUX) -> {
-            val release = release(repo = "linchrome")
+            val release = release(owner = "macchrome", repo = "linchrome")
             val setup = folder.resolve("Chromium-${release.tagName}")
 
             if (setup.exists().not()) {
@@ -804,7 +804,7 @@ internal fun setupChromium(folder: File, version: String): File {
         }
         // https://github.com/macchrome/macstable/releases
         platform.`is`(Platform.MAC) -> {
-            val release = release(repo = "macstable")
+            val release = release(owner = "macchrome", repo = "macstable")
             val setup = folder.resolve("Chromium-${release.tagName}")
 
             if (setup.exists().not()) {
