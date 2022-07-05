@@ -2,6 +2,7 @@ package xyz.cssxsh.selenium
 
 import kotlinx.serialization.json.*
 import org.asynchttpclient.Dsl.asyncHttpClient
+import org.asynchttpclient.uri.Uri
 import org.openqa.selenium.devtools.*
 import org.openqa.selenium.devtools.idealized.*
 import org.openqa.selenium.devtools.idealized.log.model.*
@@ -19,8 +20,8 @@ public inline val RemoteWebDriver.devTools: DevTools get() = (this as HasDevTool
  * @see DevTools.connection
  */
 internal fun RemoteWebDriver.cdp(): ChromeDevToolsProtocol {
-    val host = capabilities.getCapability("se:cdp") as String
-    val json = asyncHttpClient().prepareGet("http://$host//json/protocol")
+    val ws = Uri.create(capabilities.getCapability("se:cdp") as String)
+    val json = asyncHttpClient().prepareGet("http://${ws.host}//json/protocol")
         .execute()
         .get()
         .responseBody

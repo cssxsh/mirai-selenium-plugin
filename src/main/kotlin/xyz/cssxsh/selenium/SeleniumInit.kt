@@ -115,6 +115,8 @@ internal fun download(urlString: String, folder: File, filename: String? = null)
         execute().get()
     }
 
+    if (response.statusCode != 200) throw IllegalStateException("status ${response.statusCode} download $urlString ")
+
     val relative = filename
         ?: response.getHeader("Content-Disposition")
             ?.let { text -> """filename="[^"]+"""".toRegex().find(text)?.groupValues?.get(1) }
