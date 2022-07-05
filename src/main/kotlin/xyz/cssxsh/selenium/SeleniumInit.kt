@@ -337,7 +337,7 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
     val version = mapping.readText()
 
     val suffix = when {
-        platform.`is`(Platform.WINDOWS) -> "win64"
+        platform.`is`(Platform.WINDOWS) -> "win32"
         platform.`is`(Platform.LINUX) -> "linux64"
         platform.`is`(Platform.MAC) -> "mac64"
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
