@@ -9,6 +9,7 @@ import org.openqa.selenium.edge.*
 import org.openqa.selenium.firefox.*
 import org.openqa.selenium.print.*
 import org.openqa.selenium.remote.*
+import org.openqa.selenium.remote.http.*
 import org.openqa.selenium.remote.service.*
 import java.time.*
 import java.util.*
@@ -69,7 +70,7 @@ internal fun DriverService.getProcess(): Process? {
         .apply { isAccessible = true }.get(watchdog) as? Process
 }
 
-internal fun RemoteWebDriver.getHttpClientFactory(): SeleniumHttpClientFactory? {
+internal fun RemoteWebDriver.getHttpClientFactory(): HttpClient.Factory? {
     /**
      * @see org.openqa.selenium.remote.RemoteWebDriver.executor
      */
@@ -80,7 +81,7 @@ internal fun RemoteWebDriver.getHttpClientFactory(): SeleniumHttpClientFactory? 
      * @see org.openqa.selenium.remote.HttpCommandExecutor.httpClientFactory
      */
     return HttpCommandExecutor::class.java.getDeclaredField("httpClientFactory")
-        .apply { isAccessible = true }.get(executor) as SeleniumHttpClientFactory?
+        .apply { isAccessible = true }.get(executor) as? HttpClient.Factory
 }
 
 internal const val SELENIUM_TIMEOUT_INIT = "xyz.cssxsh.selenium.timeout.init"
