@@ -45,9 +45,7 @@ public object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"),
     @ValueDescription("指定使用的浏览器，Chrome/Chromium/Firefox/Edge")
     override val browser: String by value("")
 
-    @ValueName("factory")
-    @ValueDescription("指定使用的Factory")
-    override val factory: String by value("netty")
+    override val factory: String = "netty"
 
     @ValueName("arguments")
     @ValueDescription("自定义 arguments")

@@ -33,21 +33,6 @@ dependencies {
     }
     compileOnly("com.google.auto.service:auto-service:1.0.1")
     compileOnly("net.mamoe:mirai-core-utils:2.12.0")
-    implementation("io.ktor:ktor-client-okhttp:2.0.3") {
-        exclude(group = "org.jetbrains.kotlin")
-        exclude(group = "org.jetbrains.kotlinx")
-        exclude(group = "org.slf4j")
-    }
-    implementation("io.ktor:ktor-client-encoding:2.0.3") {
-        exclude(group = "org.jetbrains.kotlin")
-        exclude(group = "org.jetbrains.kotlinx")
-        exclude(group = "org.slf4j")
-    }
-    implementation("com.squareup.okhttp3:okhttp:4.10.0") {
-        exclude(group = "org.jetbrains.kotlin")
-        exclude(group = "org.jetbrains.kotlinx")
-        exclude(group = "org.slf4j")
-    }
     // test
     testImplementation(kotlin("test", "1.6.21"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.3")

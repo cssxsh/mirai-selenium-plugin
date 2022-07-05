@@ -1,18 +1,10 @@
 package xyz.cssxsh.selenium
 
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.compression.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.utils.io.*
-import io.ktor.utils.io.jvm.javaio.*
-import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.*
 import kotlinx.serialization.json.*
+import org.asynchttpclient.DefaultAsyncHttpClientConfig
+import org.asynchttpclient.Dsl.asyncHttpClient
+import org.asynchttpclient.uri.Uri
 import org.openqa.selenium.*
 import org.openqa.selenium.chrome.*
 import org.openqa.selenium.chromium.*
@@ -87,10 +79,6 @@ internal fun queryVersion(folder: File): String {
         ?: throw UnsupportedOperationException("无法在 ${folder.absolutePath} 找到版本信息")
 }
 
-internal fun HttpMessage.contentDisposition(): ContentDisposition? {
-    return headers[HttpHeaders.ContentDisposition]?.let { ContentDisposition.parse(it) }
-}
-
 internal val IgnoreJson = Json {
     prettyPrint = true
     ignoreUnknownKeys = true
@@ -103,45 +91,37 @@ internal val IgnoreJson = Json {
  * @param folder 下载目录
  * @param filename 文件名，为空时从 header 或者 url 获取
  */
-internal fun download(urlString: String, folder: File, filename: String? = null): File = runBlocking(SeleniumContext) {
+internal fun download(urlString: String, folder: File, filename: String? = null): File {
 
     if (filename != null) {
         val current = folder.resolve(filename)
-        if (current.exists()) return@runBlocking current
+        if (current.exists()) return current
     }
 
-    val url = Url(urlString = urlString)
-    val token = when (url.host) {
-        "api.github.com" -> System.getenv("GITHUB_TOKEN")
-        else -> null
-    }
-    val client = HttpClient(OkHttp) {
-        CurlUserAgent()
-        ContentEncoding()
-        expectSuccess = true
-        defaultRequest {
-            if (token != null) {
-                header(HttpHeaders.Authorization, "token $token")
-            }
+
+    val client = asyncHttpClient(
+        DefaultAsyncHttpClientConfig.Builder()
+            .setFollowRedirect(true)
+            .setUserAgent("curl/7.61.0")
+    )
+    val response = with(client.prepareGet(urlString)) {
+        val token = System.getenv("GITHUB_TOKEN")
+        if ("api.github.com" in urlString && token != null) {
+            addHeader("Authorization", token)
         }
+        execute().get()
     }
-    with(client.get(url)) {
-        val relative = filename
-            ?: contentDisposition()?.parameter(ContentDisposition.Parameters.FileName)
-            ?: request.url.encodedPath.substringAfterLast('/').decodeURLPart()
 
-        val file = folder.resolve(relative)
-
-        file.outputStream().use { output ->
-            val channel: ByteReadChannel = body()
-
-            while (!channel.isClosedForRead) {
-                channel.copyTo(output)
-            }
+    val relative = filename
+        ?: response.getHeader("Content-Disposition")?.let { text ->
+            """filename="[^"]+"""".toRegex().find(text)?.groupValues?.get(1)
         }
+        ?: response.uri.path.substringAfterLast('/')
 
-        file
-    }
+    val file = folder.resolve(relative)
+    file.writeBytes(response.responseBodyAsBytes)
+
+    return file
 }
 
 /**
@@ -344,7 +324,7 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
                     filename = "chromedriver-${version0}.mapping"
                 )
                 break
-            } catch (_: ClientRequestException) {
+            } catch (_: Throwable) {
                 continue
             }
         }
@@ -518,7 +498,7 @@ internal fun RemoteWebDriverConfig.toConsumer(): DriverOptionsConsumer = { capab
             setPageLoadStrategy(PageLoadStrategy.NORMAL)
             setAcceptInsecureCerts(true)
             if (proxy.isNotBlank()) {
-                val url = Url(proxy)
+                val url = Uri.create(proxy)
                 addPreference("network.proxy.type", 1)
                 addPreference("network.proxy.http", url.host)
                 addPreference("network.proxy.http_port", url.port)

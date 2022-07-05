@@ -1,16 +1,13 @@
 package xyz.cssxsh.mirai.selenium
 
 import kotlinx.coroutines.*
-import net.mamoe.mirai.console.MiraiConsole
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
 import net.mamoe.mirai.console.extension.*
 import net.mamoe.mirai.console.plugin.jvm.*
-import net.mamoe.mirai.console.plugin.name
-import net.mamoe.mirai.console.plugin.version
-import net.mamoe.mirai.console.util.SemVersion
 import net.mamoe.mirai.utils.*
 import org.openqa.selenium.remote.*
+import org.openqa.selenium.remote.http.*
 import xyz.cssxsh.mirai.selenium.command.*
 import xyz.cssxsh.mirai.selenium.data.*
 import xyz.cssxsh.selenium.*
@@ -114,7 +111,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     public fun destroy(enable: Boolean = true) {
         DriverCache.destroy(enable) { driver, service ->
             val process = service.getProcess()
-            val factory = (driver.getHttpClientFactory() ?: Unit)::class.findAnnotation<SeleniumHttpClientName>()?.value
+            val factory = (driver.getHttpClientFactory() ?: Unit)::class.findAnnotation<HttpClientName>()?.value
 
             logger.info { "Destroy driver, session: ${driver.sessionId}, process: $process, factory: $factory" }
 
@@ -132,10 +129,6 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     }
 
     override fun onEnable() {
-        // XXX: mirai console version check
-        check(SemVersion.parseRangeRequirement(">= 2.12.0-RC").test(MiraiConsole.version)) {
-            "$name $version 需要 Mirai-Console 版本 >= 2.12.0，目前版本是 ${MiraiConsole.version}"
-        }
 
         MiraiSeleniumConfig.reload()
         MiraiBrowserConfig.reload()
