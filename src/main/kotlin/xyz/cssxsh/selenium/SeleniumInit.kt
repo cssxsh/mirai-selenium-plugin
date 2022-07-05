@@ -3,7 +3,8 @@ package xyz.cssxsh.selenium
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.compression.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -116,21 +117,22 @@ internal fun download(urlString: String, folder: File, filename: String? = null)
     }
     val client = HttpClient(OkHttp) {
         CurlUserAgent()
+        ContentEncoding()
         defaultRequest {
             if (token != null) {
                 header(HttpHeaders.Authorization, "token $token")
             }
         }
     }
-    client.get<HttpStatement>(url).execute { response ->
+    with(client.get(url)) {
         val relative = filename
-            ?: response.contentDisposition()?.parameter(ContentDisposition.Parameters.FileName)
-            ?: response.request.url.encodedPath.substringAfterLast('/').decodeURLPart()
+            ?: contentDisposition()?.parameter(ContentDisposition.Parameters.FileName)
+            ?: request.url.encodedPath.substringAfterLast('/').decodeURLPart()
 
         val file = folder.resolve(relative)
 
         file.outputStream().use { output ->
-            val channel: ByteReadChannel = response.receive()
+            val channel: ByteReadChannel = body()
 
             while (!channel.isClosedForRead) {
                 channel.copyTo(output)

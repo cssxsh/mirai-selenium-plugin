@@ -1,16 +1,17 @@
 package xyz.cssxsh.selenium
 
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.websocket.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.util.*
-import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.*
+import java.io.InputStream
 import java.net.URI
 
 internal class KtorHttpClient(private val config: SeleniumHttpClientConfig) : SeleniumHttpClient {
@@ -49,16 +50,20 @@ internal class KtorHttpClient(private val config: SeleniumHttpClientConfig) : Se
             attributes.put(AttributeKey(name), request.getAttribute(name))
         }
         if (method == HttpMethod.Post) {
-            body = ByteArrayContent(
+            setBody(body = ByteArrayContent(
                 bytes = request.content.get().readAllBytes(),
                 contentType = request.getHeader(HttpHeaders.ContentType)?.let(ContentType::parse)
-            )
+            ))
         }
     }
 
     private fun HttpResponse.toSeleniumHttpResponse() = SeleniumHttpResponse().also { response ->
         response.status = status.value
-        response.content = SeleniumHttpContents.memoize { content.toInputStream() }
+        response.content = SeleniumHttpContents.memoize {
+            runBlocking(SeleniumContext) {
+                body<InputStream>()
+            }
+        }
         headers.forEach { name, list ->
             response.addHeader(name, list.joinToString(separator = ";"))
         }
@@ -66,7 +71,7 @@ internal class KtorHttpClient(private val config: SeleniumHttpClientConfig) : Se
 
     override fun execute(request: SeleniumHttpRequest): SeleniumHttpResponse {
         return runBlocking(SeleniumContext) {
-            client.request<HttpResponse> { takeFrom(request, config.baseUri()) }.toSeleniumHttpResponse()
+            client.request { takeFrom(request, config.baseUri()) }.toSeleniumHttpResponse()
         }
     }
 

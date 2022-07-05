@@ -3,6 +3,7 @@ package xyz.cssxsh.selenium
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.json.*
 import org.openqa.selenium.devtools.*
@@ -24,13 +25,13 @@ public inline val RemoteWebDriver.devTools: DevTools get() = (this as HasDevTool
 internal suspend fun RemoteWebDriver.cdp(): ChromeDevToolsProtocol {
     val uri = capabilities.getCapability("se:cdp") as String
     val json = HttpClient(OkHttp).use { http ->
-        http.get<String> {
+        http.get {
             url {
                 takeFrom(uri)
                 protocol = URLProtocol.HTTP
                 encodedPath = "/json/protocol"
             }
-        }
+        }.bodyAsText()
     }
     return Json.decodeFromString(ChromeDevToolsProtocol.serializer(), json)
 }

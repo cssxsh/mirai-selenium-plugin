@@ -1,6 +1,6 @@
 package xyz.cssxsh.selenium
 
-import io.ktor.http.cio.websocket.*
+import io.ktor.websocket.*
 import kotlinx.coroutines.*
 import org.openqa.selenium.remote.http.*
 
