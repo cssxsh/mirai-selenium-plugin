@@ -1,10 +1,14 @@
 package xyz.cssxsh.mirai.selenium
 
 import kotlinx.coroutines.*
+import net.mamoe.mirai.console.MiraiConsole
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
 import net.mamoe.mirai.console.extension.*
 import net.mamoe.mirai.console.plugin.jvm.*
+import net.mamoe.mirai.console.plugin.name
+import net.mamoe.mirai.console.plugin.version
+import net.mamoe.mirai.console.util.SemVersion
 import net.mamoe.mirai.utils.*
 import org.openqa.selenium.remote.*
 import xyz.cssxsh.mirai.selenium.command.*
@@ -18,14 +22,11 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
-        version = "2.1.1",
+        version = "2.1.2",
     ) {
         author("cssxsh")
     }
 ) {
-    init {
-        Class.forName("org.openqa.selenium.remote.http.HttpClient\$Factory", true, this::class.java.classLoader)
-    }
 
     private var installed = false
 
@@ -131,6 +132,11 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     }
 
     override fun onEnable() {
+        // XXX: mirai console version check
+        check(SemVersion.parseRangeRequirement(">= 2.12.0-RC").test(MiraiConsole.version)) {
+            "$name $version 需要 Mirai-Console 版本 >= 2.12.0，目前版本是 ${MiraiConsole.version}"
+        }
+
         MiraiSeleniumConfig.reload()
         MiraiBrowserConfig.reload()
         SeleniumCommand.register()
