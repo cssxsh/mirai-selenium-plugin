@@ -103,6 +103,7 @@ internal fun download(urlString: String, folder: File, filename: String? = null)
         DefaultAsyncHttpClientConfig.Builder()
             .setFollowRedirect(true)
             .setUserAgent("curl/7.61.0")
+            .setRequestTimeout(180_000)
     )
     val response = with(client.prepareGet(urlString)) {
         val token = System.getenv("GITHUB_TOKEN")

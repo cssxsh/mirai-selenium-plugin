@@ -65,7 +65,7 @@ dependencies {
 * `proxy` 代理地址
 * `log` 启用日志文件
 * `browser` 指定使用的浏览器: `Chrome`,`Chromium`,`Firefox`,`Edge`
-* `factory` 指定使用的Factory: `ktor`,`netty`
+* `factory` 指定使用的Factory: ~~ktor~~,`netty` （ktor 不再可用）
 * `arguments` 自定义 arguments, 可以尝试加入 `--no-sandbox`, `--disable-dev-shm-usage`, 解决兼容性问题
 * `preferences` 自定义 preferences，浏览器配置
 
