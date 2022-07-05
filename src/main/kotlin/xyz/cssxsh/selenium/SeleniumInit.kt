@@ -14,6 +14,8 @@ import org.openqa.selenium.net.*
 import org.openqa.selenium.remote.*
 import java.io.*
 import java.lang.*
+import java.net.URLDecoder
+import java.nio.charset.Charset
 import java.util.zip.*
 
 internal const val SELENIUM_FOLDER = "xyz.cssxsh.selenium.folder"
@@ -114,10 +116,10 @@ internal fun download(urlString: String, folder: File, filename: String? = null)
     }
 
     val relative = filename
-        ?: response.getHeader("Content-Disposition")?.let { text ->
-            """filename="[^"]+"""".toRegex().find(text)?.groupValues?.get(1)
-        }
+        ?: response.getHeader("Content-Disposition")
+            ?.let { text -> """filename="[^"]+"""".toRegex().find(text)?.groupValues?.get(1) }
         ?: response.uri.path.substringAfterLast('/')
+            .let { value -> URLDecoder.decode(value, Charset.defaultCharset()) }
 
     val file = folder.resolve(relative)
     file.writeBytes(response.responseBodyAsBytes)
@@ -217,7 +219,7 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
 
     val url = """(?<=<Url>).{16,256}\.zip""".toRegex()
         .findAll(xml.readText())
-        .first { "win32" in it.value }.value
+        .first { "win64" in it.value }.value
 
     val file = download(
         urlString = url,
@@ -333,7 +335,7 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
     val version = mapping.readText()
 
     val suffix = when {
-        platform.`is`(Platform.WINDOWS) -> "win32"
+        platform.`is`(Platform.WINDOWS) -> "win64"
         platform.`is`(Platform.LINUX) -> "linux64"
         platform.`is`(Platform.MAC) -> "mac64"
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
@@ -406,7 +408,7 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     )
     val version = json.tagName
     val filename = when {
-        platform.`is`(Platform.WINDOWS) -> "geckodriver-$version-win32.zip"
+        platform.`is`(Platform.WINDOWS) -> "geckodriver-$version-win64.zip"
         platform.`is`(Platform.LINUX) -> "geckodriver-$version-linux64.tar.gz"
         platform.`is`(Platform.MAC) -> "geckodriver-$version-macos.tar.gz"
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")

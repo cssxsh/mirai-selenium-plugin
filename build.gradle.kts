@@ -37,7 +37,6 @@ dependencies {
     testImplementation(kotlin("test", "1.6.21"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.3")
     testCompileOnly("org.projectlombok:lombok:1.18.24")
-    testImplementation("net.mamoe:mirai-slf4j-bridge:1.2.0")
 }
 
 kotlin {

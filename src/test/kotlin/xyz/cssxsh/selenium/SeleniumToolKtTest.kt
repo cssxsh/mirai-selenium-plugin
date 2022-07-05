@@ -7,7 +7,7 @@ import java.util.concurrent.*
 internal class SeleniumToolKtTest : SeleniumTest() {
 
     @Test
-    @Timeout(value = 3, unit = TimeUnit.MINUTES)
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
     fun screenshot(): Unit = testRemoteWebDriver { browser, driver ->
 
         val url = "https://t.bilibili.com/h5/dynamic/detail/450055453856015371"
@@ -20,7 +20,7 @@ internal class SeleniumToolKtTest : SeleniumTest() {
     }
 
     @Test
-    @Timeout(value = 3, unit = TimeUnit.MINUTES)
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
     fun pdf(): Unit = testRemoteWebDriver { browser, driver ->
 
         driver.get("https://github.com/mamoe/mirai/blob/dev/README.md")
@@ -40,7 +40,7 @@ internal class SeleniumToolKtTest : SeleniumTest() {
     }
 
     @Test
-    @Timeout(value = 3, unit = TimeUnit.MINUTES)
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
     fun firefox() {
         setupFirefox(folder = folder, version = "")
         val driver = FirefoxDriver(config = object : RemoteWebDriverConfig {
@@ -58,7 +58,7 @@ internal class SeleniumToolKtTest : SeleniumTest() {
     }
 
     @Test
-    @Timeout(value = 3, unit = TimeUnit.MINUTES)
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
     fun chromium() {
         setupChromium(folder = folder, version = "98")
         val driver = ChromeDriver(config = object : RemoteWebDriverConfig {
