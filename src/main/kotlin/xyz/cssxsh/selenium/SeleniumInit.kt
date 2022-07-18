@@ -166,9 +166,12 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                 }
                 platform.`is`(Platform.MAC) -> {
                     // XXX: MacOS/Default
-                    (File("/Applications").list().orEmpty().asList() +
-                        File("${System.getProperty("user.home")}/Applications").list().orEmpty())
-                        .filter { it.endsWith(".app") }
+                    sequence<String> {
+                        File("/Applications").list()
+                            ?.let { yieldAll(it.iterator()) }
+                        File("${System.getProperty("user.home")}/Applications").list()
+                            ?.let { yieldAll(it.iterator()) }
+                    }.filter { it.endsWith(".app") }
                         .firstOrNull { """(?i)Chrome|Chromium|Firefox""".toRegex() in it }
                         ?: throw UnsupportedOperationException("未找到受支持的浏览器")
                 }
@@ -179,10 +182,81 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
 
             setupWebDriver(browser = default)
         }
-        browser.contains(other = "Edge", ignoreCase = true) -> setupEdgeDriver(folder = folder)
-        browser.contains(other = "Chrome", ignoreCase = true) -> setupChromeDriver(folder = folder, chromium = false)
-        browser.contains(other = "Chromium", ignoreCase = true) -> setupChromeDriver(folder = folder, chromium = true)
-        browser.contains(other = "Firefox", ignoreCase = true) -> setupFirefoxDriver(folder = folder)
+        browser.contains(other = "Edge", ignoreCase = true) -> {
+            if (System.getProperty(EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY) == null) {
+                setupEdgeDriver(folder = folder)
+            } else {
+                { config ->
+                    if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+                    val options = EdgeOptions().also(config.toConsumer())
+                    val port = try {
+                        PortProber.findFreePort()
+                    } catch (_: RuntimeException) {
+                        SELENIUM_DEFAULT_PORT
+                    }
+                    val uuid = "${System.currentTimeMillis()}-${port}"
+                    val service = EdgeDriverService.Builder()
+                        .withLogFile(folder.resolve("msedgedriver.${uuid}.log").takeIf { config.log })
+                        .usingPort(port)
+                        .build()
+                    val output = folder.resolve("msedgedriver.${uuid}.output")
+                        .takeIf { config.log }?.outputStream() ?: AllIgnoredOutputStream
+                    service.sendOutputTo(output)
+                    EdgeDriver(service, options).also { DriverCache[it] = service }
+                }
+            }
+        }
+        browser.contains(other = "Chrom", ignoreCase = true) -> {
+            if (System.getProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY) == null) {
+                setupChromeDriver(folder = folder, chromium = browser.contains(other = "Chromium", ignoreCase = true))
+            } else {
+                { config ->
+                    if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+                    val options = ChromeOptions().also(config.toConsumer())
+                    val port = try {
+                        PortProber.findFreePort()
+                    } catch (_: RuntimeException) {
+                        SELENIUM_DEFAULT_PORT
+                    }
+                    val uuid = "${System.currentTimeMillis()}-${port}"
+                    val service = ChromeDriverService.Builder()
+                        .withAppendLog(config.log)
+                        .withLogFile(folder.resolve("chromedriver.${uuid}.log").takeIf { config.log })
+                        .withLogLevel(options.logLevel)
+                        .usingPort(port)
+                        .build()
+                    val output = folder.resolve("chromedriver.${uuid}.output")
+                        .takeIf { config.log }?.outputStream() ?: AllIgnoredOutputStream
+                    service.sendOutputTo(output)
+                    ChromeDriver(service, options).also { DriverCache[it] = service }
+                }
+            }
+        }
+        browser.contains(other = "Firefox", ignoreCase = true) -> {
+            if (System.getProperty(GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY) == null) {
+                setupFirefoxDriver(folder = folder)
+            } else {
+                { config ->
+                    if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+                    val options = FirefoxOptions().also(config.toConsumer())
+                    val port = try {
+                        PortProber.findFreePort()
+                    } catch (_: RuntimeException) {
+                        SELENIUM_DEFAULT_PORT
+                    }
+                    val uuid = "${System.currentTimeMillis()}-${port}"
+                    val service = GeckoDriverService.Builder()
+                        .withLogFile(folder.resolve("geckodriver.${uuid}.log").takeIf { config.log })
+                        .usingPort(port)
+                        .usingFirefoxBinary(options.binary)
+                        .build()
+                    val output = folder.resolve("geckodriver.${uuid}.output")
+                        .takeIf { config.log }?.outputStream() ?: AllIgnoredOutputStream
+                    service.sendOutputTo(output)
+                    FirefoxDriver(service, options).also { DriverCache[it] = service }
+                }
+            }
+        }
         else -> throw UnsupportedOperationException("不支持的浏览器 $browser")
     }
 }
@@ -239,8 +313,6 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
         driver.setLastModified(entry.time)
     }
     driver.setExecutable(true)
-
-    System.setProperty(EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY, driver.absolutePath)
 
     return { config ->
         if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
@@ -339,7 +411,13 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
     val suffix = when {
         platform.`is`(Platform.WINDOWS) -> "win32"
         platform.`is`(Platform.LINUX) -> "linux64"
-        platform.`is`(Platform.MAC) -> "mac64"
+        platform.`is`(Platform.MAC) -> {
+            if ("aarch64" in System.getProperty("os.arch")) {
+                "mac64_m1"
+            } else {
+                "mac64"
+            }
+        }
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
     val file = download(
@@ -362,8 +440,6 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
         driver.setLastModified(entry.time)
     }
     driver.setExecutable(true)
-
-    System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, driver.absolutePath)
 
     return { config ->
         if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
@@ -412,7 +488,13 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     val filename = when {
         platform.`is`(Platform.WINDOWS) -> "geckodriver-$version-win64.zip"
         platform.`is`(Platform.LINUX) -> "geckodriver-$version-linux64.tar.gz"
-        platform.`is`(Platform.MAC) -> "geckodriver-$version-macos.tar.gz"
+        platform.`is`(Platform.MAC) -> {
+            if ("aarch64" in System.getProperty("os.arch")) {
+                "geckodriver-$version-macos-aarch64.tar.gz"
+            } else {
+                "geckodriver-$version-macos.tar.gz"
+            }
+        }
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
     // https://npm.taobao.org/mirrors/geckodriver/
@@ -447,8 +529,6 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
         }
     }
     driver.setExecutable(true)
-
-    System.setProperty(GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, driver.absolutePath)
 
     return { config ->
         if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
