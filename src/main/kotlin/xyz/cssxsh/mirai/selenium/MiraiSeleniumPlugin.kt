@@ -6,6 +6,7 @@ import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
 import net.mamoe.mirai.console.extension.*
 import net.mamoe.mirai.console.plugin.jvm.*
 import net.mamoe.mirai.utils.*
+import org.openqa.selenium.Platform
 import org.openqa.selenium.remote.*
 import org.openqa.selenium.remote.http.*
 import xyz.cssxsh.mirai.selenium.command.*
@@ -129,6 +130,12 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     }
 
     override fun onEnable() {
+        if (Platform.getCurrent().`is`(Platform.LINUX)) {
+            if ("root" == System.getProperty("user.name")) {
+                logger.error { "由于浏览器的运行特性，root 用户下将无法保证插件运行正常" }
+            }
+            logger.info { "如果要在 Linux 下使用 headless (无窗户后台模式)浏览器, 请安装 xvfb, 并启用 xvfb 服务" }
+        }
 
         MiraiSeleniumConfig.reload()
         MiraiBrowserConfig.reload()
