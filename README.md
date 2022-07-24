@@ -42,6 +42,7 @@ dependencies {
 ## 使用本前置插件的项目
 
 * [BiliBili Helper](https://github.com/cssxsh/bilibili-helper)
+* [GitHub Helper](https://github.com/gnuf0rce/github-helper)
 
 ## 管理指令
 
@@ -84,6 +85,7 @@ dependencies {
 
 ### MCL 指令安装
 
+**请确认 mcl.jar 的版本是 2.1.0+**  
 `./mcl --update-package xyz.cssxsh.mirai:mirai-selenium-plugin --channel stable --type plugin`
 
 ### 手动安装
