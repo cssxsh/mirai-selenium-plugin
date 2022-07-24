@@ -32,6 +32,10 @@ repositories {
 dependencies {
     compileOnly("xyz.cssxsh.mirai:mirai-selenium-plugin:${version}")
 }
+
+mirai {
+    jvmTarget = JavaVersion.VERSION_11
+}
 ```
 
 ### 示例代码
