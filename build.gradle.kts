@@ -30,7 +30,10 @@ dependencies {
         exclude("io.netty")
         exclude("com.google.auto.service")
     }
-    compileOnly("com.google.auto.service:auto-service:1.0.1")
+    api("com.github.jknack:handlebars:4.3.0") {
+        exclude("org.slf4j")
+    }
+    compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
     compileOnly("net.mamoe:mirai-core-utils:2.12.0")
     // test
     testImplementation(kotlin("test", "1.6.21"))

@@ -6,7 +6,7 @@
     <title>ECharts Custom</title>
     <script src="{{{ cdn }}}" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
-        #{{{ id }}} {
+        #display-container {
             width: {{ width }};
             height: {{ height }};
         }
@@ -17,7 +17,8 @@
     <div id="display-container">
     </div>
     <script type="text/javascript">
-        let chart = echarts.init(document.getElementById("{{{ id }}}"), null, { renderer: "{{{ renderer }}}" });
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const chart = echarts.init(document.getElementById("display-container"), null, { renderer: "{{{ renderer }}}" });
         let option = {{{ option }}}
         chart.setOption(option);
     </script>

@@ -1,9 +1,14 @@
 package xyz.cssxsh.mirai.selenium.command
 
+import kotlinx.serialization.json.*
 import net.mamoe.mirai.console.command.*
+import net.mamoe.mirai.contact.Contact.Companion.sendImage
+import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import xyz.cssxsh.mirai.selenium.*
 import xyz.cssxsh.mirai.selenium.data.*
 import xyz.cssxsh.selenium.*
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 public object SeleniumCommand : CompositeCommand(
     owner = MiraiSeleniumPlugin,
@@ -89,6 +94,100 @@ public object SeleniumCommand : CompositeCommand(
             sendMessage("下载 chromium 异常")
         } finally {
             MiraiBrowserConfig.chrome = System.getProperty(CHROME_BROWSER_BINARY).orEmpty()
+        }
+    }
+
+    @SubCommand
+    @Description("下载解压 chromium, https://github.com/macchrome")
+    public suspend fun MemberCommandSenderOnMessage.chart() {
+        val tags = mapOf(
+            "Within 1 days" to LocalDateTime.now().minusDays(1),
+            "Within 3 days" to LocalDateTime.now().minusDays(3),
+            "Within 1 weeks" to LocalDateTime.now().minusWeeks(1),
+            "Within 1 months" to LocalDateTime.now().minusMonths(1),
+            "Within 3 months" to LocalDateTime.now().minusMonths(3),
+            "More distant" to LocalDateTime.MIN
+        )
+        val join: MutableMap<String, Int> = HashMap()
+        val speak: MutableMap<String, Int> = HashMap()
+
+        for (member in group.members) {
+            val j = LocalDateTime.ofEpochSecond(member.joinTimestamp.toLong(), 0, ZoneOffset.of("+8"))
+            for ((tag, date) in tags) {
+                if (j > date) {
+                    join.compute(tag) { _, num -> (num ?: 0) + 1 }
+                    break
+                }
+            }
+
+            val s = LocalDateTime.ofEpochSecond(member.lastSpeakTimestamp.toLong(), 0, ZoneOffset.of("+8"))
+            for ((tag, date) in tags) {
+                if (s > date) {
+                    speak.compute(tag) { _, num -> (num ?: 0) + 1 }
+                    break
+                }
+            }
+        }
+
+        val option = buildJsonObject {
+            put("animation", false)
+            putJsonObject("tooltip") {
+                put("trigger", "item")
+            }
+            putJsonObject("legend") {
+                //
+            }
+            putJsonObject("grid") {
+                put("left", "3%")
+                put("right", "4%")
+                put("bottom", "3%")
+                put("containLabel", true)
+            }
+            putJsonArray("xAxis") {
+                addJsonObject {
+                    put("type", "category")
+                    putJsonArray("data") {
+                        tags.forEach { (date, _) ->
+                            add(date)
+                        }
+                    }
+                    putJsonObject("axisTick") {
+                        put("alignWithLabel", true)
+                    }
+                }
+            }
+            putJsonArray("yAxis") {
+                addJsonObject {
+                    put("type", "value")
+                }
+            }
+            putJsonArray("series") {
+                addJsonObject {
+                    put("type", "bar")
+                    put("name", "Join")
+                    putJsonArray("data") {
+                        tags.forEach { (date, _) ->
+                            add(join[date])
+                        }
+                    }
+                }
+                addJsonObject {
+                    put("type", "bar")
+                    put("name", "Speak")
+                    putJsonArray("data") {
+                        tags.forEach { (date, _) ->
+                            add(speak[date])
+                        }
+                    }
+                }
+            }
+        }
+
+        useRemoteWebDriver(RemoteWebDriverConfig.INSTANCE) { driver ->
+            val url = driver.echarts(meta = EChartsMeta(option = option.toString()))
+            val (_, bytes) = data(url = url)
+
+            bytes.toExternalResource().use { group.sendImage(it) }
         }
     }
 }
