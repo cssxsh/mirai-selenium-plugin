@@ -38,7 +38,7 @@ dependencies {
     compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
     compileOnly("net.mamoe:mirai-core-utils:2.12.1")
     // test
-    testImplementation(kotlin("test", "1.6.21"))
+    testImplementation(kotlin("test"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.3")
     testCompileOnly("org.projectlombok:lombok:1.18.24")
 }

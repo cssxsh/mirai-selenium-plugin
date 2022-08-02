@@ -1,7 +1,7 @@
 package xyz.cssxsh.selenium
 
 import com.github.jknack.handlebars.*
-import com.github.jknack.handlebars.io.URLTemplateLoader
+import com.github.jknack.handlebars.io.*
 import org.openqa.selenium.remote.*
 import java.net.URL
 import java.net.URLDecoder
@@ -14,7 +14,7 @@ public data class EChartsMeta(
     var option: String,
     var cdn: String = System.getProperty("xyz.cssxsh.selenium.echarts.cdn", DEFAULT_CDN),
     var renderer: EChartsRenderer = EChartsRenderer.canvas,
-    var delay: Long = 3_000
+    var duration: Long = 1_000
 )
 
 @Suppress("EnumEntryName")
@@ -33,12 +33,16 @@ public fun RemoteWebDriver.echarts(meta: EChartsMeta): String {
     html.writeText(template.apply(meta))
     get(html.toURI().toASCIIString())
 
-    return executeScript(
-        """
-            await new Promise(r => setTimeout(r, ${meta.delay}));
-            return chart.getDataURL()
-        """.trimIndent()
-    ) as String
+    return executeAsyncScript("""
+        const duration = arguments[0] || 1000;
+        const callback = [...arguments].at(-1);
+        const id = setInterval(() => {
+            if (window.chart != null) {
+                clearInterval(id)
+                callback(chart.getDataURL());
+            }
+        }, duration);
+    """.trimIndent(), meta.duration) as String
 }
 
 public fun data(url: String): Pair<String, ByteArray> {

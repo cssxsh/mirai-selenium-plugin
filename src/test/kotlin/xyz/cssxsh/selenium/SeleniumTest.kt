@@ -50,7 +50,7 @@ internal abstract class SeleniumTest {
                 val driver = setupWebDriver(browser = browser).invoke(config)
                 try {
                     block(browser, driver)
-                } catch (cause: Throwable) {
+                } catch (cause: WebDriverException) {
                     cause.printStackTrace()
                 } finally {
                     driver.quit()

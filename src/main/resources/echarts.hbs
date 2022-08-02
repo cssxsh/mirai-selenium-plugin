@@ -17,8 +17,7 @@
     <div id="display-container">
     </div>
     <script type="text/javascript">
-        const sleep = ms => new Promise(r => setTimeout(r, ms));
-        const chart = echarts.init(document.getElementById("display-container"), null, { renderer: "{{{ renderer }}}" });
+        window.chart = echarts.init(document.getElementById("display-container"), null, { renderer: "{{{ renderer }}}" });
         let option = {{{ option }}}
         chart.setOption(option);
     </script>
