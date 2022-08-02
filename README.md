@@ -56,6 +56,7 @@ mirai {
 * `/selenium status` 驱动进程状态
 * `/selenium firefox` 下载解压 firefox
 * `/selenium chromium` 下载解压 chromium
+* `/selenium chart` 测试 图表绘制功能，将以群员入群事件和发言时间为数据集
 
 ## 配置
 
@@ -70,7 +71,7 @@ mirai {
 * `proxy` 代理地址
 * `log` 启用日志文件
 * `browser` 指定使用的浏览器: `Chrome`,`Chromium`,`Firefox`,`Edge`
-* `factory` 指定使用的Factory: ~~ktor~~,`netty` （ktor 不再可用）
+* `factory` 指定使用的Factory: `netty` （ktor 不再可用）
 * `arguments` 自定义 arguments, 可以尝试加入 `--no-sandbox`, `--disable-dev-shm-usage`, 解决兼容性问题
 * `preferences` 自定义 preferences，浏览器配置
 
@@ -80,9 +81,9 @@ mirai {
 * `edge` Edge 二进制文件路径
 * `firefox` Firefox 二进制文件路径
 
-## LoginSolver
+## [MiraiSeleniumLoginSolver](src/main/kotlin/xyz/cssxsh/mirai/selenium/MiraiSeleniumLoginSolver.kt)
 
-本插件提供了 [MiraiSeleniumLoginSolver](src/main/kotlin/xyz/cssxsh/mirai/selenium/MiraiSeleniumLoginSolver.kt)  
+本插件提供了 一个类似 [mirai-login-solver-selenium](https://github.com/project-mirai/mirai-login-solver-selenium) 的 登陆处理器   
 需要在 mirai 运行时中添加 JVM 属性 mirai.slider.captcha.supported (添加参数 -Dmirai.slider.captcha.supported) 启用
 
 ## 安装
@@ -94,5 +95,5 @@ mirai {
 
 ### 手动安装
 
-1. 运行 [Mirai Console](https://github.com/mamoe/mirai-console) 生成`plugins`文件夹
-1. 从 [Releases](https://github.com/cssxsh/mirai-selenium-plugin/releases) 下载`jar`并将其放入`plugins`文件夹中
+1. 运行 [Mirai Console](https://github.com/mamoe/mirai-console) 生成 `plugins` 文件夹
+2. 从 [Releases](https://github.com/cssxsh/mirai-selenium-plugin/releases) 下载 `jar` 并将其放入 `plugins` 文件夹中

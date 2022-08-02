@@ -98,7 +98,7 @@ public object SeleniumCommand : CompositeCommand(
     }
 
     @SubCommand
-    @Description("下载解压 chromium, https://github.com/macchrome")
+    @Description("测试 图表绘制功能，将以群员入群事件和发言时间为数据集")
     public suspend fun MemberCommandSenderOnMessage.chart() {
         val tags = mapOf(
             "Within 1 days" to LocalDateTime.now().minusDays(1),

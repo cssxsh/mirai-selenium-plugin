@@ -1,19 +1,21 @@
 plugins {
-    kotlin("jvm") version "1.6.21"
-    kotlin("plugin.serialization") version "1.6.21"
+    kotlin("jvm") version "1.7.10"
+    kotlin("plugin.serialization") version "1.7.10"
 
-    id("net.mamoe.mirai-console") version "2.12.0"
-    id("net.mamoe.maven-central-publish") version "0.7.1"
-    id("me.him188.kotlin-jvm-blocking-bridge") version "2.1.0-162.1"
+    id("net.mamoe.mirai-console") version "2.12.1"
+    id("me.him188.maven-central-publish") version "1.0.0-dev-3"
+    id("me.him188.kotlin-jvm-blocking-bridge") version "2.1.0-170.1"
 }
 
 group = "xyz.cssxsh.mirai"
-version = "2.2.1"
+version = "2.2.2"
 
 mavenCentralPublish {
     useCentralS01()
     singleDevGithubProject("cssxsh", "mirai-selenium-plugin")
     licenseFromGitHubProject("AGPL-3.0", "master")
+    workingDir = System.getenv("PUBLICATION_TEMP")?.let { file(it).resolve(projectName) }
+        ?: project.buildDir.resolve("publishing-tmp")
     publication {
         artifact(tasks.getByName("buildPlugin"))
     }
@@ -34,7 +36,7 @@ dependencies {
         exclude("org.slf4j")
     }
     compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
-    compileOnly("net.mamoe:mirai-core-utils:2.12.0")
+    compileOnly("net.mamoe:mirai-core-utils:2.12.1")
     // test
     testImplementation(kotlin("test", "1.6.21"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.3")
