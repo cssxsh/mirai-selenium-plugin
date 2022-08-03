@@ -39,7 +39,7 @@ dependencies {
     compileOnly("net.mamoe:mirai-core-utils:2.12.1")
     // test
     testImplementation(kotlin("test"))
-    testImplementation("org.icepear.echarts:echarts-java:1.0.3")
+    testImplementation("org.icepear.echarts:echarts-java:1.0.4")
     testCompileOnly("org.projectlombok:lombok:1.18.24")
 }
 

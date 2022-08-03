@@ -86,6 +86,12 @@ mirai {
 本插件提供了 一个类似 [mirai-login-solver-selenium](https://github.com/project-mirai/mirai-login-solver-selenium) 的 登陆处理器   
 需要在 mirai 运行时中添加 JVM 属性 mirai.slider.captcha.supported (添加参数 -Dmirai.slider.captcha.supported) 启用
 
+## [ECharts](src/main/kotlin/xyz/cssxsh/selenium/ECharts.kt)
+
+`v2.2.2` 提供了方便调用 [ECharts](https://echarts.apache.org/) 进行表格绘制的工具类, 使用方法详见示例代码  
+`/selenium chart` 测试结果示例  
+![chart](examlpe/group.chart.png)
+
 ## 安装
 
 ### MCL 指令安装

@@ -8,6 +8,9 @@ import java.net.URLDecoder
 import java.nio.file.Files
 import java.util.*
 
+/**
+ * @param option https://echarts.apache.org/zh/option.html
+ */
 public data class EChartsMeta(
     var height: String = "100%",
     var width: String = "100%",
