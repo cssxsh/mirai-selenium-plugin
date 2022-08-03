@@ -54,7 +54,7 @@ class MiraiSeleniumPluginJavaTest extends JavaPlugin {
             EChartsMeta meta = new EChartsMeta(
                     "100%",
                     "100%",
-                    EChartsSerializer.toJson(bar.getOption()),
+                    new EChartsSerializer().toJson(bar.getOption()),
                     "https://cdnjs.cloudflare.com/ajax/libs/echarts/5.2.2/echarts.min.js",
                     EChartsRenderer.canvas,
                     1000

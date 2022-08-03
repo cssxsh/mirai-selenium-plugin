@@ -17,7 +17,7 @@ internal class EChartsTest : SeleniumTest() {
             .addSeries("2015", arrayOf(43.3, 83.1, 86.4, 72.4))
             .addSeries("2016", arrayOf(85.8, 73.4, 65.2, 53.9))
             .addSeries("2017", arrayOf(93.7, 55.1, 82.5, 39.1))
-        val meta = EChartsMeta(height = "100%", width = "100%", option = EChartsSerializer.toJson(bar.option))
+        val meta = EChartsMeta(height = "100%", width = "100%", option = EChartsSerializer().toJson(bar.option))
 
         if (isPC) {
             System.setProperty("xyz.cssxsh.selenium.echarts.cdn", "https://cdn.bootcss.com/echarts/5.2.2/echarts.min.js")
