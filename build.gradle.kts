@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    api("org.seleniumhq.selenium:selenium-java:4.3.0") {
+    api("org.seleniumhq.selenium:selenium-java:4.4.0") {
         exclude("org.slf4j")
         exclude("io.netty")
         exclude("com.google.auto.service")
@@ -39,7 +39,7 @@ dependencies {
     compileOnly("net.mamoe:mirai-core-utils:2.12.1")
     // test
     testImplementation(kotlin("test"))
-    testImplementation("org.icepear.echarts:echarts-java:1.0.4")
+    testImplementation("org.icepear.echarts:echarts-java:1.0.5")
     testCompileOnly("org.projectlombok:lombok:1.18.24")
 }
 
