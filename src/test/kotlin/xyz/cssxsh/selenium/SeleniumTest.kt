@@ -1,13 +1,14 @@
 package xyz.cssxsh.selenium
 
 import kotlinx.coroutines.*
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.*
 import org.openqa.selenium.*
 import org.openqa.selenium.remote.*
 import xyz.cssxsh.mirai.selenium.data.*
 import java.io.File
 import java.util.logging.*
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal abstract class SeleniumTest {
 
     protected val folder = File("run")
@@ -24,7 +25,7 @@ internal abstract class SeleniumTest {
     protected val browsers by lazy {
         val platform = Platform.getCurrent()
         when {
-            platform.`is`(Platform.WIN10) -> listOf("Edge", "Chromium", "Firefox")
+            platform.`is`(Platform.WIN10) -> listOf("Edge", "Chrome", "Firefox")
             platform.`is`(Platform.WINDOWS) -> listOf("Chromium", "Firefox")
             platform.`is`(Platform.LINUX) -> listOf("Chromium", "Firefox")
             platform.`is`(Platform.MAC) -> listOf("Chromium", "Firefox")
@@ -42,9 +43,6 @@ internal abstract class SeleniumTest {
     }
 
     protected fun testRemoteWebDriver(block: suspend CoroutineScope.(String, RemoteWebDriver) -> Unit) {
-        if (!isPC) {
-            setupChromium(folder = folder, version = "103")
-        }
         for (browser in browsers) {
             runBlocking(SeleniumContext) {
                 val driver = setupWebDriver(browser = browser).invoke(config)
@@ -59,10 +57,17 @@ internal abstract class SeleniumTest {
         }
     }
 
+    @BeforeAll
+    fun setup() {
+        if (!isPC) {
+            setupChromium(folder = folder, version = "")
+        }
+    }
+
     @AfterEach
     fun destroy() {
         println(DriverCache.status())
-        DriverCache.destroy(enable = true) { driver, service ->
+        DriverCache.destroy(enable = false) { driver, service ->
             try {
                 driver.quit()
             } catch (cause: Throwable) {
