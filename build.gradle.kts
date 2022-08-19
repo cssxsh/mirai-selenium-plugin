@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "1.7.10"
     kotlin("plugin.serialization") version "1.7.10"
 
-    id("net.mamoe.mirai-console") version "2.12.1"
+    id("net.mamoe.mirai-console") version "2.13.0-M1"
     id("me.him188.maven-central-publish") version "1.0.0-dev-3"
     id("me.him188.kotlin-jvm-blocking-bridge") version "2.1.0-170.1"
 }
@@ -36,7 +36,6 @@ dependencies {
         exclude("org.slf4j")
     }
     compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
-    compileOnly("net.mamoe:mirai-core-utils:2.12.1")
     // test
     testImplementation(kotlin("test"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.5")

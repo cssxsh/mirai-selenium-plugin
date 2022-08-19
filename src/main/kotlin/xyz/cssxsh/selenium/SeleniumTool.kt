@@ -35,10 +35,6 @@ import java.util.logging.*
  */
 internal val SeleniumLogger: Logger = Logger.getLogger("org.openqa.selenium")
 
-internal var SeleniumContext = Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { context, cause ->
-    SeleniumLogger.log(Level.WARNING, "Exception in coroutine ${context[CoroutineName]?.name ?: "Selenium"}", cause)
-}
-
 // endregion
 
 // region RemoteWebDriver
