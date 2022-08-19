@@ -8,13 +8,11 @@ import net.mamoe.mirai.console.plugin.jvm.*
 import net.mamoe.mirai.utils.*
 import org.openqa.selenium.Platform
 import org.openqa.selenium.remote.*
-import org.openqa.selenium.remote.http.*
 import xyz.cssxsh.mirai.selenium.command.*
 import xyz.cssxsh.mirai.selenium.data.*
 import xyz.cssxsh.selenium.*
 import java.io.*
 import java.util.logging.*
-import kotlin.reflect.full.*
 
 public object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
@@ -112,19 +110,18 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     public fun destroy(enable: Boolean = true) {
         DriverCache.destroy(enable) { driver, service ->
             val process = service.getProcess()
-            val factory = (driver.getHttpClientFactory() ?: Unit)::class.findAnnotation<HttpClientName>()?.value
 
-            logger.info { "Destroy driver, session: ${driver.sessionId}, process: $process, factory: $factory" }
+            logger.info { "Destroy driver, session: ${driver.sessionId}, process: $process, url: ${service.url}" }
 
             try {
                 driver.quit()
             } catch (cause: Throwable) {
-                logger.warning({ "Driver ${process ?: service.url} stop failure." }, cause)
+                logger.warning({ "Driver ${service.url} stop failure." }, cause)
             }
             try {
                 service.stop()
             } catch (cause: Throwable) {
-                logger.warning({ "Service ${process ?: service.url} stop failure." }, cause)
+                logger.warning({ "Service ${service.url} stop failure." }, cause)
             }
         }
     }
