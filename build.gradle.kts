@@ -15,9 +15,9 @@ mavenCentralPublish {
     singleDevGithubProject("cssxsh", "mirai-selenium-plugin")
     licenseFromGitHubProject("AGPL-3.0")
     workingDir = System.getenv("PUBLICATION_TEMP")?.let { file(it).resolve(projectName) }
-        ?: project.buildDir.resolve("publishing-tmp")
+        ?: buildDir.resolve("publishing-tmp")
     publication {
-        artifact(tasks.getByName("buildPlugin"))
+        artifact(tasks["buildPlugin"])
     }
 }
 
@@ -38,7 +38,9 @@ dependencies {
     compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
     // test
     testImplementation(kotlin("test"))
-    testImplementation("org.icepear.echarts:echarts-java:1.0.5")
+    testImplementation("org.slf4j:slf4j-simple:2.0.1")
+    testImplementation("net.mamoe:mirai-logging-slf4j:2.13.0-M1")
+    testImplementation("org.icepear.echarts:echarts-java:1.0.6")
     testCompileOnly("org.projectlombok:lombok:1.18.24")
 }
 
