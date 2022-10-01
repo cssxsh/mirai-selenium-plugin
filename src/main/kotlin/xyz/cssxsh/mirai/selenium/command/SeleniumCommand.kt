@@ -7,8 +7,7 @@ import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import xyz.cssxsh.mirai.selenium.*
 import xyz.cssxsh.mirai.selenium.data.*
 import xyz.cssxsh.selenium.*
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.*
 
 public object SeleniumCommand : CompositeCommand(
     owner = MiraiSeleniumPlugin,
@@ -108,22 +107,23 @@ public object SeleniumCommand : CompositeCommand(
             "Within 3 months" to LocalDateTime.now().minusMonths(3),
             "More distant" to LocalDateTime.MIN
         )
-        val join: MutableMap<String, Int> = HashMap()
-        val speak: MutableMap<String, Int> = HashMap()
+        val joins: MutableMap<String, Int> = HashMap()
+        val speaks: MutableMap<String, Int> = HashMap()
+        val zone = ZoneOffset.ofHours(+8)
 
         for (member in group.members) {
-            val j = LocalDateTime.ofEpochSecond(member.joinTimestamp.toLong(), 0, ZoneOffset.of("+8"))
+            val join = LocalDateTime.ofEpochSecond(member.joinTimestamp.toLong(), 0, zone)
             for ((tag, date) in tags) {
-                if (j > date) {
-                    join.compute(tag) { _, num -> (num ?: 0) + 1 }
+                if (join > date) {
+                    joins.compute(tag) { _, num -> (num ?: 0) + 1 }
                     break
                 }
             }
 
-            val s = LocalDateTime.ofEpochSecond(member.lastSpeakTimestamp.toLong(), 0, ZoneOffset.of("+8"))
+            val speak = LocalDateTime.ofEpochSecond(member.lastSpeakTimestamp.toLong(), 0, zone)
             for ((tag, date) in tags) {
-                if (s > date) {
-                    speak.compute(tag) { _, num -> (num ?: 0) + 1 }
+                if (speak > date) {
+                    speaks.compute(tag) { _, num -> (num ?: 0) + 1 }
                     break
                 }
             }
@@ -167,7 +167,7 @@ public object SeleniumCommand : CompositeCommand(
                     put("name", "Join")
                     putJsonArray("data") {
                         tags.forEach { (date, _) ->
-                            add(join[date])
+                            add(joins[date])
                         }
                     }
                 }
@@ -176,7 +176,7 @@ public object SeleniumCommand : CompositeCommand(
                     put("name", "Speak")
                     putJsonArray("data") {
                         tags.forEach { (date, _) ->
-                            add(speak[date])
+                            add(speaks[date])
                         }
                     }
                 }
