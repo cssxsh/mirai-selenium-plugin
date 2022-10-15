@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    api("org.seleniumhq.selenium:selenium-java:4.4.0") {
+    api("org.seleniumhq.selenium:selenium-java:4.5.0") {
         exclude("org.slf4j")
         exclude("io.netty")
         exclude("com.google.auto.service")
