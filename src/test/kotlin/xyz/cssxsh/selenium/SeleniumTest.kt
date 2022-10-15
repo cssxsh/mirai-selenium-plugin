@@ -23,22 +23,30 @@ internal abstract class SeleniumTest {
         System.setProperty(SEVEN7Z_MIRRORS, "https://downloads.sourceforge.net/sevenzip")
         // System.setProperty("selenium.webdriver.verbose", "true")
         SeleniumLogger.level = Level.WARNING
-        try {
-            System.setProperty(EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY, System.getenv("EDGEWEBDRIVER") + "/msedgedriver")
-            System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, System.getenv("CHROMEWEBDRIVER") + "/chromedriver")
-            System.setProperty(GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, System.getenv("GECKOWEBDRIVER") + "/geckodriver")
-        } catch (_: NullPointerException) {
-            //
-        }
     }
 
     protected val browsers by lazy {
         val platform = Platform.getCurrent()
         when {
             platform.`is`(Platform.WIN10) -> listOf("Edge", "Chrome", "Firefox")
-            platform.`is`(Platform.WINDOWS) -> listOf("Edge", "Chromium", "Firefox")
-            platform.`is`(Platform.LINUX) -> listOf("Edge", "Chromium", "Firefox")
-            platform.`is`(Platform.MAC) -> listOf("Edge", "Chromium", "Firefox")
+            platform.`is`(Platform.WINDOWS) -> {
+                System.setProperty(EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY, System.getenv("EDGEWEBDRIVER") + "/msedgedriver.exe")
+                System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, System.getenv("CHROMEWEBDRIVER") + "/chromedriver.exe")
+                System.setProperty(GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, System.getenv("GECKOWEBDRIVER") + "/geckodriver.exe")
+                listOf("Edge", "Chromium", "Firefox")
+            }
+            platform.`is`(Platform.LINUX) -> {
+                System.setProperty(EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY, System.getenv("EDGEWEBDRIVER") + "/msedgedriver")
+                System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, System.getenv("CHROMEWEBDRIVER") + "/chromedriver")
+                System.setProperty(GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, System.getenv("GECKOWEBDRIVER") + "/geckodriver")
+                listOf("Edge", "Chromium", "Firefox")
+            }
+            platform.`is`(Platform.MAC) -> {
+                System.setProperty(EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY, System.getenv("EDGEWEBDRIVER") + "/msedgedriver")
+                System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, System.getenv("CHROMEWEBDRIVER") + "/chromedriver")
+                System.setProperty(GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, System.getenv("GECKOWEBDRIVER") + "/geckodriver")
+                listOf("Edge", "Chromium", "Firefox")
+            }
             else -> throw UnsupportedOperationException("不受支持的平台 $platform")
         }
     }
