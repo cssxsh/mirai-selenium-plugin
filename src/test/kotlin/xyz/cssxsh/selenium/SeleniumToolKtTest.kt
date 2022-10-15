@@ -60,7 +60,7 @@ internal class SeleniumToolKtTest : SeleniumTest() {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     fun chromium() {
-        setupChromium(folder = folder, version = "98")
+        setupChromium(folder = folder, version = "")
         val driver = ChromeDriver(config = object : RemoteWebDriverConfig {
             override val headless: Boolean = true
             override val log: Boolean = true

@@ -3,6 +3,9 @@ package xyz.cssxsh.selenium
 import kotlinx.coroutines.*
 import org.junit.jupiter.api.*
 import org.openqa.selenium.*
+import org.openqa.selenium.chrome.ChromeDriverService
+import org.openqa.selenium.edge.EdgeDriverService
+import org.openqa.selenium.firefox.GeckoDriverService
 import org.openqa.selenium.remote.*
 import xyz.cssxsh.mirai.selenium.data.*
 import java.io.File
@@ -20,15 +23,22 @@ internal abstract class SeleniumTest {
         System.setProperty(SEVEN7Z_MIRRORS, "https://downloads.sourceforge.net/sevenzip")
         // System.setProperty("selenium.webdriver.verbose", "true")
         SeleniumLogger.level = Level.WARNING
+        try {
+            System.setProperty(EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY, System.getenv("EDGEWEBDRIVER"))
+            System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, System.getenv("CHROMEWEBDRIVER"))
+            System.setProperty(GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, System.getenv("GECKOWEBDRIVER"))
+        } catch (_: NullPointerException) {
+            //
+        }
     }
 
     protected val browsers by lazy {
         val platform = Platform.getCurrent()
         when {
             platform.`is`(Platform.WIN10) -> listOf("Edge", "Chrome", "Firefox")
-            platform.`is`(Platform.WINDOWS) -> listOf("Chromium", "Firefox")
-            platform.`is`(Platform.LINUX) -> listOf("Chromium", "Firefox")
-            platform.`is`(Platform.MAC) -> listOf("Chromium", "Firefox")
+            platform.`is`(Platform.WINDOWS) -> listOf("Edge", "Chromium", "Firefox")
+            platform.`is`(Platform.LINUX) -> listOf("Edge", "Chromium", "Firefox")
+            platform.`is`(Platform.MAC) -> listOf("Edge", "Chromium", "Firefox")
             else -> throw UnsupportedOperationException("不受支持的平台 $platform")
         }
     }
@@ -54,13 +64,6 @@ internal abstract class SeleniumTest {
                     driver.quit()
                 }
             }
-        }
-    }
-
-    @BeforeAll
-    fun setup() {
-        if (!isPC) {
-            setupChromium(folder = folder, version = "")
         }
     }
 
