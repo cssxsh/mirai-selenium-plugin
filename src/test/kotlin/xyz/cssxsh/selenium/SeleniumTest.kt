@@ -24,9 +24,9 @@ internal abstract class SeleniumTest {
         // System.setProperty("selenium.webdriver.verbose", "true")
         SeleniumLogger.level = Level.WARNING
         try {
-            System.setProperty(EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY, System.getenv("EDGEWEBDRIVER"))
-            System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, System.getenv("CHROMEWEBDRIVER"))
-            System.setProperty(GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, System.getenv("GECKOWEBDRIVER"))
+            System.setProperty(EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY, System.getenv("EDGEWEBDRIVER") + "/msedgedriver")
+            System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, System.getenv("CHROMEWEBDRIVER") + "/chromedriver")
+            System.setProperty(GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, System.getenv("GECKOWEBDRIVER") + "/geckodriver")
         } catch (_: NullPointerException) {
             //
         }
