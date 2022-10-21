@@ -4,6 +4,7 @@ import org.icepear.echarts.*
 import org.icepear.echarts.components.coord.cartesian.ValueAxis
 import org.icepear.echarts.serializer.*
 import org.junit.jupiter.api.Test
+import org.openqa.selenium.OutputType
 
 internal class EChartsTest : SeleniumTest() {
 
@@ -26,15 +27,14 @@ internal class EChartsTest : SeleniumTest() {
         testRemoteWebDriver { browser, driver ->
             println(browser)
 
-            val svg = driver.echarts(meta = meta.copy(renderer = EChartsRenderer.svg))
+            val svg = driver.echartsAs(meta = meta.copy(renderer = EChartsRenderer.svg), outputType = OutputType.FILE)
 
-            folder.resolve("echarts.${browser.lowercase()}.svg")
-                .writeBytes(data(url = svg).second)
+            svg.renameTo(folder.resolve("echarts.${browser.lowercase()}.svg"))
 
-            val png = driver.echarts(meta = meta.copy(renderer = EChartsRenderer.canvas))
+            val png = driver.echartsAs(meta = meta.copy(renderer = EChartsRenderer.canvas), outputType = OutputType.BYTES)
 
             folder.resolve("echarts.${browser.lowercase()}.png")
-                .writeBytes(data(url = png).second)
+                .writeBytes(png)
         }
     }
 }

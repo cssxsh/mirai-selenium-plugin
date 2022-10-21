@@ -59,8 +59,7 @@ class MiraiSeleniumPluginJavaTest extends JavaPlugin {
                     EChartsRenderer.canvas,
                     1000
             );
-            String url = EChartsKt.echarts(driver, meta);
-            byte[] bytes = EChartsKt.data(url).component2();
+            byte[] bytes = EChartsKt.echartsAs(driver, meta, OutputType.BYTES);
 
             driver.close();
         };

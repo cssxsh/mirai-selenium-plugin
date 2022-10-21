@@ -4,6 +4,7 @@ import kotlinx.serialization.json.*
 import net.mamoe.mirai.console.command.*
 import net.mamoe.mirai.contact.Contact.Companion.sendImage
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
+import org.openqa.selenium.*
 import xyz.cssxsh.mirai.selenium.*
 import xyz.cssxsh.mirai.selenium.data.*
 import xyz.cssxsh.selenium.*
@@ -184,8 +185,7 @@ public object SeleniumCommand : CompositeCommand(
         }
 
         useRemoteWebDriver(RemoteWebDriverConfig.INSTANCE) { driver ->
-            val url = driver.echarts(meta = EChartsMeta(option = option.toString()))
-            val (_, bytes) = data(url = url)
+            val bytes = driver.echartsAs(meta = EChartsMeta(option = option.toString()), OutputType.BYTES)
 
             bytes.toExternalResource().use { group.sendImage(it) }
         }
