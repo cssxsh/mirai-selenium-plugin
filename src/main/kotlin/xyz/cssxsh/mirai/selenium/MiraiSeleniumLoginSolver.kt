@@ -65,6 +65,11 @@ public object MiraiSeleniumLoginSolver : LoginSolver(), BotConfigurationAlterer 
         }
     }
 
+    @Deprecated(
+        "Please use onSolveDeviceVerification instead",
+        replaceWith = ReplaceWith("onSolveDeviceVerification(bot, url, null)"),
+        level = DeprecationLevel.WARNING
+    )
     override suspend fun onSolveUnsafeDeviceLoginVerify(bot: Bot, url: String): String? {
         val start = System.currentTimeMillis()
         val timeout = System.getProperty(TIMEOUT_PROPERTY)?.toLong() ?: 600_000L
