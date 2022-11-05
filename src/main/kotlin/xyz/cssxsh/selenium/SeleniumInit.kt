@@ -38,14 +38,6 @@ internal const val FIREFOX_BROWSER_BINARY = FirefoxDriver.SystemProperty.BROWSER
 
 internal const val SEVEN7Z_MIRRORS = "seven7z.mirrors"
 
-private object AllIgnoredOutputStream : OutputStream() {
-    override fun close() {}
-    override fun write(b: ByteArray, off: Int, len: Int) {}
-    override fun write(b: ByteArray) {}
-    override fun write(b: Int) {}
-    override fun flush() {}
-}
-
 internal typealias RemoteWebDriverSupplier = (config: RemoteWebDriverConfig) -> RemoteWebDriver
 
 public typealias DriverOptionsConsumer = (Capabilities) -> Unit
@@ -200,7 +192,7 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                         .usingPort(port)
                         .build()
                     val output = folder.resolve("msedgedriver.${uuid}.output")
-                        .takeIf { config.log }?.outputStream() ?: AllIgnoredOutputStream
+                        .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
                     service.sendOutputTo(output)
                     EdgeDriver(service, options).also { DriverCache[it] = service }
                 }
@@ -226,7 +218,7 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                         .usingPort(port)
                         .build()
                     val output = folder.resolve("chromedriver.${uuid}.output")
-                        .takeIf { config.log }?.outputStream() ?: AllIgnoredOutputStream
+                        .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
                     service.sendOutputTo(output)
                     ChromeDriver(service, options).also { DriverCache[it] = service }
                 }
@@ -251,7 +243,7 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                         .usingFirefoxBinary(options.binary)
                         .build()
                     val output = folder.resolve("geckodriver.${uuid}.output")
-                        .takeIf { config.log }?.outputStream() ?: AllIgnoredOutputStream
+                        .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
                     service.sendOutputTo(output)
                     FirefoxDriver(service, options).also { DriverCache[it] = service }
                 }
@@ -330,7 +322,7 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
             .usingPort(port)
             .build()
         val output = folder.resolve("msedgedriver.${uuid}.output")
-            .takeIf { config.log }?.outputStream() ?: AllIgnoredOutputStream
+            .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
         service.sendOutputTo(output)
         EdgeDriver(service, options).also { DriverCache[it] = service }
     }
@@ -459,7 +451,7 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
             .usingPort(port)
             .build()
         val output = folder.resolve("chromedriver.${uuid}.output")
-            .takeIf { config.log }?.outputStream() ?: AllIgnoredOutputStream
+            .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
         service.sendOutputTo(output)
         ChromeDriver(service, options).also { DriverCache[it] = service }
     }
@@ -546,7 +538,7 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
             .usingFirefoxBinary(options.binary)
             .build()
         val output = folder.resolve("geckodriver.${uuid}.output")
-            .takeIf { config.log }?.outputStream() ?: AllIgnoredOutputStream
+            .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
         service.sendOutputTo(output)
         FirefoxDriver(service, options).also { DriverCache[it] = service }
     }
@@ -691,7 +683,7 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .directory(folder)
                     .start()
                     // 防止卡顿
-                    .apply { inputStream.transferTo(AllIgnoredOutputStream) }
+                    .apply { inputStream.transferTo(OutputStream.nullOutputStream()) }
                     .waitFor()
 
                 check(folder.resolve("core").renameTo(setup)) { "重命名 core 失败" }
@@ -836,7 +828,7 @@ internal fun setupChromium(folder: File, version: String): File {
                     .directory(folder)
                     .start()
                     // 防止卡顿
-                    .apply { inputStream.transferTo(AllIgnoredOutputStream) }
+                    .apply { inputStream.transferTo(OutputStream.nullOutputStream()) }
                     .waitFor()
 
                 check(folder.resolve(pack.nameWithoutExtension).renameTo(setup)) {
