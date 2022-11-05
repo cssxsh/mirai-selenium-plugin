@@ -27,13 +27,13 @@ repositories {
 }
 
 dependencies {
-    api("org.seleniumhq.selenium:selenium-java:4.5.2") {
-        exclude("org.slf4j")
-        exclude("io.netty")
-        exclude("com.google.auto.service")
+    api("org.seleniumhq.selenium:selenium-java:4.6.0") {
+        exclude(group = "org.slf4j")
+        exclude(group = "io.netty")
+        exclude(group = "com.google.auto.service")
     }
     api("com.github.jknack:handlebars:4.3.1") {
-        exclude("org.slf4j")
+        exclude(group = "org.slf4j")
     }
     compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
     // test
