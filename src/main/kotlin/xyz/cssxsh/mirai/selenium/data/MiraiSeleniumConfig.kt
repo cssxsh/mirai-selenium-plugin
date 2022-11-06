@@ -3,6 +3,9 @@ package xyz.cssxsh.mirai.selenium.data
 import net.mamoe.mirai.console.data.*
 import xyz.cssxsh.selenium.*
 
+/**
+ * Selenium 相关设置
+ */
 public object MiraiSeleniumConfig : ReadOnlyPluginConfig("MiraiSeleniumConfig"), RemoteWebDriverConfig {
 
     @ValueName("expires")

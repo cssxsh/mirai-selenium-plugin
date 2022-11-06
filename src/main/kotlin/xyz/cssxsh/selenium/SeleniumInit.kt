@@ -143,7 +143,7 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                 platform.`is`(Platform.WINDOWS) -> {
                     try {
                         queryRegister(key = RegisterKeys.USER_CHOICE)
-                    } catch (cause: Throwable) {
+                    } catch (cause: IOException) {
                         throw UnsupportedOperationException("UserChoice 查询失败", cause)
                     }
                 }
@@ -152,7 +152,7 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                         ProcessBuilder("xdg-settings", "get", "default-web-browser")
                             .start()
                             .inputStream.use { it.reader().readText() }
-                    } catch (cause: Throwable) {
+                    } catch (cause: IOException) {
                         throw UnsupportedOperationException("xdg-settings 执行失败，可能需要安装 xdg-utils", cause)
                     }
                 }
@@ -273,9 +273,7 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
         } else {
             queryRegister(key = RegisterKeys.EDGE)
         }
-    } catch (unsupported: UnsupportedOperationException) {
-        throw unsupported
-    } catch (cause: Throwable) {
+    } catch (cause: IOException) {
         throw UnsupportedOperationException("Edge 版本获取失败", cause)
     }
 
@@ -368,9 +366,7 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
             }
             else -> throw UnsupportedOperationException("不受支持的平台 $platform")
         }.substringAfter("Chrome").substringAfter("Chromium").trim()
-    } catch (unsupported: UnsupportedOperationException) {
-        throw unsupported
-    } catch (cause: Throwable) {
+    } catch (cause: IOException) {
         throw UnsupportedOperationException("Chrome/Chromium 版本获取失败", cause)
     }
     // MIRRORS "https://npm.taobao.org/mirrors/chromedriver"
@@ -393,7 +389,7 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
                     filename = "chromedriver-${version0}.mapping"
                 )
                 break
-            } catch (_: Throwable) {
+            } catch (_: IOException) {
                 continue
             }
         }

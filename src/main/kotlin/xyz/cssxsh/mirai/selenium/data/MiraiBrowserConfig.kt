@@ -3,6 +3,9 @@ package xyz.cssxsh.mirai.selenium.data
 import net.mamoe.mirai.console.data.*
 import net.mamoe.mirai.console.util.*
 
+/**
+ * 浏览器相关设置
+ */
 public object MiraiBrowserConfig : AutoSavePluginConfig("MiraiBrowserConfig") {
 
     @ValueDescription("Chrome/Chromium 二进制文件路径")

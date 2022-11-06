@@ -19,7 +19,7 @@ public inline val RemoteWebDriver.devTools: DevTools get() = (this as HasDevTool
 /**
  * @see DevTools.connection
  */
-internal fun RemoteWebDriver.cdp(): ChromeDevToolsProtocol {
+public fun RemoteWebDriver.cdp(): ChromeDevToolsProtocol {
     val ws = Uri.create(capabilities.getCapability("se:cdp") as String)
     val json = asyncHttpClient().prepareGet("http://${ws.authority}/json/protocol")
         .execute()

@@ -11,6 +11,9 @@ import xyz.cssxsh.selenium.*
 import java.util.*
 import kotlin.coroutines.*
 
+/**
+ * 基于 Selenium 的 LoginSolver 实现
+ */
 public object MiraiSeleniumLoginSolver : LoginSolver(), BotConfigurationAlterer {
     private const val TIMEOUT_PROPERTY = "xyz.cssxsh.mirai.solver.timeout"
     override val isSliderCaptchaSupported: Boolean = true

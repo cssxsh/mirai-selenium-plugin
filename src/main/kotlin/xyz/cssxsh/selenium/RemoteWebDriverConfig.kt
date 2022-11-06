@@ -72,6 +72,10 @@ public interface RemoteWebDriverConfig {
      */
     public val custom: DriverOptionsConsumer get() = {}
 
+    /**
+     * 单例实现
+     * @see instances 所有注册的实例
+     */
     public companion object INSTANCE : RemoteWebDriverConfig {
         @JvmStatic
         public val instances: Sequence<RemoteWebDriverConfig> = sequence {

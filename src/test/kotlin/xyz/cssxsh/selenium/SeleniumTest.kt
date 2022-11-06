@@ -89,6 +89,7 @@ internal abstract class SeleniumTest {
             } catch (cause: Throwable) {
                 cause.printStackTrace()
             }
+            true
         }
     }
 }

@@ -134,6 +134,11 @@ public fun FirefoxDriver(config: RemoteWebDriverConfig): FirefoxDriver {
 
 // region Screenshot
 
+/**
+ * 使用 RemoteWebDriver
+ * @param config 配置
+ * @param block lambda
+ */
 public inline fun <reified T> useRemoteWebDriver(config: RemoteWebDriverConfig, block: (RemoteWebDriver) -> T): T {
     val driver = RemoteWebDriver(config)
     return try {

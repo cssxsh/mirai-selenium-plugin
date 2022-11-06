@@ -14,6 +14,9 @@ import xyz.cssxsh.selenium.*
 import java.io.*
 import java.util.logging.*
 
+/**
+ * mirai-selenium-plugin 插件主类
+ */
 public object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
@@ -33,7 +36,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
      */
     @JvmOverloads
     public fun setup(flush: Boolean = false): Boolean = synchronized(this) {
-        if (!flush && installed) return@synchronized true
+        if (!flush && installed) return true
 
         if (RemoteWebDriverConfig.arguments.isNotEmpty()) {
             logger.info { "额外参数: ${RemoteWebDriverConfig.arguments}" }
@@ -44,11 +47,11 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
             installed = true
         } catch (exception: UnsupportedOperationException) {
             logger.warning({ "浏览器 ${RemoteWebDriverConfig.browser} 不受支持" }, exception)
-        } catch (cause: Throwable) {
+        } catch (cause: IOException) {
             logger.warning({ "初始化浏览器驱动失败" }, cause)
         }
 
-        return@synchronized installed
+        return installed
     }
 
     /**
@@ -65,11 +68,11 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
      * @see clearWebDriver
      */
     public fun clear(): Unit = synchronized(this) {
-        if (!installed) return@synchronized
+        if (!installed) return
 
         val deleted = clearWebDriver()
 
-        if (deleted.isEmpty()) return@synchronized
+        if (deleted.isEmpty()) return
         logger.info { "以下文件已清理: ${deleted.joinToString { it.name }}" }
     }
 
@@ -122,6 +125,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
             } catch (cause: Throwable) {
                 logger.warning({ "Service ${service.url} stop failure." }, cause)
             }
+            true
         }
     }
 

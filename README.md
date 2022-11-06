@@ -97,9 +97,9 @@ mirai {
 ### MCL 指令安装
 
 **请确认 mcl.jar 的版本是 2.1.0+**  
-`./mcl --update-package xyz.cssxsh.mirai:mirai-selenium-plugin --channel stable --type plugin`
+`./mcl --update-package xyz.cssxsh.mirai:mirai-selenium-plugin --channel maven-stable --type plugin`
 
 ### 手动安装
 
-1. 运行 [Mirai Console](https://github.com/mamoe/mirai-console) 生成 `plugins` 文件夹
-2. 从 [Releases](https://github.com/cssxsh/mirai-selenium-plugin/releases) 下载 `jar` 并将其放入 `plugins` 文件夹中
+1.  从 [Releases](https://github.com/cssxsh/mirai-selenium-plugin/releases) 或者 [Maven](https://repo1.maven.org/maven2/xyz/cssxsh/mirai/mirai-selenium-plugin/) 下载 `mirai2.jar`
+2.  将其放入 `plugins` 文件夹中

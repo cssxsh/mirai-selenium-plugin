@@ -8,8 +8,12 @@ import org.openqa.selenium.*
 import xyz.cssxsh.mirai.selenium.*
 import xyz.cssxsh.mirai.selenium.data.*
 import xyz.cssxsh.selenium.*
+import java.io.*
 import java.time.*
 
+/**
+ * Selenium 驱动/测试相关指令
+ */
 public object SeleniumCommand : CompositeCommand(
     owner = MiraiSeleniumPlugin,
     primaryName = "selenium",
@@ -18,6 +22,10 @@ public object SeleniumCommand : CompositeCommand(
 
     private val logger get() = MiraiSeleniumPlugin.logger
 
+    /**
+     * 安装驱动文件
+     * @param flush 是否刷新
+     */
     @SubCommand
     @Description("安装驱动文件")
     public suspend fun CommandSender.setup(flush: Boolean = true) {
@@ -26,47 +34,61 @@ public object SeleniumCommand : CompositeCommand(
             if (flush) with(MiraiSeleniumPlugin) { MiraiSeleniumConfig.reload() }
             val result = MiraiSeleniumPlugin.setup(flush = flush)
             sendMessage("安装驱动${if (result) "成功" else "失败"}")
-        } catch (cause: Throwable) {
+        } catch (cause: IOException) {
             logger.warning("安装驱动异常", cause)
             sendMessage("安装驱动异常")
         }
     }
 
+    /**
+     * 清理驱动文件
+     */
     @SubCommand
     @Description("清理驱动文件")
     public suspend fun CommandSender.clear() {
         sendMessage("清理驱动文件")
         try {
             MiraiSeleniumPlugin.clear()
-        } catch (cause: Throwable) {
+        } catch (cause: IOException) {
             logger.warning("清理驱动文件异常", cause)
             sendMessage("清理驱动文件异常")
         }
     }
 
+    /**
+     * 清理驱动进程
+     * @param enable 判断是否进程是否正常工作
+     */
     @SubCommand
     @Description("清理驱动进程")
-    public suspend fun CommandSender.destroy(all: Boolean = true) {
-        sendMessage(if (all) "清理异常驱动进程" else "清除所有驱动进程")
+    public suspend fun CommandSender.destroy(enable: Boolean = true) {
+        sendMessage(if (enable) "清理异常驱动进程" else "清除所有驱动进程")
         try {
-            MiraiSeleniumPlugin.destroy(enable = all)
-        } catch (cause: Throwable) {
+            MiraiSeleniumPlugin.destroy(enable = enable)
+        } catch (cause: IOException) {
             logger.warning("清理驱动进程异常", cause)
             sendMessage("清理驱动进程异常")
         }
     }
 
+    /**
+     * 驱动进程状态
+     */
     @SubCommand
     @Description("驱动进程状态")
     public suspend fun CommandSender.status() {
         try {
             sendMessage(DriverCache.status().joinToString(separator = "\n").ifEmpty { "当前没有驱动进程" })
-        } catch (cause: Throwable) {
+        } catch (cause: IOException) {
             logger.warning("驱动进程状态异常", cause)
             sendMessage("驱动进程状态异常")
         }
     }
 
+    /**
+     * 安装 firefox
+     * @param version 版本
+     */
     @SubCommand
     @Description("下载解压 firefox, https://archive.mozilla.org/pub/firefox/releases/")
     public suspend fun CommandSender.firefox(version: String = "") {
@@ -74,7 +96,7 @@ public object SeleniumCommand : CompositeCommand(
         try {
             val binary = MiraiSeleniumPlugin.firefox(version = version)
             sendMessage("下载结束，binary: ${binary.absolutePath}")
-        } catch (cause: Throwable) {
+        } catch (cause: IOException) {
             logger.warning("下载 firefox 异常", cause)
             sendMessage("下载 firefox 异常")
         } finally {
@@ -82,6 +104,10 @@ public object SeleniumCommand : CompositeCommand(
         }
     }
 
+    /**
+     * 安装 chromium
+     * @param version 版本
+     */
     @SubCommand
     @Description("下载解压 chromium, https://github.com/macchrome")
     public suspend fun CommandSender.chromium(version: String = "") {
@@ -89,7 +115,7 @@ public object SeleniumCommand : CompositeCommand(
         try {
             val binary = MiraiSeleniumPlugin.chromium(version = version)
             sendMessage("下载结束，binary: ${binary.absolutePath}")
-        } catch (cause: Throwable) {
+        } catch (cause: IOException) {
             logger.warning("下载 chromium 异常", cause)
             sendMessage("下载 chromium 异常")
         } finally {
@@ -97,6 +123,9 @@ public object SeleniumCommand : CompositeCommand(
         }
     }
 
+    /**
+     * 测试 图表绘制功能
+     */
     @SubCommand
     @Description("测试 图表绘制功能，将以群员入群事件和发言时间为数据集")
     public suspend fun MemberCommandSenderOnMessage.chart() {

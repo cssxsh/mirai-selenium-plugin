@@ -9,6 +9,7 @@ import java.nio.file.*
 import java.util.*
 
 /**
+ * ECharts 元数据
  * @param option https://echarts.apache.org/zh/option.html
  */
 public data class EChartsMeta(
@@ -20,6 +21,11 @@ public data class EChartsMeta(
     var duration: Long = 1_000
 )
 
+/**
+ * ECharts 绘制类型
+ * @property canvas 画板
+ * @property svg 矢量图
+ */
 @Suppress("EnumEntryName")
 public enum class EChartsRenderer { canvas, svg }
 
