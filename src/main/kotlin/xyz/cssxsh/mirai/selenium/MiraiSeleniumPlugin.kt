@@ -35,7 +35,8 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
      * @see setupWebDriver
      */
     @JvmOverloads
-    public fun setup(flush: Boolean = false): Boolean = synchronized(this) {
+    @Synchronized
+    public fun setup(flush: Boolean = false): Boolean {
         if (!flush && installed) return true
 
         if (RemoteWebDriverConfig.arguments.isNotEmpty()) {
@@ -67,7 +68,8 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
      * 清理驱动文件，会在插件 [onDisable] 时执行一次，如非必要，无需主动执行
      * @see clearWebDriver
      */
-    public fun clear(): Unit = synchronized(this) {
+    @Synchronized
+    public fun clear() {
         if (!installed) return
 
         val deleted = clearWebDriver()
@@ -117,12 +119,12 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
 
             try {
                 driver.quit()
-            } catch (cause: Throwable) {
+            } catch (cause: IOException) {
                 logger.warning({ "Driver ${service.url} stop failure." }, cause)
             }
             try {
                 service.stop()
-            } catch (cause: Throwable) {
+            } catch (cause: IOException) {
                 logger.warning({ "Service ${service.url} stop failure." }, cause)
             }
             true
@@ -151,13 +153,9 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
         launch(Dispatchers.IO) {
             while (isActive) {
                 delay(MiraiSeleniumConfig.destroy * 60_000L)
-                try {
-                    val status = DriverCache.status()
-                    if (status.isNotEmpty()) {
-                        logger.info { "DriverCache: \n${status.joinToString(separator = "\n")}" }
-                    }
-                } catch (cause: Throwable) {
-                    logger.warning({ "DriverCache get status failure." }, cause)
+                val status = DriverCache.status()
+                if (status.isNotEmpty()) {
+                    logger.info { "DriverCache: \n${status.joinToString(separator = "\n")}" }
                 }
                 destroy()
             }

@@ -186,12 +186,12 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                     } catch (_: RuntimeException) {
                         SELENIUM_DEFAULT_PORT
                     }
-                    val uuid = "${System.currentTimeMillis()}-${port}"
+                    val uuid = "msedgedriver-${System.currentTimeMillis()}-${port}"
                     val service = EdgeDriverService.Builder()
-                        .withLogFile(folder.resolve("msedgedriver.${uuid}.log").takeIf { config.log })
+                        .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
                         .usingPort(port)
                         .build()
-                    val output = folder.resolve("msedgedriver.${uuid}.output")
+                    val output = folder.resolve("${uuid}.output")
                         .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
                     service.sendOutputTo(output)
                     EdgeDriver(service, options).also { DriverCache[it] = service }
@@ -210,14 +210,14 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                     } catch (_: RuntimeException) {
                         SELENIUM_DEFAULT_PORT
                     }
-                    val uuid = "${System.currentTimeMillis()}-${port}"
+                    val uuid = "chromedriver-${System.currentTimeMillis()}-${port}"
                     val service = ChromeDriverService.Builder()
                         .withAppendLog(config.log)
-                        .withLogFile(folder.resolve("chromedriver.${uuid}.log").takeIf { config.log })
+                        .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
                         .withLogLevel(options.logLevel)
                         .usingPort(port)
                         .build()
-                    val output = folder.resolve("chromedriver.${uuid}.output")
+                    val output = folder.resolve("${uuid}.output")
                         .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
                     service.sendOutputTo(output)
                     ChromeDriver(service, options).also { DriverCache[it] = service }
@@ -236,13 +236,13 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                     } catch (_: RuntimeException) {
                         SELENIUM_DEFAULT_PORT
                     }
-                    val uuid = "${System.currentTimeMillis()}-${port}"
+                    val uuid = "geckodriver-${System.currentTimeMillis()}-${port}"
                     val service = GeckoDriverService.Builder()
-                        .withLogFile(folder.resolve("geckodriver.${uuid}.log").takeIf { config.log })
+                        .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
                         .usingPort(port)
                         .usingFirefoxBinary(options.binary)
                         .build()
-                    val output = folder.resolve("geckodriver.${uuid}.output")
+                    val output = folder.resolve("${uuid}.output")
                         .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
                     service.sendOutputTo(output)
                     FirefoxDriver(service, options).also { DriverCache[it] = service }
@@ -313,13 +313,13 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
         } catch (_: RuntimeException) {
             SELENIUM_DEFAULT_PORT
         }
-        val uuid = "${System.currentTimeMillis()}-${port}"
+        val uuid = "msedgedriver-${System.currentTimeMillis()}-${port}"
         val service = EdgeDriverService.Builder()
-            .withLogFile(folder.resolve("msedgedriver.${uuid}.log").takeIf { config.log })
+            .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
             .usingDriverExecutable(driver)
             .usingPort(port)
             .build()
-        val output = folder.resolve("msedgedriver.${uuid}.output")
+        val output = folder.resolve("${uuid}.output")
             .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
         service.sendOutputTo(output)
         EdgeDriver(service, options).also { DriverCache[it] = service }
@@ -438,15 +438,15 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
         } catch (_: RuntimeException) {
             SELENIUM_DEFAULT_PORT
         }
-        val uuid = "${System.currentTimeMillis()}-${port}"
+        val uuid = "chromedriver-${System.currentTimeMillis()}-${port}"
         val service = ChromeDriverService.Builder()
             .withAppendLog(config.log)
-            .withLogFile(folder.resolve("chromedriver.${uuid}.log").takeIf { config.log })
+            .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
             .withLogLevel(options.logLevel)
             .usingDriverExecutable(driver)
             .usingPort(port)
             .build()
-        val output = folder.resolve("chromedriver.${uuid}.output")
+        val output = folder.resolve("${uuid}.output")
             .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
         service.sendOutputTo(output)
         ChromeDriver(service, options).also { DriverCache[it] = service }
@@ -526,14 +526,14 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
         } catch (_: RuntimeException) {
             SELENIUM_DEFAULT_PORT
         }
-        val uuid = "${System.currentTimeMillis()}-${port}"
+        val uuid = "geckodriver-${System.currentTimeMillis()}-${port}"
         val service = GeckoDriverService.Builder()
-            .withLogFile(folder.resolve("geckodriver.${uuid}.log").takeIf { config.log })
+            .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
             .usingDriverExecutable(driver)
             .usingPort(port)
             .usingFirefoxBinary(options.binary)
             .build()
-        val output = folder.resolve("geckodriver.${uuid}.output")
+        val output = folder.resolve("${uuid}.output")
             .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
         service.sendOutputTo(output)
         FirefoxDriver(service, options).also { DriverCache[it] = service }
