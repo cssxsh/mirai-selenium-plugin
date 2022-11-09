@@ -68,31 +68,6 @@ public object MiraiSeleniumLoginSolver : LoginSolver(), BotConfigurationAlterer 
         }
     }
 
-    @Deprecated(
-        "Please use onSolveDeviceVerification instead",
-        replaceWith = ReplaceWith("onSolveDeviceVerification(bot, url, null)"),
-        level = DeprecationLevel.WARNING
-    )
-    override suspend fun onSolveUnsafeDeviceLoginVerify(bot: Bot, url: String): String? {
-        val start = System.currentTimeMillis()
-        val timeout = System.getProperty(TIMEOUT_PROPERTY)?.toLong() ?: 600_000L
-
-        return useRemoteWebDriver(DriverConfig) { driver ->
-            driver.setDeviceMetrics(400, 700, 0, true)
-            driver.get(url)
-            driver.executeScript("""return alert("处理完成后请关闭所有窗口")""")
-
-            while (coroutineContext.isActive) {
-                if (driver.windowHandles.isNullOrEmpty()) break
-                delay(1000)
-
-                if (System.currentTimeMillis() - start > timeout) break
-            }
-
-            null
-        }
-    }
-
     override fun alterConfiguration(botId: Long, configuration: BotConfiguration): BotConfiguration {
         configuration.loginSolver = this
 

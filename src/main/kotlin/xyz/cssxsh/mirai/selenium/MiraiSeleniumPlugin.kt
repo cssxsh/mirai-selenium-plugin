@@ -21,7 +21,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
-        version = "2.2.3",
+        version = "2.2.4",
     ) {
         author("cssxsh")
     }
@@ -166,5 +166,6 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
         SeleniumCommand.unregister()
         destroy(enable = false)
         clear()
+        cancel("mirai-selenium-plugin on disable")
     }
 }
