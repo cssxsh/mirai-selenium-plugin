@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.7.20"
-    kotlin("plugin.serialization") version "1.7.20"
+    kotlin("jvm") version "1.7.21"
+    kotlin("plugin.serialization") version "1.7.21"
 
     id("net.mamoe.mirai-console") version "2.13.0"
     id("me.him188.maven-central-publish") version "1.0.0-dev-3"
@@ -27,21 +27,20 @@ repositories {
 }
 
 dependencies {
-    api("org.seleniumhq.selenium:selenium-java:4.6.0") {
-        exclude(group = "org.slf4j")
+    api("com.github.jknack:handlebars:4.3.1")
+    api("org.seleniumhq.selenium:selenium-java:4.7.0") {
         exclude(group = "io.netty")
-        exclude(group = "com.google.auto.service")
     }
-    api("com.github.jknack:handlebars:4.3.1") {
-        exclude(group = "org.slf4j")
-    }
-    compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
-    // test
     testImplementation(kotlin("test"))
-    testImplementation("org.slf4j:slf4j-simple:2.0.3")
-    testImplementation("net.mamoe:mirai-logging-slf4j:2.13.0")
     testImplementation("org.icepear.echarts:echarts-java:1.0.7")
     testCompileOnly("org.projectlombok:lombok:1.18.24")
+    //
+    implementation(platform("net.mamoe:mirai-bom:2.13.0"))
+    compileOnly("net.mamoe:mirai-console-compiler-common")
+    testImplementation("net.mamoe:mirai-logging-slf4j")
+    //
+    implementation(platform("org.slf4j:slf4j-parent:2.13.0"))
+    testImplementation("org.slf4j:slf4j-simple")
 }
 
 kotlin {
