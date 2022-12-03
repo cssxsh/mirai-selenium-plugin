@@ -39,7 +39,7 @@ dependencies {
     compileOnly("net.mamoe:mirai-console-compiler-common")
     testImplementation("net.mamoe:mirai-logging-slf4j")
     //
-    implementation(platform("org.slf4j:slf4j-parent:2.13.0"))
+    implementation(platform("org.slf4j:slf4j-parent:2.0.5"))
     testImplementation("org.slf4j:slf4j-simple")
 }
 
