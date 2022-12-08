@@ -62,15 +62,16 @@ internal abstract class SeleniumTest {
 
     protected fun testRemoteWebDriver(block: suspend CoroutineScope.(String, RemoteWebDriver) -> Unit) {
         for (browser in browsers) {
-            runBlocking {
-                val driver = setupWebDriver(browser = browser).invoke(config)
-                try {
+            val driver = setupWebDriver(browser = browser).invoke(config)
+            try {
+                runBlocking {
                     block(browser, driver)
-                } catch (cause: WebDriverException) {
-                    cause.printStackTrace()
-                } finally {
-                    driver.quit()
                 }
+            } catch (cause: WebDriverException) {
+                cause.printStackTrace()
+            } finally {
+                driver.close()
+                driver.quit()
             }
         }
     }
