@@ -28,7 +28,7 @@ repositories {
 
 dependencies {
     api("com.github.jknack:handlebars:4.3.1")
-    api("org.seleniumhq.selenium:selenium-java:4.7.0") {
+    api("org.seleniumhq.selenium:selenium-java:4.7.1") {
         exclude(group = "io.netty")
     }
     testImplementation(kotlin("test"))
