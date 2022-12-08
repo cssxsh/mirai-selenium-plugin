@@ -70,7 +70,6 @@ internal abstract class SeleniumTest {
             } catch (cause: WebDriverException) {
                 cause.printStackTrace()
             } finally {
-                driver.close()
                 driver.quit()
             }
         }
