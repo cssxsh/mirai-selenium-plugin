@@ -8,29 +8,41 @@ internal class SeleniumDevToolsKtTest : SeleniumTest() {
     fun getVersion(): Unit = testRemoteWebDriver { browser, driver ->
         println(browser)
         driver.cdp()
-        println(driver.devTools.session())
-        println(driver.browser())
-        driver.devTools.close()
+        try {
+            println(driver.devTools.session())
+            println(driver.browser())
+        } finally {
+            driver.devTools.close()
+        }
     }
 
     @Test
     fun network(): Unit = testRemoteWebDriver { browser, driver ->
         println(browser)
-        driver.network().setUserAgent("curl/3.0")
-        driver.devTools.close()
+        try {
+            driver.network().setUserAgent("curl/3.0")
+        } finally {
+            driver.devTools.close()
+        }
     }
 
     @Test
     fun setDeviceMetrics(): Unit = testRemoteWebDriver { browser, driver ->
         println(browser)
-        driver.setDeviceMetrics(1080, 960, 0, true)
-        driver.devTools.close()
+        try {
+            driver.setDeviceMetrics(1080, 960, 0, true)
+        } finally {
+            driver.devTools.close()
+        }
     }
 
     @Test
     fun setScrollbarsHidden(): Unit = testRemoteWebDriver { browser, driver ->
         println(browser)
-        driver.setScrollbarsHidden()
-        driver.devTools.close()
+        try {
+            driver.setScrollbarsHidden()
+        } finally {
+            driver.devTools.close()
+        }
     }
 }
