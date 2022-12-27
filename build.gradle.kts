@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "xyz.cssxsh.mirai"
-version = "2.2.4"
+version = "2.2.5"
 
 mavenCentralPublish {
     useCentralS01()
@@ -28,7 +28,7 @@ repositories {
 
 dependencies {
     api("com.github.jknack:handlebars:4.3.1")
-    api("org.seleniumhq.selenium:selenium-java:4.7.2")
+    api("org.seleniumhq.selenium:selenium-java:4.7.2") { exclude(group = "io.netty") }
     testImplementation(kotlin("test"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.7")
     testCompileOnly("org.projectlombok:lombok:1.18.24")
@@ -37,7 +37,7 @@ dependencies {
     compileOnly("net.mamoe:mirai-console-compiler-common")
     testImplementation("net.mamoe:mirai-logging-slf4j")
     //
-    implementation(platform("org.slf4j:slf4j-parent:2.0.5"))
+    implementation(platform("org.slf4j:slf4j-parent:2.0.6"))
     testImplementation("org.slf4j:slf4j-simple")
 }
 

@@ -6,7 +6,7 @@ import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
 import net.mamoe.mirai.console.extension.*
 import net.mamoe.mirai.console.plugin.jvm.*
 import net.mamoe.mirai.utils.*
-import org.openqa.selenium.Platform
+import org.openqa.selenium.*
 import org.openqa.selenium.remote.*
 import xyz.cssxsh.mirai.selenium.command.*
 import xyz.cssxsh.mirai.selenium.data.*
@@ -21,7 +21,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
-        version = "2.2.4",
+        version = "2.2.5",
     ) {
         author("cssxsh")
     }

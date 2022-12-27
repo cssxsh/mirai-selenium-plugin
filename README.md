@@ -104,3 +104,7 @@ mirai {
 
 1.  从 [Releases](https://github.com/cssxsh/mirai-selenium-plugin/releases) 或者 [Maven](https://repo1.maven.org/maven2/xyz/cssxsh/mirai/mirai-selenium-plugin/) 下载 `mirai2.jar`
 2.  将其放入 `plugins` 文件夹中
+
+## [爱发电](https://afdian.net/@cssxsh)
+
+![afdian](.github/afdian.jpg)
