@@ -391,6 +391,8 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
                 break
             } catch (_: IOException) {
                 continue
+            } catch (_: IllegalStateException) {
+                continue
             }
         }
     }
