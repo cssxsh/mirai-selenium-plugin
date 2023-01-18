@@ -28,7 +28,7 @@ repositories {
 
 dependencies {
     api("com.github.jknack:handlebars:4.3.1")
-    api("org.seleniumhq.selenium:selenium-java:4.7.2") { exclude(group = "io.netty") }
+    api("org.seleniumhq.selenium:selenium-java:4.7.2")
     testImplementation(kotlin("test"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.7")
     testCompileOnly("org.projectlombok:lombok:1.18.24")
