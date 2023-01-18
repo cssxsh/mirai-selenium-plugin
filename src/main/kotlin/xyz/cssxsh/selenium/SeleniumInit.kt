@@ -266,9 +266,12 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
         throw UnsupportedOperationException("Edge only supported Windows/Edge")
     }
 
-    val binary = System.getProperty(EDGE_BROWSER_BINARY)?.let(::File)
+    val binary = System.getProperty(
+        EDGE_BROWSER_BINARY,
+        "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+    ).let(::File)
     val version = try {
-        if (binary != null) {
+        if (binary.exists()) {
             queryVersion(folder = binary.parentFile)
         } else {
             queryRegister(key = RegisterKeys.EDGE)
@@ -307,7 +310,7 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
     return { config ->
         if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
         val options = EdgeOptions().also(config.toConsumer())
-        if (binary != null) options.setBinary(binary)
+        if (binary.exists()) options.setBinary(binary)
         val port = try {
             PortProber.findFreePort()
         } catch (_: RuntimeException) {
@@ -340,11 +343,14 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
 internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverSupplier {
     // 取版本
     val platform = Platform.getCurrent()
-    val binary = System.getProperty(CHROME_BROWSER_BINARY)?.let(::File)
+    val binary = System.getProperty(
+        CHROME_BROWSER_BINARY,
+        "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+    ).let(::File)
     val version0 = try {
         when {
             platform.`is`(Platform.WINDOWS) -> {
-                if (binary != null) {
+                if (binary.exists()) {
                     queryVersion(folder = binary.parentFile)
                 } else {
                     queryRegister(key = if (chromium) RegisterKeys.CHROMIUM else RegisterKeys.CHROME)
@@ -434,7 +440,7 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
     return { config ->
         if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
         val options = ChromeOptions().also(config.toConsumer())
-        if (binary != null) options.setBinary(binary)
+        if (binary.exists()) options.setBinary(binary)
         val port = try {
             PortProber.findFreePort()
         } catch (_: RuntimeException) {
