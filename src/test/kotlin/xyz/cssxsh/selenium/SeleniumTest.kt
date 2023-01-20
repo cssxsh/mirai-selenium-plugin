@@ -22,7 +22,8 @@ internal abstract class SeleniumTest {
         System.setProperty(FIREFOX_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/geckodriver")
         System.setProperty(SEVEN7Z_MIRRORS, "https://downloads.sourceforge.net/sevenzip")
         // System.setProperty("selenium.webdriver.verbose", "true")
-        SeleniumLogger.level = Level.WARNING
+        org.slf4j.bridge.SLF4JBridgeHandler.removeHandlersForRootLogger()
+        org.slf4j.bridge.SLF4JBridgeHandler.install()
     }
 
     protected val browsers by lazy {
@@ -79,13 +80,21 @@ internal abstract class SeleniumTest {
     fun destroy() {
         println(DriverCache.status())
         DriverCache.destroy(enable = false) { driver, service ->
+            val process = service.getProcess()
             try {
                 driver.quit()
+            } catch (_: WebDriverException) {
+                //
             } catch (cause: Throwable) {
                 cause.printStackTrace()
             }
             try {
                 service.stop()
+            } catch (cause: Throwable) {
+                cause.printStackTrace()
+            }
+            try {
+                process?.destroy()
             } catch (cause: Throwable) {
                 cause.printStackTrace()
             }

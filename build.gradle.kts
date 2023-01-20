@@ -36,12 +36,13 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok:1.18.24")
     //
     implementation(platform("net.mamoe:mirai-bom:2.14.0-RC"))
-    compileOnly("net.mamoe:mirai-console")
-    testImplementation("net.mamoe:mirai-logging-slf4j")
     testCompileOnly("net.mamoe:mirai-console-compiler-common")
     //
     implementation(platform("org.slf4j:slf4j-parent:2.0.6"))
-    testImplementation("org.slf4j:slf4j-simple")
+    testImplementation("org.slf4j:jcl-over-slf4j:2.0.6")
+    testImplementation("org.slf4j:jul-to-slf4j:2.0.6")
+    //
+    implementation(platform("io.netty:netty-bom:4.1.87.Final"))
 }
 
 kotlin {
@@ -49,7 +50,6 @@ kotlin {
 }
 
 mirai {
-    noConsole = true
     jvmTarget = JavaVersion.VERSION_11
 }
 

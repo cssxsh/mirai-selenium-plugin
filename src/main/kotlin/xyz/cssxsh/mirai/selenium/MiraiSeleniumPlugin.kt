@@ -121,11 +121,18 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
                 driver.quit()
             } catch (cause: IOException) {
                 logger.warning({ "Driver ${service.url} stop failure." }, cause)
+            } catch (cause: WebDriverException) {
+                logger.warning({ "Driver ${service.url} stop failure." }, cause)
             }
             try {
                 service.stop()
             } catch (cause: IOException) {
                 logger.warning({ "Service ${service.url} stop failure." }, cause)
+            }
+            try {
+                process?.destroy()
+            } catch (cause: IOException) {
+                logger.warning({ "Process $process stop failure." }, cause)
             }
             true
         }
