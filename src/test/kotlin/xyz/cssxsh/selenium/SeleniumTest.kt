@@ -25,7 +25,6 @@ internal abstract class SeleniumTest {
         // System.setProperty("selenium.webdriver.verbose", "true")
         org.slf4j.bridge.SLF4JBridgeHandler.removeHandlersForRootLogger()
         org.slf4j.bridge.SLF4JBridgeHandler.install()
-        net.mamoe.mirai.mock.MockBotFactory.initialize()
     }
 
     protected val browsers by lazy {
