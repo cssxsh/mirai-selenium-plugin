@@ -7,12 +7,13 @@ import org.openqa.selenium.chrome.ChromeDriverService
 import org.openqa.selenium.edge.EdgeDriverService
 import org.openqa.selenium.firefox.GeckoDriverService
 import org.openqa.selenium.remote.*
+import org.slf4j.*
 import xyz.cssxsh.mirai.selenium.data.*
 import java.io.File
-import java.util.logging.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal abstract class SeleniumTest {
+    protected val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     protected val folder = File("run")
 
@@ -24,6 +25,7 @@ internal abstract class SeleniumTest {
         // System.setProperty("selenium.webdriver.verbose", "true")
         org.slf4j.bridge.SLF4JBridgeHandler.removeHandlersForRootLogger()
         org.slf4j.bridge.SLF4JBridgeHandler.install()
+        net.mamoe.mirai.mock.MockBotFactory.initialize()
     }
 
     protected val browsers by lazy {
@@ -83,20 +85,18 @@ internal abstract class SeleniumTest {
             val process = service.getProcess()
             try {
                 driver.quit()
-            } catch (_: WebDriverException) {
-                //
             } catch (cause: Throwable) {
-                cause.printStackTrace()
+                logger.warn("Driver ${service.url}", cause)
             }
             try {
                 service.stop()
             } catch (cause: Throwable) {
-                cause.printStackTrace()
+                logger.warn("Service ${service.url}", cause)
             }
             try {
                 process?.destroy()
             } catch (cause: Throwable) {
-                cause.printStackTrace()
+                logger.warn("Process ${service.url}", cause)
             }
             true
         }

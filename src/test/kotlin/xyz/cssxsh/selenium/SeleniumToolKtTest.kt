@@ -53,7 +53,7 @@ internal class SeleniumToolKtTest : SeleniumTest() {
             driver.get("about:config")
             println(driver.devTools.session())
         } catch (cause: Throwable) {
-            cause.printStackTrace()
+            logger.warn("firefox", cause)
         }
     }
 
@@ -70,7 +70,7 @@ internal class SeleniumToolKtTest : SeleniumTest() {
         try {
             driver.get("chrome://settings/help")
         } catch (cause: Throwable) {
-            cause.printStackTrace()
+            logger.warn("chromium", cause)
         }
     }
 }

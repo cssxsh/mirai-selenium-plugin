@@ -36,6 +36,7 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok:1.18.24")
     //
     implementation(platform("net.mamoe:mirai-bom:2.14.0-RC"))
+    testImplementation("net.mamoe:mirai-core-mock")
     testCompileOnly("net.mamoe:mirai-console-compiler-common")
     //
     implementation(platform("org.slf4j:slf4j-parent:2.0.6"))
