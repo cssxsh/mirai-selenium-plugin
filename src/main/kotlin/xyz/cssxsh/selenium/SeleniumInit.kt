@@ -86,23 +86,24 @@ internal val IgnoreJson = Json {
  * @param filename 文件名，为空时从 header 或者 url 获取
  */
 internal fun download(urlString: String, folder: File, filename: String? = null): File {
-
     if (filename != null) {
         val current = folder.resolve(filename)
         if (current.exists()) return current
     }
 
-
     val client = asyncHttpClient(
         DefaultAsyncHttpClientConfig.Builder()
             .setFollowRedirect(true)
             .setUserAgent("curl/7.61.0")
-            .setRequestTimeout(180_000)
+            .setRequestTimeout(30_000)
+            .setConnectTimeout(30_000)
+            .setReadTimeout(180_000)
     )
     val response = with(client.prepareGet(urlString)) {
-        val token = System.getenv("GITHUB_TOKEN")
-        if ("api.github.com" in urlString && token != null) {
-            addHeader("Authorization", token)
+        if ("api.github.com" in urlString) {
+            System.getenv("GITHUB_TOKEN")?.let { token ->
+                addHeader("Authorization", token)
+            }
         }
         execute().get()
     }
