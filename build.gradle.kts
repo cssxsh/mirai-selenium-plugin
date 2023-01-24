@@ -28,15 +28,14 @@ repositories {
 
 dependencies {
     api("com.github.jknack:handlebars:4.3.1")
-    api("org.seleniumhq.selenium:selenium-java:4.7.2")
+    api("org.seleniumhq.selenium:selenium-java:4.8.0")
     testImplementation(kotlin("test"))
-    testImplementation("org.icepear.echarts:echarts-java:1.0.7") {
-        exclude("org.slf4j")
-    }
+    testImplementation("org.icepear.echarts:echarts-java:1.0.7")
     testCompileOnly("org.projectlombok:lombok:1.18.24")
     //
     implementation(platform("net.mamoe:mirai-bom:2.14.0-RC"))
-    testCompileOnly("net.mamoe:mirai-console-compiler-common")
+    testImplementation("net.mamoe:mirai-logging-slf4j")
+    testImplementation("net.mamoe:mirai-console-compiler-common")
     //
     implementation(platform("org.slf4j:slf4j-parent:2.0.6"))
     testImplementation("org.slf4j:slf4j-simple")

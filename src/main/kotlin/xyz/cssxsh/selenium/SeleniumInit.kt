@@ -30,6 +30,8 @@ internal const val CHROME_BROWSER_BINARY = "webdriver.chrome.bin"
 
 internal const val CHROME_DRIVER_MIRRORS = "webdriver.chrome.mirrors"
 
+internal const val CHROME_DRIVER_VERSION = "webdriver.chrome.version"
+
 internal const val FIREFOX_DRIVER_MIRRORS = "webdriver.firefox.mirrors"
 
 internal const val EDGE_BROWSER_BINARY = "webdriver.edge.bin"
@@ -215,7 +217,6 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                     val service = ChromeDriverService.Builder()
                         .withAppendLog(config.log)
                         .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
-                        .withLogLevel(options.logLevel)
                         .usingPort(port)
                         .build()
                     val output = folder.resolve("${uuid}.output")
@@ -376,6 +377,7 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
     } catch (cause: IOException) {
         throw UnsupportedOperationException("Chrome/Chromium 版本获取失败", cause)
     }
+    System.setProperty(CHROME_DRIVER_VERSION, version0.substringBefore('.'))
     // MIRRORS "https://npm.taobao.org/mirrors/chromedriver"
     val base = System.getProperty(CHROME_DRIVER_MIRRORS, "https://chromedriver.storage.googleapis.com")
 
@@ -451,7 +453,6 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
         val service = ChromeDriverService.Builder()
             .withAppendLog(config.log)
             .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
-            .withLogLevel(options.logLevel)
             .usingDriverExecutable(driver)
             .usingPort(port)
             .build()
@@ -552,10 +553,10 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
 /**
  * [RemoteWebDriverConfig] 配置浏览器 [Capabilities]
  */
+@PublishedApi
 internal fun RemoteWebDriverConfig.toConsumer(): DriverOptionsConsumer = { capabilities ->
     when (capabilities) {
         is ChromiumOptions<*> -> capabilities.apply {
-            setHeadless(headless)
             setPageLoadStrategy(PageLoadStrategy.NORMAL)
             setAcceptInsecureCerts(true)
             addArguments("--silent")
@@ -564,6 +565,13 @@ internal fun RemoteWebDriverConfig.toConsumer(): DriverOptionsConsumer = { capab
                 listOf("enable-automation", "ignore-certificate-errors")
             )
             addArguments("--hide-scrollbars")
+            if (headless) {
+                if (System.getProperty(CHROME_DRIVER_VERSION, "109").toInt() >= 109) {
+                    addArguments("--headless=new")
+                } else {
+                    addArguments("--headless=chrome")
+                }
+            }
             if (proxy.isNotBlank()) {
                 addArguments("--proxy-server=${proxy}")
             }
@@ -576,7 +584,6 @@ internal fun RemoteWebDriverConfig.toConsumer(): DriverOptionsConsumer = { capab
             })
         }
         is FirefoxOptions -> capabilities.apply {
-            setHeadless(headless)
             setPageLoadStrategy(PageLoadStrategy.NORMAL)
             setAcceptInsecureCerts(true)
             if (proxy.isNotBlank()) {
@@ -594,6 +601,7 @@ internal fun RemoteWebDriverConfig.toConsumer(): DriverOptionsConsumer = { capab
             }
 
             if (headless) {
+                addArguments("-headless")
                 // XXX: 手动关闭 webgl
                 addPreference("webgl.disabled", true)
             }
