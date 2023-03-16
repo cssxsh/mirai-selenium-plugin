@@ -2,13 +2,13 @@ plugins {
     kotlin("jvm") version "1.7.22"
     kotlin("plugin.serialization") version "1.7.22"
 
-    id("net.mamoe.mirai-console") version "2.14.0-RC"
+    id("net.mamoe.mirai-console") version "2.14.0"
     id("me.him188.maven-central-publish") version "1.0.0-dev-3"
-    id("me.him188.kotlin-jvm-blocking-bridge") version "2.2.0-172.1"
+    id("me.him188.kotlin-jvm-blocking-bridge") version "2.2.0-180.1"
 }
 
 group = "xyz.cssxsh.mirai"
-version = "2.2.5"
+version = "2.3.0"
 
 mavenCentralPublish {
     useCentralS01()
@@ -28,12 +28,11 @@ repositories {
 
 dependencies {
     api("com.github.jknack:handlebars:4.3.1")
-    api("org.seleniumhq.selenium:selenium-java:4.8.0")
+    api("org.seleniumhq.selenium:selenium-java:4.8.1")
     testImplementation(kotlin("test"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.7")
-    testCompileOnly("org.projectlombok:lombok:1.18.24")
     //
-    implementation(platform("net.mamoe:mirai-bom:2.14.0-RC"))
+    implementation(platform("net.mamoe:mirai-bom:2.14.0"))
     testImplementation("net.mamoe:mirai-logging-slf4j")
     testImplementation("net.mamoe:mirai-console-compiler-common")
     //
@@ -42,7 +41,7 @@ dependencies {
     testImplementation("org.slf4j:jcl-over-slf4j:2.0.6")
     testImplementation("org.slf4j:jul-to-slf4j:2.0.6")
     //
-    implementation(platform("io.netty:netty-bom:4.1.87.Final"))
+    implementation(platform("io.netty:netty-bom:4.1.90.Final"))
 }
 
 kotlin {

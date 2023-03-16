@@ -21,7 +21,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.mirai-selenium-plugin",
         name = "mirai-selenium-plugin",
-        version = "2.2.5",
+        version = "2.3.0",
     ) {
         author("cssxsh")
     }
@@ -143,7 +143,7 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
             if ("root" == System.getProperty("user.name")) {
                 logger.error { "由于浏览器的运行特性，root 用户下将无法保证插件运行正常" }
             }
-            logger.info { "如果要在 Linux 下使用 headless (无窗户后台模式)浏览器, 请安装 xvfb, 并启用 xvfb 服务" }
+            logger.info { "如果要在 Linux 下使用 headless (无窗户后台模式)浏览器, 请关闭X转发" }
         }
 
         MiraiSeleniumConfig.reload()

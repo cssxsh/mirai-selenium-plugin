@@ -1,10 +1,10 @@
 package xyz.cssxsh.selenium
 
 import org.icepear.echarts.*
-import org.icepear.echarts.components.coord.cartesian.ValueAxis
+import org.icepear.echarts.components.coord.cartesian.*
 import org.icepear.echarts.serializer.*
-import org.junit.jupiter.api.Test
-import org.openqa.selenium.OutputType
+import org.junit.jupiter.api.*
+import org.openqa.selenium.*
 
 internal class EChartsTest : SeleniumTest() {
 

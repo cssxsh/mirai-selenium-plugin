@@ -10,7 +10,7 @@ internal class SeleniumToolKtTest : SeleniumTest() {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     fun screenshot(): Unit = testRemoteWebDriver { browser, driver ->
 
-        val url = "https://t.bilibili.com/h5/dynamic/detail/450055453856015371"
+        val url = "https://t.bilibili.com/761278379279253527"
 
         val hide = arrayOf(".open-app", ".launch-app-btn", ".unlogin-popover", ".no-login")
 

@@ -1,6 +1,6 @@
 package xyz.cssxsh.selenium
 
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 
 internal class SeleniumDevToolsKtTest : SeleniumTest() {
 
