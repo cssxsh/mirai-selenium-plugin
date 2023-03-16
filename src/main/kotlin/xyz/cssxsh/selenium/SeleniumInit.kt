@@ -407,11 +407,18 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
     }
     val version = mapping.readText()
 
+    val arch = System.getProperty("os.arch")
     val suffix = when {
         platform.`is`(Platform.WINDOWS) -> "win32"
-        platform.`is`(Platform.LINUX) -> "linux64"
+        platform.`is`(Platform.LINUX) -> {
+            if ("aarch64" in arch) {
+                throw UnsupportedOperationException("ChromeDriver 官方下载没有 ARM64 版本，你需要手动安装，并设置 ${ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY}")
+            } else {
+                "linux64"
+            }
+        }
         platform.`is`(Platform.MAC) -> {
-            if ("aarch64" in System.getProperty("os.arch")) {
+            if ("aarch64" in arch) {
                 "mac64_m1"
             } else {
                 "mac64"
@@ -483,11 +490,24 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
         ).readText()
     )
     val version = json.tagName
+    val arch = System.getProperty("os.arch").orEmpty()
     val filename = when {
-        platform.`is`(Platform.WINDOWS) -> "geckodriver-$version-win64.zip"
-        platform.`is`(Platform.LINUX) -> "geckodriver-$version-linux64.tar.gz"
+        platform.`is`(Platform.WINDOWS) -> {
+            if ("aarch64" in arch) {
+                "geckodriver-$version-win-aarch64.zip"
+            } else {
+                "geckodriver-$version-win32.zip"
+            }
+        }
+        platform.`is`(Platform.LINUX) -> {
+            if ("aarch64" in arch) {
+                "geckodriver-$version-linux-aarch64.tar.gz"
+            } else {
+                "geckodriver-$version-linux64.tar.gz"
+            }
+        }
         platform.`is`(Platform.MAC) -> {
-            if ("aarch64" in System.getProperty("os.arch")) {
+            if ("aarch64" in arch) {
                 "geckodriver-$version-macos-aarch64.tar.gz"
             } else {
                 "geckodriver-$version-macos.tar.gz"
