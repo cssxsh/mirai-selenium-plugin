@@ -587,7 +587,7 @@ internal fun RemoteWebDriverConfig.toConsumer(): DriverOptionsConsumer = { capab
             addArguments("--hide-scrollbars")
             if (headless) {
                 if (System.getProperty(CHROME_DRIVER_VERSION, "109").toInt() >= 109) {
-                    addArguments("--headless=new")
+                    addArguments("--headless")
                 } else {
                     addArguments("--headless=chrome")
                 }
@@ -595,7 +595,7 @@ internal fun RemoteWebDriverConfig.toConsumer(): DriverOptionsConsumer = { capab
             if (proxy.isNotBlank()) {
                 addArguments("--proxy-server=${proxy}")
             }
-
+            addArguments("--remote-allow-origins=*")
             addArguments("--user-agent=${userAgent}")
             addArguments("--window-size=${width},${height}")
             addArguments(arguments)
