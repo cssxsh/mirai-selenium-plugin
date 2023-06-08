@@ -28,7 +28,7 @@ repositories {
 
 dependencies {
     api("com.github.jknack:handlebars:4.3.1")
-    api("org.seleniumhq.selenium:selenium-java:4.8.1")
+    api("org.seleniumhq.selenium:selenium-java:4.10.0")
     testImplementation(kotlin("test"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.7")
     //
@@ -41,7 +41,7 @@ dependencies {
     testImplementation("org.slf4j:jcl-over-slf4j:2.0.6")
     testImplementation("org.slf4j:jul-to-slf4j:2.0.6")
     //
-    implementation(platform("io.netty:netty-bom:4.1.90.Final"))
+    implementation(platform("io.netty:netty-bom:4.1.91.Final"))
 }
 
 kotlin {
