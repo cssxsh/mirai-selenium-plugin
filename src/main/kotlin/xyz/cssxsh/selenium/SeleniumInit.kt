@@ -725,7 +725,7 @@ internal fun setupFirefox(folder: File, version: String): File {
                     input.nextEntry
                     for (entry in input.entries.reversed()) {
                         if (entry.hasStream().not()) continue
-                        println(entry.name)
+                        // println(entry.name)
                         val target = folder.resolve(entry.name)
                         target.parentFile.mkdirs()
                         target.outputStream().use { output ->
@@ -967,9 +967,6 @@ internal fun setupChromium(folder: File, version: String): File {
                             target.setLastModified(entry.modTime.time)
                         }
                     }
-
-                val unpack = xz.name.removeSuffix(".tar.xz")
-                check(folder.resolve(unpack).renameTo(setup)) { "重命名 $unpack 失败" }
             }
 
             setup.resolve("Chromium.app/Contents/MacOS/Chromium")
