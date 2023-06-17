@@ -548,7 +548,7 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
                 .let(::GzipCompressorInputStream)
                 .let(::TarArchiveInputStream)
                 .use { input ->
-                    val entry = input.currentEntry
+                    val entry = input.nextTarEntry
                     driver.parentFile.mkdirs()
                     driver.outputStream().use { output ->
                         input.copyTo(output)
