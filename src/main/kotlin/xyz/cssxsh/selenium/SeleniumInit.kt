@@ -820,7 +820,7 @@ internal fun setupFirefox(folder: File, version: String): File {
                 check(folder.resolve("firefox").renameTo(setup)) { "重命名 firefox 失败" }
             }
 
-            setup.resolve("firefox")
+            setup.resolve("firefox-bin")
         }
         platform.`is`(Platform.MAC) -> {
             val setup: File
