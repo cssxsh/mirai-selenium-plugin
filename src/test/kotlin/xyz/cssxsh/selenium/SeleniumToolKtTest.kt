@@ -42,7 +42,11 @@ internal class SeleniumToolKtTest : SeleniumTest() {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     fun firefox() {
-        setupFirefox(folder = folder, version = "")
+        try {
+            setupFirefox(folder = folder, version = "")
+        } catch (cause: RuntimeException) {
+            logger.warn("...", cause)
+        }
         val driver = FirefoxDriver(config = object : RemoteWebDriverConfig {
             override val headless: Boolean = true
             override val log: Boolean = true

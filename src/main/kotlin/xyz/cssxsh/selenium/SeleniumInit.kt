@@ -487,6 +487,10 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
 internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     // 取版本
     val platform = Platform.getCurrent()
+    val binary = System.getProperty(
+        FIREFOX_BROWSER_BINARY,
+        "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
+    ).let(::File)
     val json = IgnoreJson.decodeFromString(
         deserializer = GitHubRelease.serializer(),
         string = download(
@@ -562,6 +566,7 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     return { config ->
         if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
         val options = FirefoxOptions().also(config.toConsumer())
+        if (binary.exists()) options.setBinary(binary.toPath())
         val port = try {
             PortProber.findFreePort()
         } catch (_: RuntimeException) {
@@ -703,36 +708,83 @@ internal fun setupFirefox(folder: File, version: String): File {
             if (setup.exists().not()) {
                 // TODO: https://issues.apache.org/jira/browse/COMPRESS-431
                 // 37 7A BC AF 27 1C
-                // 0001_1200 - 0002_0251
-                // 0001_1D00 - 0002_C051
 
                 val channel = Files.newByteChannel(exe.toPath(), StandardOpenOption.READ)
-                channel.position(0x0002_C051 + 0x0C)
-                val (offset, size) = ByteBuffer.allocate(0x10).let { buffer ->
+                val (start, size) = ByteBuffer.allocate(0x28).let { buffer ->
+                    buffer.order(ByteOrder.LITTLE_ENDIAN)
+                    // NtHeader
+                    channel.position(0x0000_003CL)
                     channel.read(buffer)
                     buffer.position(0)
-                    buffer.order(ByteOrder.LITTLE_ENDIAN)
-                    buffer.long to buffer.long
+                    val nt = buffer.int.toLong()
+                    buffer.position(0)
+
+                    channel.position(nt)
+                    channel.read(buffer)
+                    buffer.position(0)
+                    buffer.int
+                    buffer.short
+                    val numberOfSection = buffer.short.toInt()
+                    buffer.int
+                    buffer.int
+                    buffer.int
+                    val section = nt + 0x0004 + 0x0014 + buffer.short
+                    buffer.position(0)
+
+                    var skip = 0
+                    for (index in 0 until numberOfSection) {
+                        channel.position(section + index * 0x0028)
+
+                        channel.read(buffer)
+                        buffer.position(0)
+                        val bytes = ByteArray(8)
+                        buffer.get(bytes)
+                        val name = bytes.decodeToString()
+                        buffer.int
+                        buffer.int
+                        val sizeOfRawData = buffer.int
+                        buffer.position(0)
+
+                        if (name.trimEnd('\u0000') == ".rsrc") {
+                            break
+                        } else {
+                            skip += sizeOfRawData
+                        }
+                    }
+                    val start = 0x0000_1000L + skip + 0xF051
+
+                    channel.position(start + 0x0C)
+                    channel.read(buffer)
+                    buffer.position(0)
+                    val offset = buffer.long
+                    val size = buffer.long
+                    buffer.position(0)
+
+                    start to (0x20 + offset + size + 1)
                 }
-                val end = 0x20 + offset + size + 1
 
                 val pack = folder.resolve(exe.nameWithoutExtension + ".7z")
-                val bytes = exe.inputStream().apply { skip(0x0002_C051) }
-                    .readNBytes(end.toInt())
+                val bytes = exe.inputStream()
+                    .apply { skip(start) }
+                    .readNBytes(size.toInt())
                 pack.writeBytes(bytes)
 
-                SevenZFile(pack).use { input ->
-                    input.nextEntry
-                    for (entry in input.entries.reversed()) {
-                        if (entry.hasStream().not()) continue
-                        // println(entry.name)
-                        val target = folder.resolve(entry.name)
-                        target.parentFile.mkdirs()
-                        target.outputStream().use { output ->
-                            input.getInputStream(entry).copyTo(output)
+                try {
+                    SevenZFile(pack).use { input ->
+                        input.nextEntry
+                        for (entry in input.entries.reversed()) {
+                            if (entry.hasStream().not()) continue
+                            // println(entry.name)
+                            val target = folder.resolve(entry.name)
+                            target.parentFile.mkdirs()
+                            target.outputStream().use { output ->
+                                input.getInputStream(entry).copyTo(output)
+                            }
+                            target.setLastModified(entry.lastModifiedTime.toMillis())
                         }
-                        target.setLastModified(entry.lastModifiedTime.toMillis())
                     }
+                } catch (cause: Throwable) {
+                    throw RuntimeException("解压 $pack 失败", cause)
                 }
 
                 check(folder.resolve("core").renameTo(setup)) { "重命名 core 失败" }
