@@ -199,11 +199,9 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                     val uuid = "msedgedriver-${System.currentTimeMillis()}-${port}"
                     val service = EdgeDriverService.Builder()
                         .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
+                        .withLogOutput(folder.resolve("${uuid}.output").takeIf { config.log }?.outputStream())
                         .usingPort(port)
                         .build()
-                    val output = folder.resolve("${uuid}.output")
-                        .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
-                    service.sendOutputTo(output)
                     EdgeDriver(service, options).also { DriverCache[it] = service }
                 }
             }
@@ -224,11 +222,9 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                     val service = ChromeDriverService.Builder()
                         .withAppendLog(config.log)
                         .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
+                        .withLogOutput(folder.resolve("${uuid}.output").takeIf { config.log }?.outputStream())
                         .usingPort(port)
                         .build()
-                    val output = folder.resolve("${uuid}.output")
-                        .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
-                    service.sendOutputTo(output)
                     ChromeDriver(service, options).also { DriverCache[it] = service }
                 }
             }
@@ -248,11 +244,9 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                     val uuid = "geckodriver-${System.currentTimeMillis()}-${port}"
                     val service = GeckoDriverService.Builder()
                         .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
+                        .withLogOutput(folder.resolve("${uuid}.output").takeIf { config.log }?.outputStream())
                         .usingPort(port)
                         .build()
-                    val output = folder.resolve("${uuid}.output")
-                        .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
-                    service.sendOutputTo(output)
                     FirefoxDriver(service, options).also { DriverCache[it] = service }
                 }
             }
@@ -766,7 +760,7 @@ internal fun setupFirefox(folder: File, version: String): File {
                 try {
                     SevenZFile(pack).use { input ->
                         for (entry in input.entries) {
-                            if (entry.hasStream().not()) continue
+                            if (entry.isDirectory) continue
                             // println(entry.name)
                             val target = folder.resolve(entry.name)
                             target.parentFile.mkdirs()
