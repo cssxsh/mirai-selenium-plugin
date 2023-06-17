@@ -878,6 +878,7 @@ internal fun setupFirefox(folder: File, version: String): File {
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
 
+    binary.setExecutable(true)
     System.setProperty(FIREFOX_BROWSER_BINARY, binary.absolutePath)
 
     return binary
@@ -936,16 +937,20 @@ internal fun setupChromium(folder: File, version: String): File {
 
                 val pack = download(urlString = url, folder = folder, filename = url.substringAfterLast('/'))
 
-                SevenZFile(pack).use { input ->
-                    for (entry in input.entries) {
-                        if (entry.isDirectory) continue
-                        val target = setup.resolve(entry.name)
-                        target.parentFile.mkdirs()
-                        target.outputStream().use { output ->
-                            input.getInputStream(entry).copyTo(output)
+                try {
+                    SevenZFile(pack).use { input ->
+                        for (entry in input.entries) {
+                            if (entry.isDirectory) continue
+                            val target = setup.resolve(entry.name)
+                            target.parentFile.mkdirs()
+                            target.outputStream().use { output ->
+                                input.getInputStream(entry).copyTo(output)
+                            }
+                            target.setLastModified(entry.lastModifiedTime.toMillis())
                         }
-                        target.setLastModified(entry.lastModifiedTime.toMillis())
                     }
+                } catch (cause: Throwable) {
+                    throw RuntimeException("解压 $pack 失败", cause)
                 }
 
                 val unpack = pack.nameWithoutExtension
@@ -1026,6 +1031,7 @@ internal fun setupChromium(folder: File, version: String): File {
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
 
+    binary.setExecutable(true)
     System.setProperty(CHROME_BROWSER_BINARY, binary.absolutePath)
 
     return binary
