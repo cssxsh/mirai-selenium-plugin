@@ -948,20 +948,28 @@ internal fun setupChromium(folder: File, version: String): File {
                     .first { asset -> "Chromium" in asset.browserDownloadUrl }
                     .browserDownloadUrl
 
-                val zip = download(urlString = url, folder = folder, filename = url.substringAfterLast('/'))
+                val xz = download(urlString = url, folder = folder, filename = url.substringAfterLast('/'))
 
-                setup.mkdirs()
-                ZipFile(zip).use { input ->
-                    for (entry in input.entries()) {
-                        if (entry.isDirectory) continue
-                        val target = setup.resolve(entry.name)
-                        target.parentFile.mkdirs()
-                        target.outputStream().use { output ->
-                            input.getInputStream(entry).copyTo(output)
+                xz.inputStream()
+                    .buffered()
+                    .let(::XZCompressorInputStream)
+                    .let(::TarArchiveInputStream)
+                    .use { input ->
+                        while (true) {
+                            val entry = input.nextTarEntry ?: break
+                            if (entry.isFile.not()) continue
+                            if (input.canReadEntryData(entry).not()) continue
+                            val target = folder.resolve(entry.name)
+                            target.parentFile.mkdirs()
+                            target.outputStream().use { output ->
+                                input.copyTo(output)
+                            }
+                            target.setLastModified(entry.modTime.time)
                         }
-                        target.setLastModified(entry.lastModifiedTime.toMillis())
                     }
-                }
+
+                val unpack = xz.name.removeSuffix(".tar.xz")
+                check(folder.resolve(unpack).renameTo(setup)) { "重命名 $unpack 失败" }
             }
 
             setup.resolve("Chromium.app/Contents/MacOS/Chromium")
