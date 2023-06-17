@@ -98,7 +98,6 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
         SeleniumLogger.level = Level.OFF
         System.setProperty(CHROME_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/chromedriver")
         System.setProperty(FIREFOX_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/geckodriver")
-        System.setProperty(SEVEN7Z_MIRRORS, "https://downloads.sourceforge.net/sevenzip")
         System.setProperty(SELENIUM_FOLDER, dataFolder.resolve("selenium").absolutePath)
 
         if (System.getProperty("mirai.slider.captcha.supported").toBoolean()) {

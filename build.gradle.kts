@@ -29,6 +29,8 @@ repositories {
 dependencies {
     api("com.github.jknack:handlebars:4.3.1")
     api("org.seleniumhq.selenium:selenium-java:4.10.0")
+    implementation("org.apache.commons:commons-compress:1.23.0")
+    implementation("org.tukaani:xz:1.9")
     testImplementation(kotlin("test"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.7")
     //

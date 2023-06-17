@@ -2,6 +2,11 @@ package xyz.cssxsh.selenium
 
 import kotlinx.serialization.builtins.*
 import kotlinx.serialization.json.*
+import org.apache.commons.compress.archivers.sevenz.*
+import org.apache.commons.compress.archivers.tar.*
+import org.apache.commons.compress.compressors.bzip2.*
+import org.apache.commons.compress.compressors.gzip.*
+import org.apache.commons.compress.compressors.xz.*
 import org.asynchttpclient.DefaultAsyncHttpClientConfig
 import org.asynchttpclient.Dsl.asyncHttpClient
 import org.asynchttpclient.uri.Uri
@@ -15,7 +20,11 @@ import org.openqa.selenium.remote.*
 import java.io.*
 import java.lang.*
 import java.net.URLDecoder
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.charset.Charset
+import java.nio.file.Files
+import java.nio.file.StandardOpenOption
 import java.util.zip.*
 
 internal const val SELENIUM_FOLDER = "xyz.cssxsh.selenium.folder"
@@ -37,8 +46,6 @@ internal const val FIREFOX_DRIVER_MIRRORS = "webdriver.firefox.mirrors"
 internal const val EDGE_BROWSER_BINARY = "webdriver.edge.bin"
 
 internal const val FIREFOX_BROWSER_BINARY = FirefoxDriver.SystemProperty.BROWSER_BINARY
-
-internal const val SEVEN7Z_MIRRORS = "seven7z.mirrors"
 
 internal typealias RemoteWebDriverSupplier = (config: RemoteWebDriverConfig) -> RemoteWebDriver
 
@@ -242,7 +249,6 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                     val service = GeckoDriverService.Builder()
                         .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
                         .usingPort(port)
-                        .usingFirefoxBinary(options.binary)
                         .build()
                     val output = folder.resolve("${uuid}.output")
                         .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
@@ -537,13 +543,18 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
             }
             driver.setLastModified(entry.time)
         } else {
-            // XXX: tar.gz
-            ProcessBuilder("tar", "-xzf", file.absolutePath)
-                .directory(folder)
-                .start()
-                .waitFor()
-
-            check(folder.resolve("geckodriver").renameTo(driver)) { "重命名 geckodriver 失败" }
+            file.inputStream()
+                .buffered()
+                .let(::GzipCompressorInputStream)
+                .let(::TarArchiveInputStream)
+                .use { input ->
+                    val entry = input.currentEntry
+                    driver.parentFile.mkdirs()
+                    driver.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                    driver.setLastModified(entry.modTime.time)
+                }
         }
     }
     driver.setExecutable(true)
@@ -561,7 +572,6 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
             .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
             .usingDriverExecutable(driver)
             .usingPort(port)
-            .usingFirefoxBinary(options.binary)
             .build()
         val output = folder.resolve("${uuid}.output")
             .takeIf { config.log }?.outputStream() ?: OutputStream.nullOutputStream()
@@ -660,26 +670,6 @@ internal fun clearWebDriver(): List<File> {
 }
 
 /**
- * [Platform.WINDOWS] 安装 7za
- * @param folder 安装目录
- * @return binary
- */
-internal fun sevenZA(folder: File): File {
-    return folder.resolve("7za.exe").apply {
-        if (exists().not()) {
-            val base = System.getProperty(SEVEN7Z_MIRRORS, "https://www.7-zip.org/a")
-            val pack = download(urlString = "${base}/7za920.zip", folder = folder)
-            ZipFile(pack).use { file ->
-                val entry = file.getEntry("7za.exe")
-                setLastModified(entry.time)
-                writeBytes(file.getInputStream(entry).readAllBytes())
-            }
-            setExecutable(true)
-        }
-    }
-}
-
-/**
  * 安装 Firefox 浏览器
  * @param folder 安装目录
  * @param version 版本, 为空时下载 release-latest 版
@@ -711,13 +701,39 @@ internal fun setupFirefox(folder: File, version: String): File {
             }
 
             if (setup.exists().not()) {
-                // XXX: bcj2
-                ProcessBuilder(sevenZA(folder = folder).absolutePath, "x", exe.absolutePath, "-x!setup.exe", "-y")
-                    .directory(folder)
-                    .start()
-                    // 防止卡顿
-                    .apply { inputStream.transferTo(OutputStream.nullOutputStream()) }
-                    .waitFor()
+                // TODO: https://issues.apache.org/jira/browse/COMPRESS-431
+                // 37 7A BC AF 27 1C
+                // 0001_1200 - 0002_0251
+                // 0001_1D00 - 0002_C051
+
+                val channel = Files.newByteChannel(exe.toPath(), StandardOpenOption.READ)
+                channel.position(0x0002_C051 + 0x0C)
+                val (offset, size) = ByteBuffer.allocate(0x10).let { buffer ->
+                    channel.read(buffer)
+                    buffer.position(0)
+                    buffer.order(ByteOrder.LITTLE_ENDIAN)
+                    buffer.long to buffer.long
+                }
+                val end = 0x20 + offset + size + 1
+
+                val pack = folder.resolve(exe.nameWithoutExtension + ".7z")
+                val bytes = exe.inputStream().apply { skip(0x0002_C051) }
+                    .readNBytes(end.toInt())
+                pack.writeBytes(bytes)
+
+                SevenZFile(pack).use { input ->
+                    input.nextEntry
+                    for (entry in input.entries.reversed()) {
+                        if (entry.hasStream().not()) continue
+                        println(entry.name)
+                        val target = folder.resolve(entry.name)
+                        target.parentFile.mkdirs()
+                        target.outputStream().use { output ->
+                            input.getInputStream(entry).copyTo(output)
+                        }
+                        target.setLastModified(entry.lastModifiedTime.toMillis())
+                    }
+                }
 
                 check(folder.resolve("core").renameTo(setup)) { "重命名 core 失败" }
             }
@@ -744,11 +760,23 @@ internal fun setupFirefox(folder: File, version: String): File {
             }
 
             if (setup.exists().not()) {
-                // XXX: tar.bz2
-                ProcessBuilder("tar", "-xjf", bz2.absolutePath)
-                    .directory(folder)
-                    .start()
-                    .waitFor()
+                bz2.inputStream()
+                    .buffered()
+                    .let(::BZip2CompressorInputStream)
+                    .let(::TarArchiveInputStream)
+                    .use { input ->
+                        while (true) {
+                            val entry = input.nextTarEntry ?: break
+                            if (entry.isFile.not()) continue
+                            if (input.canReadEntryData(entry).not()) continue
+                            val target = folder.resolve(entry.name)
+                            target.parentFile.mkdirs()
+                            target.outputStream().use { output ->
+                                input.copyTo(output)
+                            }
+                            target.setLastModified(entry.modTime.time)
+                        }
+                    }
 
                 check(folder.resolve("firefox").renameTo(setup)) { "重命名 firefox 失败" }
             }
@@ -856,17 +884,20 @@ internal fun setupChromium(folder: File, version: String): File {
 
                 val pack = download(urlString = url, folder = folder, filename = url.substringAfterLast('/'))
 
-                // XXX: 7z
-                ProcessBuilder(sevenZA(folder = folder).absolutePath, "x", pack.absolutePath, "-y")
-                    .directory(folder)
-                    .start()
-                    // 防止卡顿
-                    .apply { inputStream.transferTo(OutputStream.nullOutputStream()) }
-                    .waitFor()
-
-                check(folder.resolve(pack.nameWithoutExtension).renameTo(setup)) {
-                    "重命名 ${pack.nameWithoutExtension} 失败"
+                SevenZFile(pack).use { input ->
+                    for (entry in input.entries) {
+                        if (entry.isDirectory) continue
+                        val target = setup.resolve(entry.name)
+                        target.parentFile.mkdirs()
+                        target.outputStream().use { output ->
+                            input.getInputStream(entry).copyTo(output)
+                        }
+                        target.setLastModified(entry.lastModifiedTime.toMillis())
+                    }
                 }
+
+                val unpack = pack.nameWithoutExtension
+                check(folder.resolve(unpack).renameTo(setup)) { "重命名 $unpack 失败" }
             }
 
             setup.resolve("chrome.exe")
@@ -883,11 +914,23 @@ internal fun setupChromium(folder: File, version: String): File {
 
                 val xz = download(urlString = url, folder = folder, filename = url.substringAfterLast('/'))
 
-                // XXX: tar.xz
-                ProcessBuilder("tar", "-xf", xz.absolutePath)
-                    .directory(folder)
-                    .start()
-                    .waitFor()
+                xz.inputStream()
+                    .buffered()
+                    .let(::XZCompressorInputStream)
+                    .let(::TarArchiveInputStream)
+                    .use { input ->
+                        while (true) {
+                            val entry = input.nextTarEntry ?: break
+                            if (entry.isFile.not()) continue
+                            if (input.canReadEntryData(entry).not()) continue
+                            val target = folder.resolve(entry.name)
+                            target.parentFile.mkdirs()
+                            target.outputStream().use { output ->
+                                input.copyTo(output)
+                            }
+                            target.setLastModified(entry.modTime.time)
+                        }
+                    }
 
                 val unpack = xz.name.removeSuffix(".tar.xz")
                 check(folder.resolve(unpack).renameTo(setup)) { "重命名 $unpack 失败" }
@@ -908,11 +951,17 @@ internal fun setupChromium(folder: File, version: String): File {
                 val zip = download(urlString = url, folder = folder, filename = url.substringAfterLast('/'))
 
                 setup.mkdirs()
-                // XXX: big zip
-                ProcessBuilder("unzip", "-o", "-q", zip.absolutePath)
-                    .directory(setup)
-                    .start()
-                    .waitFor()
+                ZipFile(zip).use { input ->
+                    for (entry in input.entries()) {
+                        if (entry.isDirectory) continue
+                        val target = setup.resolve(entry.name)
+                        target.parentFile.mkdirs()
+                        target.outputStream().use { output ->
+                            input.getInputStream(entry).copyTo(output)
+                        }
+                        target.setLastModified(entry.lastModifiedTime.toMillis())
+                    }
+                }
             }
 
             setup.resolve("Chromium.app/Contents/MacOS/Chromium")
