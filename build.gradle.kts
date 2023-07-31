@@ -1,8 +1,8 @@
 plugins {
-    kotlin("jvm") version "1.7.22"
-    kotlin("plugin.serialization") version "1.7.22"
+    kotlin("jvm") version "1.8.10"
+    kotlin("plugin.serialization") version "1.8.10"
 
-    id("net.mamoe.mirai-console") version "2.14.0"
+    id("net.mamoe.mirai-console") version "2.15.0"
     id("me.him188.maven-central-publish") version "1.0.0-dev-3"
     id("me.him188.kotlin-jvm-blocking-bridge") version "2.2.0-180.1"
 }
@@ -34,7 +34,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.7")
     //
-    implementation(platform("net.mamoe:mirai-bom:2.14.0"))
+    implementation(platform("net.mamoe:mirai-bom:2.15.0"))
     testImplementation("net.mamoe:mirai-logging-slf4j")
     testImplementation("net.mamoe:mirai-console-compiler-common")
     //
@@ -43,7 +43,7 @@ dependencies {
     testImplementation("org.slf4j:jcl-over-slf4j:2.0.7")
     testImplementation("org.slf4j:jul-to-slf4j:2.0.7")
     //
-    implementation(platform("io.netty:netty-bom:4.1.93.Final"))
+    implementation(platform("io.netty:netty-bom:4.1.96.Final"))
 }
 
 kotlin {
