@@ -27,25 +27,35 @@ import java.nio.file.Files
 import java.nio.file.StandardOpenOption
 import java.util.zip.*
 
-internal const val SELENIUM_FOLDER = "xyz.cssxsh.selenium.folder"
+@PublishedApi
+internal const val SELENIUM_FOLDER: String = "xyz.cssxsh.selenium.folder"
 
-internal const val SELENIUM_DOWNLOAD_EXPIRES = "xyz.cssxsh.selenium.download.expires"
+@PublishedApi
+internal const val SELENIUM_DOWNLOAD_EXPIRES: String = "xyz.cssxsh.selenium.download.expires"
 
-internal const val SELENIUM_DEFAULT_PORT = 9515
+@PublishedApi
+internal const val SELENIUM_DEFAULT_PORT: Int = 9515
 
-internal const val WEBDRIVER_HTTP_FACTORY = "webdriver.http.factory"
+@PublishedApi
+internal const val WEBDRIVER_HTTP_FACTORY: String = "webdriver.http.factory"
 
-internal const val CHROME_BROWSER_BINARY = "webdriver.chrome.bin"
+@PublishedApi
+internal const val CHROME_BROWSER_BINARY: String = "webdriver.chrome.bin"
 
-internal const val CHROME_DRIVER_MIRRORS = "webdriver.chrome.mirrors"
+@PublishedApi
+internal const val CHROME_DRIVER_MIRRORS: String = "webdriver.chrome.mirrors"
 
-internal const val CHROME_DRIVER_VERSION = "webdriver.chrome.version"
+@PublishedApi
+internal const val CHROME_DRIVER_VERSION: String = "webdriver.chrome.version"
 
-internal const val FIREFOX_DRIVER_MIRRORS = "webdriver.firefox.mirrors"
+@PublishedApi
+internal const val FIREFOX_DRIVER_MIRRORS: String = "webdriver.firefox.mirrors"
 
-internal const val EDGE_BROWSER_BINARY = "webdriver.edge.bin"
+@PublishedApi
+internal const val EDGE_BROWSER_BINARY: String = "webdriver.edge.bin"
 
-internal const val FIREFOX_BROWSER_BINARY = FirefoxDriver.SystemProperty.BROWSER_BINARY
+@PublishedApi
+internal const val FIREFOX_BROWSER_BINARY: String = FirefoxDriver.SystemProperty.BROWSER_BINARY
 
 internal typealias RemoteWebDriverSupplier = (config: RemoteWebDriverConfig) -> RemoteWebDriver
 

@@ -80,23 +80,23 @@ internal fun RemoteWebDriver.getHttpClientFactory(): HttpClient.Factory? {
         .apply { isAccessible = true }.get(executor) as? HttpClient.Factory
 }
 
-internal const val SELENIUM_TIMEOUT_INIT = "xyz.cssxsh.selenium.timeout.init"
+@PublishedApi
+internal const val SELENIUM_TIMEOUT_INIT: String = "xyz.cssxsh.selenium.timeout.init"
 
-internal const val SELENIUM_TIMEOUT_PAGE = "xyz.cssxsh.selenium.timeout.page"
+@PublishedApi
+internal const val SELENIUM_TIMEOUT_PAGE: String = "xyz.cssxsh.selenium.timeout.page"
 
-internal const val SELENIUM_TIMEOUT_INTERVAL = "xyz.cssxsh.selenium.timeout.interval"
+@PublishedApi
+internal const val SELENIUM_TIMEOUT_INTERVAL: String = "xyz.cssxsh.selenium.timeout.interval"
 
-private val Init: Duration by lazy {
-    Duration.ofMillis(System.getProperty(SELENIUM_TIMEOUT_INIT, "10000").toLong())
-}
+private val init: Duration
+    get() = Duration.ofMillis(System.getProperty(SELENIUM_TIMEOUT_INIT, "10000").toLong())
 
-private val PageLoad: Duration by lazy {
-    Duration.ofMillis(System.getProperty(SELENIUM_TIMEOUT_PAGE, "180000").toLong())
-}
+private val load: Duration
+    get() = Duration.ofMillis(System.getProperty(SELENIUM_TIMEOUT_PAGE, "180000").toLong())
 
-private val Interval: Duration by lazy {
-    Duration.ofMillis(System.getProperty(SELENIUM_TIMEOUT_INTERVAL, "10000").toLong())
-}
+private val interval: Duration
+    get() = Duration.ofMillis(System.getProperty(SELENIUM_TIMEOUT_INTERVAL, "10000").toLong())
 
 /**
  * 创建一个 RemoteWebDriver
@@ -200,11 +200,11 @@ public suspend fun RemoteWebDriver.getScreenshot(url: String, vararg hide: Strin
     val tab = switchTo().newWindow(WindowType.TAB) as RemoteWebDriver
 
     try {
-        withTimeout(PageLoad.toMillis()) {
+        withTimeout(load.toMillis()) {
             tab.get(url)
-            delay(Init.toMillis())
+            delay(init.toMillis())
             while (!isReady()) {
-                delay(Interval.toMillis())
+                delay(interval.toMillis())
             }
         }
     } catch (_: TimeoutCancellationException) {
