@@ -92,7 +92,7 @@ internal fun queryRegister(key: String): String {
  */
 internal fun queryVersion(folder: File): String {
     // XXX: get version by folder
-    val regex = """^[\d.]+""".toRegex()
+    val regex = """\d+.\d+.\d+.\d+""".toRegex()
     return folder.list()?.reversed()?.firstNotNullOf { regex.find(it)?.value }
         ?: throw UnsupportedOperationException("无法在 ${folder.absolutePath} 找到版本信息")
 }
@@ -389,13 +389,13 @@ internal fun fetchChromeDriver(folder: File, version: String): RemoteWebDriverSu
     val file = download(
         urlString = download.url,
         folder = folder,
-        filename = "chromedriver-${platform}_${version}.zip"
+        filename = "chromedriver-${platform}_${target.version}.zip"
     )
 
     val driver = if (Platform.getCurrent().`is`(Platform.WINDOWS)) {
-        folder.resolve("chromedriver-${platform}_${version}.exe")
+        folder.resolve("chromedriver-${platform}_${target.version}.exe")
     } else {
-        folder.resolve("chromedriver-${platform}_${version}")
+        folder.resolve("chromedriver-${platform}_${target.version}")
     }
     if (driver.exists().not()) {
         ZipFile(file).use { zip ->
@@ -412,6 +412,8 @@ internal fun fetchChromeDriver(folder: File, version: String): RemoteWebDriverSu
     return { config ->
         val options = ChromeOptions().also(config.toConsumer())
         if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+        val binary = File(System.getProperty(CHROME_BROWSER_BINARY, "chrome.exe"))
+        if (binary.exists()) options.setBinary(binary)
         val port = try {
             PortProber.findFreePort()
         } catch (_: RuntimeException) {
@@ -1029,17 +1031,17 @@ internal fun setupChrome(folder: File, version: String): File {
         setup.resolve("chrome")
     }
 
-    if (binary.exists()) return binary
-
-    ZipFile(file).use { zip ->
-        for (entry in zip.entries()) {
-            if (entry.isDirectory) continue
-            val item = folder.resolve(entry.name)
-            item.parentFile.mkdirs()
-            Files.copy(zip.getInputStream(entry), item.toPath(), StandardCopyOption.REPLACE_EXISTING)
+    if (binary.exists().not()) {
+        ZipFile(file).use { zip ->
+            for (entry in zip.entries()) {
+                if (entry.isDirectory) continue
+                val item = folder.resolve(entry.name)
+                item.parentFile.mkdirs()
+                Files.copy(zip.getInputStream(entry), item.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            }
         }
+        folder.resolve("chrome-${platform}").renameTo(setup)
     }
-    folder.resolve("chrome-${platform}").renameTo(setup)
 
     binary.setExecutable(true)
     System.setProperty(CHROME_BROWSER_BINARY, binary.absolutePath)
