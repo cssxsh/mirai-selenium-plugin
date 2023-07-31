@@ -24,7 +24,9 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.Charset
 import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
+import java.time.LocalDate
 import java.util.zip.*
 
 @PublishedApi
@@ -44,6 +46,9 @@ internal const val CHROME_BROWSER_BINARY: String = "webdriver.chrome.bin"
 
 @PublishedApi
 internal const val CHROME_DRIVER_MIRRORS: String = "webdriver.chrome.mirrors"
+
+@PublishedApi
+internal const val CHROME_DRIVER_VERSIONS: String = "webdriver.chrome.versions"
 
 @PublishedApi
 internal const val CHROME_DRIVER_VERSION: String = "webdriver.chrome.version"
@@ -136,7 +141,8 @@ internal fun download(urlString: String, folder: File, filename: String? = null)
             .let { value -> URLDecoder.decode(value, Charset.defaultCharset()) }
 
     val file = folder.resolve(relative)
-    file.writeBytes(response.responseBodyAsBytes)
+
+    Files.copy(response.responseBodyAsStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING)
 
     return file
 }
@@ -312,12 +318,13 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
 
     val driver = folder.resolve("${file.nameWithoutExtension}.exe")
     if (driver.exists().not()) {
-        val zip = ZipFile(file)
-        val entry = zip.getEntry("msedgedriver.exe")
-        zip.getInputStream(entry).use { input ->
-            driver.writeBytes(input.readAllBytes())
+        ZipFile(file).use { zip ->
+            val entry = zip.getEntry("msedgedriver.exe")
+            zip.getInputStream(entry).use { input ->
+                Files.copy(input, driver.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            }
+            driver.setLastModified(entry.time)
         }
-        driver.setLastModified(entry.time)
     }
     driver.setExecutable(true)
 
@@ -338,6 +345,87 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
             .usingPort(port)
             .build()
         EdgeDriver(service, options).also { DriverCache[it] = service }
+    }
+}
+
+@PublishedApi
+internal fun fetchChromeVersion(folder: File, version: String): ChromeVersion {
+    val url = System.getProperty(CHROME_DRIVER_VERSIONS, "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json")
+    val file = download(urlString = url, folder = folder, filename = "chrome_versions_${LocalDate.now()}.json")
+    val data = IgnoreJson.decodeFromString(ChromeVersions.serializer(), file.readText())
+
+    return data.versions.findLast { it.version == version }
+        ?: data.versions.findLast { it.version.startsWith(version.substringBeforeLast(".")) }
+        ?: data.versions.last()
+}
+
+@PublishedApi
+internal fun fetchChromeDriver(folder: File, version: String): RemoteWebDriverSupplier? {
+    val target = fetchChromeVersion(folder = folder, version = version)
+    val arch = System.getProperty("os.arch")
+    val platform = Platform.getCurrent().let {
+        when {
+            it.`is`(Platform.WINDOWS) -> "win64"
+            it.`is`(Platform.LINUX) -> {
+                if ("aarch64" in arch) {
+                    throw UnsupportedOperationException("ChromeDriver 官方下载没有 ARM64 版本，你需要手动安装，并设置 ${ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY}")
+                } else {
+                    "linux64"
+                }
+            }
+            it.`is`(Platform.MAC) -> {
+                if ("aarch64" in arch) {
+                    "mac-arm64"
+                } else {
+                    "mac-x64"
+                }
+            }
+            else -> throw UnsupportedOperationException("不受支持的平台 $it")
+        }
+    }
+
+    val download = target.downloads.chromedriver.find { it.platform == platform } ?: return null
+
+    val file = download(
+        urlString = download.url,
+        folder = folder,
+        filename = "chromedriver-${platform}_${version}.zip"
+    )
+
+    val driver = if (Platform.getCurrent().`is`(Platform.WINDOWS)) {
+        folder.resolve("chromedriver-${platform}_${version}.exe")
+    } else {
+        folder.resolve("chromedriver-${platform}_${version}")
+    }
+    if (driver.exists().not()) {
+        ZipFile(file).use { zip ->
+            val entry = zip.getEntry("chromedriver-${platform}/chromedriver.exe")
+                ?: zip.getEntry("chromedriver-${platform}/chromedriver")
+            zip.getInputStream(entry).use { input ->
+                Files.copy(input, driver.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            }
+            driver.setLastModified(entry.time)
+        }
+    }
+    driver.setExecutable(true)
+
+    return { config ->
+        val options = ChromeOptions().also(config.toConsumer())
+        if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+        val port = try {
+            PortProber.findFreePort()
+        } catch (_: RuntimeException) {
+            SELENIUM_DEFAULT_PORT
+        }
+        val uuid = "chromedriver-${System.currentTimeMillis()}-${port}"
+        val service = ChromeDriverService.Builder()
+            .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
+            .withLogOutput(folder.resolve("${uuid}.output").takeIf { config.log }?.outputStream())
+            .withAppendLog(config.log)
+            .usingDriverExecutable(driver)
+            .usingPort(port)
+            .build()
+        ChromeDriver(service, options).also { DriverCache[it] = service }
     }
 }
 
@@ -389,6 +477,10 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
         throw UnsupportedOperationException("Chrome/Chromium 版本获取失败", cause)
     }
     System.setProperty(CHROME_DRIVER_VERSION, version0.substringBefore('.'))
+
+    val supplier = fetchChromeDriver(folder = folder, version = version0)
+    if (supplier != null) return supplier
+
     // MIRRORS "https://npm.taobao.org/mirrors/chromedriver"
     val base = System.getProperty(CHROME_DRIVER_MIRRORS, "https://chromedriver.storage.googleapis.com")
 
@@ -449,12 +541,13 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
         folder.resolve("chromedriver-${version}_${suffix}")
     }
     if (driver.exists().not()) {
-        val zip = ZipFile(file)
-        val entry = zip.entries().nextElement()
-        zip.getInputStream(entry).use { input ->
-            driver.writeBytes(input.readAllBytes())
+        ZipFile(file).use { zip ->
+            val entry = zip.getEntry("chromedriver.exe") ?: zip.getEntry("chromedriver")
+            zip.getInputStream(entry).use { input ->
+                Files.copy(input, driver.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            }
+            driver.setLastModified(entry.time)
         }
-        driver.setLastModified(entry.time)
     }
     driver.setExecutable(true)
 
@@ -544,12 +637,13 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     }
     if (driver.exists().not()) {
         if (file.extension == "zip") {
-            val zip = ZipFile(file)
-            val entry = zip.entries().nextElement()
-            zip.getInputStream(entry).use { input ->
-                driver.writeBytes(input.readAllBytes())
+            ZipFile(file).use { zip ->
+                val entry = zip.entries().nextElement()
+                zip.getInputStream(entry).use { input ->
+                    Files.copy(input, driver.toPath(), StandardCopyOption.REPLACE_EXISTING)
+                }
+                driver.setLastModified(entry.time)
             }
-            driver.setLastModified(entry.time)
         } else {
             file.inputStream()
                 .buffered()
@@ -882,6 +976,73 @@ internal fun setupFirefox(folder: File, version: String): File {
 
     binary.setExecutable(true)
     System.setProperty(FIREFOX_BROWSER_BINARY, binary.absolutePath)
+
+    return binary
+}
+
+/**
+ * 安装 Google Chrome 浏览器
+ * @param folder 安装目录
+ * @param version 版本, 为空时下载 snapshots-latest 版
+ * @return binary
+ * @see CHROME_BROWSER_BINARY
+ */
+@PublishedApi
+internal fun setupChrome(folder: File, version: String): File {
+    folder.mkdirs()
+    val arch = System.getProperty("os.arch")
+    val platform = Platform.getCurrent().let {
+        when {
+            it.`is`(Platform.WINDOWS) -> "win64"
+            it.`is`(Platform.LINUX) -> {
+                if ("aarch64" in arch) {
+                    throw UnsupportedOperationException("Chrome 官方下载没有 ARM64 版本，你需要手动安装，并设置 ${ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY}")
+                } else {
+                    "linux64"
+                }
+            }
+            it.`is`(Platform.MAC) -> {
+                if ("aarch64" in arch) {
+                    "mac-arm64"
+                } else {
+                    "mac-x64"
+                }
+            }
+            else -> throw UnsupportedOperationException("不受支持的平台 $it")
+        }
+    }
+
+    val target = fetchChromeVersion(folder = folder, version = version)
+    val download = target.downloads.chrome.find { it.platform == platform }
+        ?: throw UnsupportedOperationException("Chrome 官方下载没有 ${platform}-${version}")
+
+    val file = download(
+        urlString = download.url,
+        folder = folder,
+        filename = "chrome-${platform}_${target.version}.zip"
+    )
+
+    val setup = folder.resolve("chrome-${platform}_${target.version}")
+    val binary = if (Platform.getCurrent().`is`(Platform.WINDOWS)) {
+        setup.resolve("chrome.exe")
+    } else {
+        setup.resolve("chrome")
+    }
+
+    if (binary.exists()) return binary
+
+    ZipFile(file).use { zip ->
+        for (entry in zip.entries()) {
+            if (entry.isDirectory) continue
+            val item = folder.resolve(entry.name)
+            item.parentFile.mkdirs()
+            Files.copy(zip.getInputStream(entry), item.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        }
+    }
+    folder.resolve("chrome-${platform}").renameTo(setup)
+
+    binary.setExecutable(true)
+    System.setProperty(CHROME_BROWSER_BINARY, binary.absolutePath)
 
     return binary
 }
