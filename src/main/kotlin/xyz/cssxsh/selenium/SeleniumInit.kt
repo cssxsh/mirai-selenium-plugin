@@ -150,6 +150,7 @@ internal fun download(urlString: String, folder: File, filename: String? = null)
  * @see setupFirefoxDriver
  * @see org.openqa.selenium.remote.http.HttpClient.Factory.createDefault
  */
+@PublishedApi
 internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
     val folder = File(System.getProperty(SELENIUM_FOLDER, "."))
     folder.mkdirs()
@@ -273,6 +274,7 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
  * @see EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY
  * @see WEBDRIVER_HTTP_FACTORY
  */
+@PublishedApi
 internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
     if (Platform.getCurrent().`is`(Platform.WINDOWS).not()) {
         throw UnsupportedOperationException("Edge only supported Windows/Edge")
@@ -350,6 +352,7 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
  * @see ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY
  * @see WEBDRIVER_HTTP_FACTORY
  */
+@PublishedApi
 internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriverSupplier {
     // 取版本
     val platform = Platform.getCurrent()
@@ -484,6 +487,7 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
  * @see FirefoxBinary
  * @see FIREFOX_BROWSER_BINARY
  */
+@PublishedApi
 internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     // 取版本
     val platform = Platform.getCurrent()
@@ -680,6 +684,7 @@ internal fun clearWebDriver(): List<File> {
  * @see FirefoxBinary
  * @see FIREFOX_BROWSER_BINARY
  */
+@PublishedApi
 internal fun setupFirefox(folder: File, version: String): File {
     folder.mkdirs()
     val platform = Platform.getCurrent()
@@ -888,6 +893,7 @@ internal fun setupFirefox(folder: File, version: String): File {
  * @return binary
  * @see CHROME_BROWSER_BINARY
  */
+@PublishedApi
 internal fun setupChromium(folder: File, version: String): File {
     folder.mkdirs()
     val platform = Platform.getCurrent()
