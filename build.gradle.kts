@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "xyz.cssxsh.mirai"
-version = "2.4.0"
+version = "2.5.0"
 
 mavenCentralPublish {
     useCentralS01()
@@ -24,6 +24,7 @@ mavenCentralPublish {
 repositories {
     mavenLocal()
     mavenCentral()
+    maven("https://repo.mirai.mamoe.net/snapshots")
 }
 
 dependencies {
@@ -34,7 +35,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.7")
     //
-    implementation(platform("net.mamoe:mirai-bom:2.15.0"))
+    implementation(platform("net.mamoe:mirai-bom:2.15.0-dev-120"))
     testImplementation("net.mamoe:mirai-logging-slf4j")
     testImplementation("net.mamoe:mirai-console-compiler-common")
     //
@@ -52,6 +53,8 @@ kotlin {
 
 mirai {
     jvmTarget = JavaVersion.VERSION_11
+    coreVersion = "2.15.0-dev-120"
+    consoleVersion = "2.15.0-dev-120"
 }
 
 tasks {
