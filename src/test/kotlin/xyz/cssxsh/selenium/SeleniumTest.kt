@@ -58,7 +58,7 @@ internal abstract class SeleniumTest {
                     GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY,
                     System.getenv("GECKOWEBDRIVER") + "/geckodriver"
                 )
-                listOf("Edge", "Chromium", "Firefox")
+                listOf("Chromium", "Firefox")
             }
             platform.`is`(Platform.MAC) -> {
                 System.setProperty(
