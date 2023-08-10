@@ -3,6 +3,7 @@ package xyz.cssxsh.mirai.test
 import kotlinx.coroutines.*
 import net.mamoe.mirai.console.plugin.jvm.*
 import net.mamoe.mirai.utils.*
+import org.openqa.selenium.OutputType
 import org.openqa.selenium.remote.*
 import xyz.cssxsh.mirai.selenium.*
 import xyz.cssxsh.mirai.selenium.data.*
@@ -131,8 +132,7 @@ internal class MiraiSeleniumPluginTest :
                       ]
                     }
                 """.trimIndent()
-                val content = driver.echarts(meta = EChartsMeta(option = option))
-                val (type, bytes) = data(url = content)
+                val content = driver.echartsAs(meta = EChartsMeta(option = option), outputType = OutputType.FILE)
             }
         }
     }
