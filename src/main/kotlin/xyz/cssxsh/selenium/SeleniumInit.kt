@@ -119,7 +119,7 @@ internal fun download(urlString: String, folder: File, filename: String? = null)
         DefaultAsyncHttpClientConfig.Builder()
             .setFollowRedirect(true)
             .setUserAgent("curl/7.61.0")
-            .setRequestTimeout(30_000)
+            .setRequestTimeout(90_000)
             .setConnectTimeout(30_000)
             .setReadTimeout(180_000)
     )
@@ -129,7 +129,11 @@ internal fun download(urlString: String, folder: File, filename: String? = null)
                 addHeader("Authorization", token)
             }
         }
-        execute().get()
+        try {
+            execute().get()
+        } catch (cause: Throwable) {
+            throw IOException("download $urlString ", cause)
+        }
     }
 
     if (response.statusCode != 200) throw IllegalStateException("status ${response.statusCode} download $urlString ")
