@@ -35,7 +35,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.7")
     //
-    implementation(platform("net.mamoe:mirai-bom:2.15.0"))
+    implementation(platform("net.mamoe:mirai-bom:2.16.0-dev-133"))
     testImplementation("net.mamoe:mirai-logging-slf4j")
     testImplementation("net.mamoe:mirai-console-compiler-common")
     //
@@ -53,6 +53,8 @@ kotlin {
 
 mirai {
     jvmTarget = JavaVersion.VERSION_11
+    coreVersion = "2.16.0-dev-133"
+    consoleVersion = "2.16.0-dev-133"
     if (System.getenv("CI").toBoolean()) {
         useTestConsoleFrontEnd = null
     }
