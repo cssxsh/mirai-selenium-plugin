@@ -35,7 +35,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.7")
     //
-    implementation(platform("net.mamoe:mirai-bom:2.15.0-dev-120"))
+    implementation(platform("net.mamoe:mirai-bom:2.15.0"))
     testImplementation("net.mamoe:mirai-logging-slf4j")
     testImplementation("net.mamoe:mirai-console-compiler-common")
     //
