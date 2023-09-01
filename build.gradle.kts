@@ -53,8 +53,6 @@ kotlin {
 
 mirai {
     jvmTarget = JavaVersion.VERSION_11
-    coreVersion = "2.15.0-dev-120"
-    consoleVersion = "2.15.0-dev-120"
     if (System.getenv("CI").toBoolean()) {
         useTestConsoleFrontEnd = null
     }
