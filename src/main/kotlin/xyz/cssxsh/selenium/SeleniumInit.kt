@@ -343,6 +343,7 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
         }
         val uuid = "msedgedriver-${System.currentTimeMillis()}-${port}"
         val service = EdgeDriverService.Builder()
+            .withBuildCheckDisabled(true)
             .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
             .withLogOutput(folder.resolve("${uuid}.output").takeIf { config.log }?.outputStream())
             .usingDriverExecutable(driver)
@@ -568,6 +569,7 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
         }
         val uuid = "chromedriver-${System.currentTimeMillis()}-${port}"
         val service = ChromeDriverService.Builder()
+            .withBuildCheckDisabled(true)
             .withAppendLog(config.log)
             .withLogFile(folder.resolve("${uuid}.log").takeIf { config.log })
             .withLogOutput(folder.resolve("${uuid}.output").takeIf { config.log }?.outputStream())
