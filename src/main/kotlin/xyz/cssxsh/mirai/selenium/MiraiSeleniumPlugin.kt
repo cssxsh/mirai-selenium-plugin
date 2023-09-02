@@ -94,6 +94,14 @@ public object MiraiSeleniumPlugin : KotlinPlugin(
     @JvmOverloads
     public fun chromium(version: String = ""): File = setupChromium(folder = dataFolder, version = version)
 
+    /**
+     * 下载解压 chrome
+     * @param version 浏览器版本
+     * @see setupChrome
+     */
+    @JvmOverloads
+    public fun chrome(version: String = ""): File = setupChrome(folder = dataFolder, version = version)
+
     override fun PluginComponentStorage.onLoad() {
         SeleniumLogger.level = Level.OFF
         System.setProperty(CHROME_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/chromedriver")

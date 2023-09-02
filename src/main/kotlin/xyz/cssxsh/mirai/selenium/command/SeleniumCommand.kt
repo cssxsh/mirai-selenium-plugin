@@ -124,6 +124,25 @@ public object SeleniumCommand : CompositeCommand(
     }
 
     /**
+     * 安装 chrome
+     * @param version 版本
+     */
+    @SubCommand
+    @Description("下载解压 chrome")
+    public suspend fun CommandSender.chrome(version: String = "") {
+        sendMessage("下载 chrome 开始, version: ${version.ifBlank { "latest" }}")
+        try {
+            val binary = MiraiSeleniumPlugin.chrome(version = version)
+            sendMessage("下载结束，binary: ${binary.absolutePath}")
+        } catch (cause: IOException) {
+            logger.warning("下载 chrome 异常", cause)
+            sendMessage("下载 chrome 异常")
+        } finally {
+            MiraiBrowserConfig.chrome = System.getProperty(CHROME_BROWSER_BINARY).orEmpty()
+        }
+    }
+
+    /**
      * 测试 图表绘制功能
      */
     @SubCommand
