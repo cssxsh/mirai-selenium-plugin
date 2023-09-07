@@ -57,6 +57,7 @@ mirai {
 *   `/selenium status` 驱动进程状态
 *   `/selenium firefox` 下载解压 firefox
 *   `/selenium chromium` 下载解压 chromium
+*   `/selenium chrome` 下载解压 chrome
 *   `/selenium chart` 测试 图表绘制功能，将以群员入群事件和发言时间为数据集
 
 ## 配置

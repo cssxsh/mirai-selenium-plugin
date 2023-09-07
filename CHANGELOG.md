@@ -1,6 +1,12 @@
-# 2.5.0 (23/08/..)
+# 2.5.1（23/09/08)
+
+1. feat: setup chrome command
+
+# 2.5.0 (23/08/12)
 
 1.  update: mirai 2.15
+2.  feat: fetchChromeVersion
+3.  fix: setupChrome
 
 # 2.4.0 (23/06/18)
 
