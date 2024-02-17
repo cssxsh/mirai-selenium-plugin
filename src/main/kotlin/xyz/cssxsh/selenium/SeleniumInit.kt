@@ -488,7 +488,7 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
     val supplier = fetchChromeDriver(folder = folder, version = version0)
     if (supplier != null) return supplier
 
-    // MIRRORS "https://npm.taobao.org/mirrors/chromedriver"
+    // MIRRORS "https://npmmirror.com/mirrors/chromedriver"
     val base = System.getProperty(CHROME_DRIVER_MIRRORS, "https://chromedriver.storage.googleapis.com")
 
     // 映射
@@ -630,7 +630,7 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
         }
         else -> throw UnsupportedOperationException("不受支持的平台 $platform")
     }
-    // https://npm.taobao.org/mirrors/geckodriver/
+    // https://npmmirror.com/mirrors/geckodriver/
     val base = System.getProperty(FIREFOX_DRIVER_MIRRORS, "https://github.com/mozilla/geckodriver/releases/download")
     val file = download(
         urlString = "$base/$version/$filename",

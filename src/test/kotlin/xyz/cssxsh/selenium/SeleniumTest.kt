@@ -19,8 +19,8 @@ internal abstract class SeleniumTest {
 
     init {
         System.setProperty(SELENIUM_FOLDER, folder.resolve("selenium").apply { mkdirs() }.absolutePath)
-        System.setProperty(CHROME_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/chromedriver")
-        System.setProperty(FIREFOX_DRIVER_MIRRORS, "https://npm.taobao.org/mirrors/geckodriver")
+        System.setProperty(CHROME_DRIVER_MIRRORS, "https://npmmirror.com/mirrors/chromedriver")
+        System.setProperty(FIREFOX_DRIVER_MIRRORS, "https://npmmirror.com/mirrors/geckodriver")
         // System.setProperty("selenium.webdriver.verbose", "true")
         org.slf4j.bridge.SLF4JBridgeHandler.removeHandlersForRootLogger()
         org.slf4j.bridge.SLF4JBridgeHandler.install()
