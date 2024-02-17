@@ -210,7 +210,12 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                 setupEdgeDriver(folder = folder)
             } else {
                 { config ->
-                    if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+                    try {
+                        org.openqa.selenium.remote.http.HttpClient.Factory.create(config.factory)
+                        System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+                    } catch (_: Throwable) {
+                        //
+                    }
                     val options = EdgeOptions().also(config.toConsumer())
                     val port = try {
                         PortProber.findFreePort()
@@ -232,7 +237,12 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                 setupChromeDriver(folder = folder, chromium = browser.contains(other = "Chromium", ignoreCase = true))
             } else {
                 { config ->
-                    if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+                    try {
+                        org.openqa.selenium.remote.http.HttpClient.Factory.create(config.factory)
+                        System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+                    } catch (_: Throwable) {
+                        // ignore
+                    }
                     val options = ChromeOptions().also(config.toConsumer())
                     val port = try {
                         PortProber.findFreePort()
@@ -255,7 +265,12 @@ internal fun setupWebDriver(browser: String = ""): RemoteWebDriverSupplier {
                 setupFirefoxDriver(folder = folder)
             } else {
                 { config ->
-                    if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+                    try {
+                        org.openqa.selenium.remote.http.HttpClient.Factory.create(config.factory)
+                        System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+                    } catch (_: Throwable) {
+                        // ignore
+                    }
                     val options = FirefoxOptions().also(config.toConsumer())
                     val port = try {
                         PortProber.findFreePort()
@@ -333,7 +348,12 @@ internal fun setupEdgeDriver(folder: File): RemoteWebDriverSupplier {
     driver.setExecutable(true)
 
     return { config ->
-        if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+        try {
+            org.openqa.selenium.remote.http.HttpClient.Factory.create(config.factory)
+            System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+        } catch (_: Throwable) {
+            // ignore
+        }
         val options = EdgeOptions().also(config.toConsumer())
         if (binary.exists()) options.setBinary(binary)
         val port = try {
@@ -416,7 +436,12 @@ internal fun fetchChromeDriver(folder: File, version: String): RemoteWebDriverSu
 
     return { config ->
         val options = ChromeOptions().also(config.toConsumer())
-        if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+        try {
+            org.openqa.selenium.remote.http.HttpClient.Factory.create(config.factory)
+            System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+        } catch (_: Throwable) {
+            // ignore
+        }
         val binary = File(System.getProperty(CHROME_BROWSER_BINARY, "chrome.exe"))
         if (binary.exists()) options.setBinary(binary)
         val port = try {
@@ -559,7 +584,12 @@ internal fun setupChromeDriver(folder: File, chromium: Boolean): RemoteWebDriver
     driver.setExecutable(true)
 
     return { config ->
-        if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+        try {
+            org.openqa.selenium.remote.http.HttpClient.Factory.create(config.factory)
+            System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+        } catch (_: Throwable) {
+            // ignore
+        }
         val options = ChromeOptions().also(config.toConsumer())
         if (binary.exists()) options.setBinary(binary)
         val port = try {
@@ -670,7 +700,12 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
     driver.setExecutable(true)
 
     return { config ->
-        if (config.factory.isNotBlank()) System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+        try {
+            org.openqa.selenium.remote.http.HttpClient.Factory.create(config.factory)
+            System.setProperty(WEBDRIVER_HTTP_FACTORY, config.factory)
+        } catch (_: Throwable) {
+            // ignore
+        }
         val options = FirefoxOptions().also(config.toConsumer())
         if (binary.exists()) options.setBinary(binary.toPath())
         val port = try {

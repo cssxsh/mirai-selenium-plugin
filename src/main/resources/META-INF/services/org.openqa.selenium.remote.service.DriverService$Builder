@@ -2,6 +2,5 @@ org.openqa.selenium.chrome.ChromeDriverService$Builder
 org.openqa.selenium.edge.EdgeDriverService$Builder
 org.openqa.selenium.firefox.GeckoDriverService$Builder
 org.openqa.selenium.ie.InternetExplorerDriverService$Builder
-org.openqa.selenium.opera.OperaDriverService$Builder
 org.openqa.selenium.safari.SafariDriverService$Builder
 org.openqa.selenium.safari.SafariTechPreviewDriverService$Builder

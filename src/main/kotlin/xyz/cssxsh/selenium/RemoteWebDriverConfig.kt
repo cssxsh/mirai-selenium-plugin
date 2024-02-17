@@ -58,9 +58,9 @@ public interface RemoteWebDriverConfig {
     public val browser: String get() = ""
 
     /**
-     * Selenium HttpClientFactory，可选值: netty
+     * Selenium HttpClientFactory，可选值: jdk-http-client
      */
-    public val factory: String get() = "netty"
+    public val factory: String get() = ""
 
     /**
      * 浏览器启动参数

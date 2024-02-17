@@ -24,6 +24,7 @@ internal abstract class SeleniumTest {
         // System.setProperty("selenium.webdriver.verbose", "true")
         org.slf4j.bridge.SLF4JBridgeHandler.removeHandlersForRootLogger()
         org.slf4j.bridge.SLF4JBridgeHandler.install()
+        org.openqa.selenium.remote.http.HttpClient.Factory.createDefault()
     }
 
     protected val browsers by lazy {
