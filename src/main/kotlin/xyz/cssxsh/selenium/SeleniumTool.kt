@@ -23,12 +23,10 @@ import java.util.logging.*
  * @see org.openqa.selenium.devtools.CdpEndpointFinder
  * @see org.openqa.selenium.devtools.Connection
  * @see org.openqa.selenium.devtools.idealized.Network
- * @see org.openqa.selenium.remote.ErrorCodes
  * @see org.openqa.selenium.remote.ProtocolHandshake
  * @see org.openqa.selenium.remote.RemoteLogs
  * @see org.openqa.selenium.remote.RemoteWebDriver
  * @see org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec
- * @see org.openqa.selenium.remote.http.netty.NettyWebSocket
  * @see org.openqa.selenium.net.UrlChecker
  * @see org.openqa.selenium.json.JsonOutput
  * @see org.openqa.selenium.os.OsProcess
@@ -44,26 +42,14 @@ internal fun DriverService.getProcess(): Process? {
     /**
      * @see org.openqa.selenium.remote.service.DriverService.process
      */
-    val commandline = DriverService::class.java.getDeclaredField("process")
+    val external = DriverService::class.java.getDeclaredField("process")
         .apply { isAccessible = true }.get(this) ?: return null
 
     /**
-     * @see org.openqa.selenium.os.CommandLine.process
+     * @see org.openqa.selenium.os.ExternalProcess.process
      */
-    val osProcess = commandline::class.java.getDeclaredField("process")
-        .apply { isAccessible = true }.get(commandline) ?: return null
-
-    /**
-     * @see org.openqa.selenium.os.OsProcess.executeWatchdog
-     */
-    val watchdog = osProcess::class.java.getDeclaredField("executeWatchdog")
-        .apply { isAccessible = true }.get(osProcess) ?: return null
-
-    /**
-     * @see org.openqa.selenium.os.OsProcess.SeleniumWatchDog.process
-     */
-    return watchdog::class.java.getDeclaredField("process")
-        .apply { isAccessible = true }.get(watchdog) as? Process
+    return external::class.java.getDeclaredField("process")
+        .apply { isAccessible = true }.get(external) as? Process
 }
 
 internal fun RemoteWebDriver.getHttpClientFactory(): HttpClient.Factory? {
