@@ -31,6 +31,7 @@ dependencies {
     api("org.seleniumhq.selenium:selenium-java:4.16.1")
     implementation("org.apache.commons:commons-compress:1.24.0")
     implementation("org.tukaani:xz:1.9")
+    implementation("me.him188:kotlin-jvm-blocking-bridge-runtime:3.0.0-180.1")
     testImplementation(kotlin("test"))
     testImplementation("org.icepear.echarts:echarts-java:1.0.7")
     //
