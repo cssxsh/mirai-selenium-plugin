@@ -43,6 +43,9 @@ dependencies {
     testImplementation("org.slf4j:jcl-over-slf4j:2.0.7")
     testImplementation("org.slf4j:jul-to-slf4j:2.0.7")
     //
+    implementation(platform("org.asynchttpclient:async-http-client-bom:2.12.3"))
+    implementation("org.asynchttpclient:async-http-client")
+    //
     implementation(platform("io.netty:netty-bom:4.1.107.Final"))
 }
 
