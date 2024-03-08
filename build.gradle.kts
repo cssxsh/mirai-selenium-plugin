@@ -3,7 +3,7 @@ plugins {
     kotlin("plugin.serialization") version "1.8.10"
 
     id("net.mamoe.mirai-console") version "2.16.0"
-    id("me.him188.maven-central-publish") version "1.0.0-dev-3"
+    id("me.him188.maven-central-publish") version "1.0.0"
     id("me.him188.kotlin-jvm-blocking-bridge") version "3.0.0-180.1"
 }
 
@@ -27,9 +27,9 @@ repositories {
 }
 
 dependencies {
-    api("com.github.jknack:handlebars:4.3.1")
-    api("org.seleniumhq.selenium:selenium-java:4.17.0")
-    implementation("org.apache.commons:commons-compress:1.24.0")
+    api("com.github.jknack:handlebars:4.4.0")
+    api("org.seleniumhq.selenium:selenium-java:4.18.1")
+    implementation("org.apache.commons:commons-compress:1.26.0")
     implementation("org.tukaani:xz:1.9")
     implementation("me.him188:kotlin-jvm-blocking-bridge-runtime:3.0.0-180.1")
     testImplementation(kotlin("test"))
@@ -39,7 +39,7 @@ dependencies {
     testImplementation("net.mamoe:mirai-logging-slf4j")
     testImplementation("net.mamoe:mirai-console-compiler-common")
     //
-    implementation(platform("org.slf4j:slf4j-parent:2.0.11"))
+    implementation(platform("org.slf4j:slf4j-parent:2.0.12"))
     testImplementation("org.slf4j:slf4j-simple")
     testImplementation("org.slf4j:jcl-over-slf4j:2.0.7")
     testImplementation("org.slf4j:jul-to-slf4j:2.0.7")
