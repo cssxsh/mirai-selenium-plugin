@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    api("com.github.jknack:handlebars:4.4.0")
+    api("com.github.jknack:handlebars:4.3.1")
     api("org.seleniumhq.selenium:selenium-java:4.18.1")
     implementation("org.apache.commons:commons-compress:1.26.0")
     implementation("org.tukaani:xz:1.9")
