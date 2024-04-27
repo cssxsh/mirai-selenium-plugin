@@ -2,10 +2,10 @@
 
 > Mirai Selenium 前置插件
 
-Mirai-Console的前置插件，用于使用Selenium调用浏览器进行截图等
+Mirai-Console 的前置插件，用于使用 Selenium 调用浏览器进行截图等
 
 [![maven-central](https://img.shields.io/maven-central/v/xyz.cssxsh.mirai/mirai-selenium-plugin)](https://search.maven.org/artifact/xyz.cssxsh.mirai/mirai-selenium-plugin)
-[![Setup](https://github.com/cssxsh/mirai-selenium-plugin/actions/workflows/setup.yml/badge.svg?branch=master)](https://github.com/cssxsh/mirai-selenium-plugin/actions/workflows/setup.yml)
+[![Setup and Build](https://github.com/cssxsh/mirai-selenium-plugin/actions/workflows/setup.yml/badge.svg)](https://github.com/cssxsh/mirai-selenium-plugin/actions/workflows/setup.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2ac22c6b3f4a4ce5a205971ad0e53412)](https://www.codacy.com/gh/cssxsh/mirai-selenium-plugin/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cssxsh/mirai-selenium-plugin&amp;utm_campaign=Badge_Grade)
 
 ## 运行平台支持
@@ -13,7 +13,7 @@ Mirai-Console的前置插件，用于使用Selenium调用浏览器进行截图�
 |   OS    | Browser | Driver | Setup |
 |:-------:|:-------:|:------:|:-----:|
 | Windows | Chrome  |  Yes   |  Yes  |
-| Windows | Firefox |  Yes   |  Yes  |
+| Windows | Firefox |  Yes   |  No   |
 | Windows |  Edge   |  Yes   |   ~   |
 |  Linux  | Chrome  |  Yes   |  Yes  |
 |  Linux  | Firefox |  Yes   |  Yes  |

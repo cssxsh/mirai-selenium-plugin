@@ -37,31 +37,25 @@ internal val SeleniumLogger: Logger = Logger.getLogger("org.openqa.selenium")
 
 // region RemoteWebDriver
 
+/**
+ * @see org.openqa.selenium.remote.service.DriverService.process
+ * @see org.openqa.selenium.os.ExternalProcess.process
+ */
 @Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
 internal fun DriverService.getProcess(): Process? {
-    /**
-     * @see org.openqa.selenium.remote.service.DriverService.process
-     */
     val external = DriverService::class.java.getDeclaredField("process")
         .apply { isAccessible = true }.get(this) ?: return null
-
-    /**
-     * @see org.openqa.selenium.os.ExternalProcess.process
-     */
     return external::class.java.getDeclaredField("process")
         .apply { isAccessible = true }.get(external) as? Process
 }
 
+/**
+ * @see org.openqa.selenium.remote.RemoteWebDriver.executor
+ * @see org.openqa.selenium.remote.HttpCommandExecutor.httpClientFactory
+ */
 internal fun RemoteWebDriver.getHttpClientFactory(): HttpClient.Factory? {
-    /**
-     * @see org.openqa.selenium.remote.RemoteWebDriver.executor
-     */
     val executor = RemoteWebDriver::class.java.getDeclaredField("executor")
         .apply { isAccessible = true }.get(this) ?: return null
-
-    /**
-     * @see org.openqa.selenium.remote.HttpCommandExecutor.httpClientFactory
-     */
     return HttpCommandExecutor::class.java.getDeclaredField("httpClientFactory")
         .apply { isAccessible = true }.get(executor) as? HttpClient.Factory
 }
