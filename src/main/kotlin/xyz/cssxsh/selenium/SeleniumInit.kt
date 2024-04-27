@@ -688,7 +688,7 @@ internal fun setupFirefoxDriver(folder: File): RemoteWebDriverSupplier {
                 .let(::GzipCompressorInputStream)
                 .let(::TarArchiveInputStream)
                 .use { input ->
-                    val entry = input.nextTarEntry
+                    val entry = input.nextEntry
                     driver.parentFile.mkdirs()
                     driver.outputStream().use { output ->
                         input.copyTo(output)
@@ -910,7 +910,7 @@ internal fun setupFirefox(folder: File, version: String): File {
                 pack.writeBytes(bytes)
 
                 try {
-                    SevenZFile(pack).use { input ->
+                    SevenZFile.builder().setFile(pack).get().use { input ->
                         for (entry in input.entries) {
                             if (entry.isDirectory) continue
                             // println(entry.name)
@@ -957,7 +957,7 @@ internal fun setupFirefox(folder: File, version: String): File {
                     .let(::TarArchiveInputStream)
                     .use { input ->
                         while (true) {
-                            val entry = input.nextTarEntry ?: break
+                            val entry = input.nextEntry ?: break
                             if (entry.isFile.not()) continue
                             if (input.canReadEntryData(entry).not()) continue
                             val target = folder.resolve(entry.name)
@@ -1145,7 +1145,7 @@ internal fun setupChromium(folder: File, version: String): File {
                 val pack = download(urlString = url, folder = folder, filename = url.substringAfterLast('/'))
 
                 try {
-                    SevenZFile(pack).use { input ->
+                    SevenZFile.builder().setFile(pack).get().use { input ->
                         for (entry in input.entries) {
                             if (entry.isDirectory) continue
                             val target = folder.resolve(entry.name)
@@ -1184,7 +1184,7 @@ internal fun setupChromium(folder: File, version: String): File {
                     .let(::TarArchiveInputStream)
                     .use { input ->
                         while (true) {
-                            val entry = input.nextTarEntry ?: break
+                            val entry = input.nextEntry ?: break
                             if (entry.isFile.not()) continue
                             if (input.canReadEntryData(entry).not()) continue
                             val target = folder.resolve(entry.name)
@@ -1220,7 +1220,7 @@ internal fun setupChromium(folder: File, version: String): File {
                     .let(::TarArchiveInputStream)
                     .use { input ->
                         while (true) {
-                            val entry = input.nextTarEntry ?: break
+                            val entry = input.nextEntry ?: break
                             if (entry.isFile.not()) continue
                             if (input.canReadEntryData(entry).not()) continue
                             val target = setup.resolve(entry.name)
