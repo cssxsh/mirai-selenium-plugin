@@ -9,7 +9,7 @@ jobs:
       matrix:
         os:
           - windows-latest
-          - macos-latest-large
+          - macos-12
           - ubuntu-latest
     steps:
       - name: Checkout
