@@ -28,7 +28,7 @@ repositories {
 
 dependencies {
     api("com.github.jknack:handlebars:4.3.1")
-    api("org.seleniumhq.selenium:selenium-java:4.18.1")
+    api("org.seleniumhq.selenium:selenium-java:4.20.0")
     implementation("org.apache.commons:commons-compress:1.26.1")
     implementation("org.tukaani:xz:1.9")
     implementation("me.him188:kotlin-jvm-blocking-bridge-runtime:3.0.0-180.1")
@@ -39,15 +39,15 @@ dependencies {
     testImplementation("net.mamoe:mirai-logging-slf4j")
     testImplementation("net.mamoe:mirai-console-compiler-common")
     //
-    implementation(platform("org.slf4j:slf4j-parent:2.0.12"))
+    implementation(platform("org.slf4j:slf4j-parent:2.0.13"))
     testImplementation("org.slf4j:slf4j-simple")
-    testImplementation("org.slf4j:jcl-over-slf4j:2.0.7")
-    testImplementation("org.slf4j:jul-to-slf4j:2.0.7")
+    testImplementation("org.slf4j:jcl-over-slf4j")
+    testImplementation("org.slf4j:jul-to-slf4j")
     //
     implementation(platform("org.asynchttpclient:async-http-client-bom:2.12.3"))
     implementation("org.asynchttpclient:async-http-client")
     //
-    implementation(platform("io.netty:netty-bom:4.1.107.Final"))
+    implementation(platform("io.netty:netty-bom:4.1.109.Final"))
 }
 
 kotlin {
